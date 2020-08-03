@@ -2,19 +2,25 @@ const express = require('express')
 const app = express()
 const dotenv = require('dotenv')
 const connectDB = require('./config/db')
+const apiRoutes = require('./routes/api/api')
 
-// load "config.env"
+// Load environment variable
 dotenv.config({path: './config/config.env'})
 
-// connect to mongodb
+// Middleware
+app.use(express.json())
+
+// Connect to mongodb
 connectDB()
 
-// routes
+// Api routes
+app.use('/api', apiRoutes)
+
 app.get('/', (req, res) => {
   return res.send('Hello word')
 })
 
-// port
+// Port
 const PORT = process.env.PORT || 8080
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}...`)
