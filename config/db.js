@@ -1,6 +1,10 @@
 const mongoose = require('mongoose')
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost/ecommerce-store-test'
+const MONGO_URI = (process.env.NODE_ENV === 'production') 
+  ? process.env.MONGO_URI
+  : 'mongodb://localhost/ecommerce-store-test'
+
+console.log(MONGO_URI)
 
 module.exports = async function() {
   try {

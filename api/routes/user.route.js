@@ -1,8 +1,8 @@
 const express = require('express')
 const router = express.Router()
-const {show, get } = require('../../controllers/api/user.controller')
+const {show, get } = require('../../api/controllers/user.controller')
 
-// @desc    Get list of users
+// @desc    Show list of users
 // @route   GET /users
 router.get('/', show)
 

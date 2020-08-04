@@ -20,7 +20,7 @@ module.exports = {
 
   // Create new user
   create: async (req,res) => {
-
+    
   },
 
   // Update user

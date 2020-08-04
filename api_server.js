@@ -3,22 +3,20 @@ require('dotenv').config({path: './config/config.env'})
 
 const express = require('express')
 const app = express()
+const apiRoutes = require('./api/routes/api')
 const connectDB = require('./config/db')
-
-
-// Middleware
-// app.use(express.static('views'))
 
 // Connect to mongodb
 connectDB()
 
-// Routes
-app.get('/', (req, res) => {
-  return res.send('Hello word')
-})
+// Middleware
+app.use(express.json())
+
+// Api routes
+app.use('/api', apiRoutes)
 
 // Port
-const PORT = process.env.PORT || 5000
+const PORT = process.env.API_SERVER_PORT || 4000
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}...`)
+    console.log(`API Server is running on port ${PORT}`)
 })
