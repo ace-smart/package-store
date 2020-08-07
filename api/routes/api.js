@@ -1,6 +1,13 @@
 const router = require('express').Router()
-const userRouter = require('./user.route')
+const authRouter = require('./auth.route')
+const userRouter = require('./admin/user.route')
+const {_ensureAccessToken, _ensureAdminRole} = require('../helper/auth')
 
-router.use('/users', userRouter)
+// All below routes have prefix '/api/'
+// Client routes
+router.use(authRouter)
+// Admin routes
+router.use('/admin/*', _ensureAccessToken, _ensureAdminRole)
+router.use('/admin/users', _ensureAccessToken, _ensureAdminRole, userRouter)
 
 module.exports = router

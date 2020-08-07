@@ -1,10 +1,9 @@
 // Load environment variable
-require('dotenv').config({path: './config/config.env'})
+require("dotenv").config({ path: "./config/config.env" })
 
-const express = require('express')
+const express = require("express")
 const app = express()
-const apiRoutes = require('./api/routes/api')
-const connectDB = require('./config/db')
+const connectDB = require("./config/db")
 
 // Connect to mongodb
 connectDB()
@@ -13,7 +12,7 @@ connectDB()
 app.use(express.json())
 
 // Api routes
-app.use('/api', apiRoutes)
+app.use("/api", require("./api/routes/api"))
 
 // Port
 const PORT = process.env.API_SERVER_PORT || 4000
