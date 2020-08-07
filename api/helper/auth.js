@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken")
 const bcrypt = require('bcrypt')
-const User = require("../../models/UserModel")
+const User = require("../models/UserModel")
 
 module.exports = authHelper = {
     //@desc:    Generate access token

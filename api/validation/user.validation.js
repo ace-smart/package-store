@@ -1,5 +1,5 @@
 const validator = require('validator')
-const User = require('../../models/UserModel')
+const User = require('../models/UserModel')
 const { isExistentEmail, isExistentUsername, hasError } = require('./validation');
 
 module.exports = {
