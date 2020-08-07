@@ -1,14 +1,15 @@
+// Load environment variable
+require('dotenv').config({path: './config/config.env'})
+
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
-const dotenv = require('dotenv')
 const connectDB = require('./config/db')
-
-// Load 'config.env'
-dotenv.config({path: './config/config.env'})
 
 // Static folder
 
+// Middleware
+// app.use(express.static('views'))
 
 // Connect to mongodb
 connectDB()
@@ -22,7 +23,7 @@ app.get('/', (req, res) => {
 })
 
 // Port
-const PORT = process.env.PORT || 8080
+const PORT = process.env.PORT || 5000
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}...`)
 })
