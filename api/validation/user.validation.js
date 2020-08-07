@@ -1,6 +1,7 @@
 const validator = require('validator')
-const User = require('../models/UserModel')
 const { isExistentEmail, isExistentUsername, hasError } = require('./validation');
+
+const userFields = ['username','password','email','status','role']
 
 module.exports = {
     create: async ({...data}={}) => {
@@ -45,7 +46,7 @@ module.exports = {
             }
         }
 
-        // validate role
+        // validate status
         let statusErrors = Array()
         if (typeof data.status !== 'undefined' && !validator.isEmpty(data.status)) {
             if (!validator.isIn(data.status.toLowerCase(), ['activated','deactivated'])){
@@ -105,7 +106,7 @@ module.exports = {
             }
         }
 
-        // validate role
+        // validate status
         let statusErrors = Array()
         if (typeof data.status !== 'undefined' && !validator.isEmpty(data.status)) {
             if (!validator.isIn(data.status.toLowerCase(), ['activated','deactivated'])){
