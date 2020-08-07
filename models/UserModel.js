@@ -21,11 +21,25 @@ const UserSchema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    enum: ["admin", "user"],
+    enum: ['admin', 'user'],
+  },
+  accessToken: {
+    type: String
+  },
+  refreshToken: {
+    type: String
+  },
+  refresh_secret: {
+    type: String,
+    default: require('crypto').randomBytes(12).toString('hex')
   },
   status: {
     type: String,
-    default: "Inactivated",
+    default: 'Deactivated',
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now(),
   },
   createdAt: {
     type: Date,
