@@ -78,7 +78,7 @@ module.exports = authHelper = {
                 return res.status(401).json({ success: false, message: payload.message })
 
             req.user = payload
-            next()
+            return next()
         } catch (error) {
             console.error(error)
             return res.status(500).json({ success: false, message: error.message })

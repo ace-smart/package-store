@@ -8,6 +8,6 @@ const {_ensureAccessToken, _ensureAdminRole} = require('../helper/auth')
 router.use(authRouter)
 // Admin routes
 router.use('/admin/*', _ensureAccessToken, _ensureAdminRole)
-router.use('/admin/users', _ensureAccessToken, _ensureAdminRole, userRouter)
+router.use('/admin/users', userRouter)
 
 module.exports = router

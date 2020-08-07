@@ -35,7 +35,7 @@ const UserSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    default: 'Deactivated',
+    default: 'deactivated',
   },
   updatedAt: {
     type: Date,
