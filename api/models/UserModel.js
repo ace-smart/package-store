@@ -18,6 +18,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  profileId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Profile'
+  },
   role: {
     type: String,
     required: true,
