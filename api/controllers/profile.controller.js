@@ -1,6 +1,5 @@
 const Profile = require("../models/ProfileModel")
-const validate_add_inp = require("../validation/create-profile")
-const validate_update_inp = require("../validation/update-profile")
+const {validate_add_inp, validate_update_inp} = require("../validation/profile")
 const sanitize = require("../validation/sanitize")
 const { outputErrors } = require("../validation/validation")
 
