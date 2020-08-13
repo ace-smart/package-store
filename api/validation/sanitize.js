@@ -81,6 +81,37 @@ module.exports = {
         if (crudOption === 'update') {
             objData.updatedAt = Date.now()
         }
+
+        return objData
+    },
+    
+    address: ({ ...data } = {}, crudOption = null) => {
+        let objData = data
+        if (typeof data.street !== "undefined" && !validator.isEmpty(data.street)) {
+            objData.street = validator.escape(validator.trim(data.street))
+        }
+        if (typeof data.district !== "undefined" && !validator.isEmpty(data.district)) {
+            objData.district = validator.trim(data.district.toLowerCase())
+        } 
+        if (typeof data.city !== "undefined" && !validator.isEmpty(data.city)) {
+            objData.city = validator.trim(data.city.toLowerCase())
+        } 
+        if (typeof data.country !== "undefined" && !validator.isEmpty(data.country)) {
+            objData.country = validator.trim(data.country.toLowerCase())
+        }
+        if (typeof data.status !== "undefined" && !validator.isEmpty(data.status)) {
+            objData.status = validator.trim(data.status.toLowerCase())
+        } 
+
+        // Set default values
+        if (crudOption === 'create') {
+            if (typeof data.status === "undefined" || validator.isEmpty(data.status)) {
+                objData.status = DEFAULT_VALUES.status
+            }
+        }
+        if (crudOption === 'update') {
+            objData.updatedAt = Date.now()
+        }
         
         return objData
     },

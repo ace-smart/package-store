@@ -10,6 +10,7 @@ const USER_FIELDS = ['username','password','email','status','role']
 const PROFILE_FIELDS = ["firstName", "lastName", "gender", "dateOfBirth", "phoneNumber", "status"]
 const PROFILE_GENDER_VALUES = ["male", "female", "lgbt"]
 const CATEGORY_FIELDS = ['name','status','subcategories']
+const ADDRESS_FIELDS = ['street','district','city','country','postalCode','status']
 
 module.exports = validation = {
     DEFAULT_VALUES: DEFAULT_VALUES,
@@ -19,6 +20,7 @@ module.exports = validation = {
     PROFILE_FIELDS: PROFILE_FIELDS,
     PROFILE_GENDER_VALUES: PROFILE_GENDER_VALUES,
     CATEGORY_FIELDS: CATEGORY_FIELDS,
+    ADDRESS_FIELDS: ADDRESS_FIELDS,
     
     // @desc    Output error message
     // Args:    {error}
