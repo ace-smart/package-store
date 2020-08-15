@@ -11,6 +11,7 @@ const PROFILE_FIELDS = ["firstName", "lastName", "gender", "dateOfBirth", "phone
 const PROFILE_GENDER_VALUES = ["male", "female", "lgbt"]
 const CATEGORY_FIELDS = ['name','status','subcategories']
 const ADDRESS_FIELDS = ['street','district','city','country','postalCode','status']
+const PRODUCT_FIELDS = ['categoryId','name','details','price','status']
 
 module.exports = validation = {
     DEFAULT_VALUES: DEFAULT_VALUES,
@@ -21,6 +22,7 @@ module.exports = validation = {
     PROFILE_GENDER_VALUES: PROFILE_GENDER_VALUES,
     CATEGORY_FIELDS: CATEGORY_FIELDS,
     ADDRESS_FIELDS: ADDRESS_FIELDS,
+    PRODUCT_FIELDS: PRODUCT_FIELDS,
     
     // @desc    Output error message
     // Args:    {error}

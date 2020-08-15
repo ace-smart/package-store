@@ -5,6 +5,7 @@ const userRouter = require('./admin/user.route')
 const categoryRouter = require('./admin/category.route')
 const profileRouter = require('./admin/profile.route')
 const addressRouter = require('./admin/address.route')
+const productRouter = require('./admin/product.route')
 
 // All below routes have prefix '/api/'
 // Client routes
@@ -15,5 +16,6 @@ router.use('/admin/users', userRouter)
 router.use('/admin/categories', categoryRouter)
 router.use('/admin/profile', profileRouter)
 router.use('/admin/addresses', addressRouter)
+router.use('/admin/products', productRouter)
 
 module.exports = router

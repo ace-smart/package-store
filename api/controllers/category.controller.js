@@ -53,7 +53,7 @@ module.exports = {
         }
     },
 
-    // @desc    Update user
+    // @desc    Update categories
     // @route   PUT /categories/:id
     updateCategoryById: async (req, res) => {
         try {
@@ -71,7 +71,7 @@ module.exports = {
         }
     },
 
-    // @desc    Delete user
+    // @desc    Delete categories
     // @route   DELETE /categories/:id
     removeCategoryById: async (req, res) => {
         try {

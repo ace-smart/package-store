@@ -1,6 +1,7 @@
 const validator = require("validator")
 const bcrypt = require('bcrypt')
 const { DEFAULT_VALUES } = require('./validation')
+const { toCapitalize } = require('../helper/format')
 
 module.exports = {
     user: async ({ ...data } = {}, crudOption = null) => {
@@ -115,4 +116,52 @@ module.exports = {
         
         return objData
     },
+    
+    product: ({ ...data } = {}, crudOption = null) => {
+        let objData = data
+        if (typeof data.name !== "undefined" && !validator.isEmpty(data.name)) {
+            objData.name = toCapitalize(validator.trim(data.name.toLowerCase()))
+        }
+        if (typeof data.price !== "undefined" && JSON.stringify(data.price) !== '{}') {
+            objData.price.value = parseFloat(data.price.value.toString())
+            objData.price.currency = validator.trim(data.price.currency.toLowerCase()).toUpperCase()
+        }
+        if (typeof data.details !== "undefined" && JSON.stringify(data.details) !== '{}') {
+            if (data.details.size != null){
+                objData.details.size = validator.trim(data.details.size.toUpperCase())
+            }
+            if (data.details.color != null) {
+                objData.details.color.name = toCapitalize(validator.trim(data.details.color.name.toLowerCase()))
+            }
+            if (data.details.tags != null){
+                data.details.tags.forEach(element => {
+                    objData.details.tags.push(toCapitalize(validator.trim(element.toLowerCase())))
+                })
+            }
+            if (data.details.description != null){
+                objData.details.description = toCapitalize(validator.trim(data.details.description))
+            }
+            if (data.details.madeIn != null){
+                objData.details.madeIn = toCapitalize(validator.trim(data.details.madeIn.toLowerCase()))
+            }
+            if (data.details.weight != null){
+                objData.details.weight.value = parseFloat(data.details.weight.value.toString())
+                objData.details.weight.unit = validator.trim(data.details.weight.unit.toLowerCase())
+            }
+        }
+    
+        // Set default values
+        if (crudOption === 'create') {
+            if (typeof data.status === "undefined" || validator.isEmpty(data.status)) {
+                objData.status = DEFAULT_VALUES.status
+            }
+        }
+        if (crudOption === 'update') {
+            objData.updatedAt = Date.now()
+        }
+        
+        return objData
+    },
+
+
 }
