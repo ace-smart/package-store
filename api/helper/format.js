@@ -2,7 +2,7 @@
 
 module.exports = {
     toCapitalize: (string = null, applyToEach = false) => {
-        if (!string) throw new Error('{toCapitalize}: Can not invoke with null paramter')
+        if (!string) throw new Error('{toCapitalize}: Can not invoke with null string')
 
         if (applyToEach) {
             // Capitalize each word
