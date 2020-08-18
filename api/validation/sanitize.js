@@ -163,5 +163,41 @@ module.exports = {
         return objData
     },
 
+    provider: ({ ...data } = {}, crudOption = null) => {
+        let objData = data
+        if (typeof data.name !== "undefined" && !validator.isEmpty(data.name)) {
+            objData.name = toCapitalize(validator.trim(data.name))
+        }
+        if (typeof data.email !== "undefined" && !validator.isEmpty(data.email)) {
+            objData.email = validator.trim(data.email.toLowerCase())
+        } 
+        if (typeof data.description !== "undefined" && !validator.isEmpty(data.description)) {
+            objData.description = validator.trim(data.description)
+        }
 
+        if (typeof data.country !== "undefined" && !validator.isEmpty(data.country)) {
+            objData.country = toCapitalize(validator.trim(data.country))
+        }
+        if (typeof data.status !== "undefined" && !validator.isEmpty(data.status)) {
+            objData.status = validator.trim(data.status.toLowerCase())
+        } 
+
+        // Set default values
+        if (crudOption === 'create') {
+            if (typeof data.status === "undefined" || validator.isEmpty(data.status)) {
+                objData.status = DEFAULT_VALUES.status
+            }
+            if (data.description != null){
+                objData.description = null
+            }
+            if (data.country != null){
+                objData.country = null
+            }
+        }
+        if (crudOption === 'update') {
+            objData.updatedAt = Date.now()
+        }
+        
+        return objData
+    },
 }

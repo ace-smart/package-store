@@ -24,11 +24,16 @@ async function validate_add_inp({ ...data } = {}) {
     if (typeof data.name === "undefined" || validator.isEmpty(data.name)) {
         throw new Error("name is required.")
     }
+    if (
+        validator.matches(
+            data.name,
+            new RegExp("[\r\n\t\f\v\\`~\\!@#\\$%\\^&\\*()_\\+\\=\\[\\]\\{\\};'\"<>\\?\\-\\/\\.\\,:]+", "g")
+        )
+    ) {
+        throw new Error("name must contain only numbers,characters and spaces.")
+    }
     if (!validator.matches(validator.trim(data.name), RegExp("(\\w+ \\w+)+", "g"))) {
         throw new Error("name must contain only numbers and characters.")
-    }
-    if (validator.matches(validator.trim(data.name), RegExp("[\r\n\t\f\v]", "g"))) {
-        throw new Error("name must contain only numbers,characters and spaces.")
     }
     if (!validator.isLength(data.name, { min: 4, max: 200 })) {
         throw new Error("name must be from 4 to 200 characters.")
@@ -155,11 +160,16 @@ async function validate_update_inp({ ...data } = {}, productId) {
     }
     // name
     if (typeof data.name !== "undefined" && !validator.isEmpty(data.name)) {
+        if (
+            validator.matches(
+                data.name,
+                new RegExp("[\r\n\t\f\v\\`~\\!@#\\$%\\^&\\*()_\\+\\=\\[\\]\\{\\};'\"<>\\?\\-\\/\\.\\,:]+", "g")
+            )
+        ) {
+            throw new Error("name must contain only numbers,characters and spaces.")
+        }
         if (!validator.matches(validator.trim(data.name), RegExp("(\\w+ \\w+)+", "g"))) {
             throw new Error("name must contain only numbers and characters.")
-        }
-        if (validator.matches(validator.trim(data.name), RegExp("[\r\n\t\f\v]", "g"))) {
-            throw new Error("name must contain only numbers,characters and spaces.")
         }
         if (!validator.isLength(data.name, { min: 4, max: 200 })) {
             throw new Error("name must be from 4 to 200 characters.")

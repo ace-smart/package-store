@@ -19,11 +19,9 @@ async function validate_add_inp({ ...data } = {}) {
             new RegExp("[\\`~\\!@#\\$%\\^&\\*()_\\+\\=\\[\\]\\{\\};'\"<>\\?]+", "g")
         )
     ) {
-        console.log("a")
         throw new Error("street is only allowed to have these special characters [\\/-,.:]")
     }
     if (!validator.matches(data.street, RegExp("[\\w/-/\\.\\,:]+", "g"))) {
-        console.log("b")
         throw new Error("street must contain only numbers, characters and [\\/-,.:].")
     }
     if (!validator.isLength(data.street, { max: 350 })) {
