@@ -1,35 +1,9 @@
 const validator = require("validator")
-const { compareSync } = require("bcrypt")
 const blacklistChars = new RegExp(
     "[\r\n\\t\\f\\v`~\\!@#\\$%\\^&\\*()_\\+\\=\\[\\]\\{\\};'\"<>\\?\\-\\/\\.\\,:]+",
     "g"
 )
-// Model constants
-const DEFAULT_VALUES = {
-    user: { role: "user", status: "deactivated" },
-    status: "deactivated",
-}
-const STATUS_VALUES = ["activated", "deactivated"]
-const USER_ROLE = ["user", "admin"]
-const USER_FIELDS = ["username", "password", "email", "status", "role"]
-const PROFILE_FIELDS = ["firstName", "lastName", "gender", "dateOfBirth", "phoneNumber", "status"]
-const PROFILE_GENDER_VALUES = ["male", "female", "lgbt"]
-const CATEGORY_FIELDS = ["name", "status", "subcategories"]
-const ADDRESS_FIELDS = ["street", "district", "city", "country", "postalCode", "status"]
-const PRODUCT_FIELDS = ["categoryId", "name", "details", "price", "status"]
-const PROVIDER_FIELDS = ["name", "addressId", "email", "description", "country", "status"]
-
 module.exports = validation = {
-    DEFAULT_VALUES: DEFAULT_VALUES,
-    STATUS_VALUES: STATUS_VALUES,
-    USER_ROLE: USER_ROLE,
-    USER_FIELDS: USER_FIELDS,
-    PROFILE_FIELDS: PROFILE_FIELDS,
-    PROFILE_GENDER_VALUES: PROFILE_GENDER_VALUES,
-    CATEGORY_FIELDS: CATEGORY_FIELDS,
-    ADDRESS_FIELDS: ADDRESS_FIELDS,
-    PRODUCT_FIELDS: PRODUCT_FIELDS,
-    PROVIDER_FIELDS: PROVIDER_FIELDS,
 
     // @desc    Output error message
     // Args:    {error}
@@ -70,7 +44,7 @@ module.exports = validation = {
             try {
                 const object = await model.findOne(criteria).exec()
                 if (!object) return false
-                
+
                 if (exceptionId && object._id.toString() === exceptionId.toString()) {
                     return false
                 }

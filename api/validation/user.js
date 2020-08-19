@@ -1,11 +1,6 @@
 const validator = require("validator")
-const {
-    hasUnknownKeys,
-    isExistent,
-    USER_FIELDS,
-    USER_ROLE,
-    STATUS_VALUES,
-} = require("./validation")
+const { hasUnknownKeys, isExistent } = require("./validation")
+const { USER_FIELDS,  USER_ROLE, STATUS_VALUES } = require("./_fields")
 
 async function validate_add_inp({ ...data } = {}) {
     if (JSON.stringify(data) === "{}") {

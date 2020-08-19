@@ -1,6 +1,6 @@
 const validator = require("validator")
 const bcrypt = require('bcrypt')
-const { DEFAULT_VALUES } = require('./validation')
+const { DEFAULT_VALUES } = require('./_fields')
 const { toCapitalize } = require('../helper/format')
 
 module.exports = {
@@ -177,6 +177,49 @@ module.exports = {
 
         if (typeof data.country !== "undefined" && !validator.isEmpty(data.country)) {
             objData.country = toCapitalize(validator.trim(data.country))
+        }
+        if (typeof data.status !== "undefined" && !validator.isEmpty(data.status)) {
+            objData.status = validator.trim(data.status.toLowerCase())
+        } 
+
+        // Set default values
+        if (crudOption === 'create') {
+            if (typeof data.status === "undefined" || validator.isEmpty(data.status)) {
+                objData.status = DEFAULT_VALUES.status
+            }
+            if (data.description != null){
+                objData.description = null
+            }
+            if (data.country != null){
+                objData.country = null
+            }
+        }
+        if (crudOption === 'update') {
+            objData.updatedAt = Date.now()
+        }
+        
+        return objData
+    },
+
+    order: ({ ...data } = {}, crudOption = null) => {
+        let objData = data
+        if (typeof data.totalCost !== "undefined" && !validator.isEmpty(data.totalCost)) {
+            objData.totalCost = parseFloat(data.totalCost)
+        }
+        if (typeof data.shippingFee !== "undefined" && !validator.isEmpty(data.shippingFee)) {
+            objData.shippingFee = parseFloat(data.shippingFee)
+        } 
+        if (typeof data.finalCost !== "undefined" && !validator.isEmpty(data.finalCost)) {
+            objData.finalCost = parseFloat(data.finalCost)
+        } 
+        if (typeof data.currency !== "undefined" && !validator.isEmpty(data.currency)) {
+            objData.currency = validator.trim(data.currency.toUpperCase())
+        }
+        if (typeof data.paymentMethod !== "undefined" && !validator.isEmpty(data.paymentMethod)) {
+            objData.paymentMethod = toCapitalize(validator.trim(data.paymentMethod))
+        }
+        if (typeof data.voucherCode !== "undefined" && !validator.isEmpty(data.voucherCode)) {
+            objData.voucherCode =validator.trim(data.voucherCode.toUpperCase())
         }
         if (typeof data.status !== "undefined" && !validator.isEmpty(data.status)) {
             objData.status = validator.trim(data.status.toLowerCase())

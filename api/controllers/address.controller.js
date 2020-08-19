@@ -27,7 +27,7 @@ module.exports = {
                     address: address,
                 })
             // Not found
-            return res.status(404).json({ success: false, message: "No category found." })
+            return res.status(404).json({ success: false, message: "No address found." })
         } catch (error) {
             return res.status(500).json({ success: false, message: outputErrors(error) })
         }

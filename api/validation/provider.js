@@ -1,11 +1,6 @@
 const validator = require("validator")
-const {
-    hasUnknownKeys,
-    isExistent,
-    hasSpecialChars,
-    PROVIDER_FIELDS,
-    STATUS_VALUES,
-} = require("./validation")
+const {hasUnknownKeys,isExistent,hasSpecialChars} = require("./validation")
+const { PROVIDER_FIELDS, STATUS_VALUES, } = require("./_fields")
 const { toCapitalize } = require("../helper/format")
 
 async function validate_add_inp({ ...data } = {}) {
