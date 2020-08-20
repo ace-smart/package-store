@@ -201,6 +201,55 @@ module.exports = {
         return objData
     },
 
+    voucher: ({ ...data } = {}, crudOption = null) => {
+        let objData = data
+        if (typeof data.name !== "undefined" && !validator.isEmpty(data.name)) {
+            objData.name = toCapitalize(validator.trim(data.name))
+        }
+        if (typeof data.description !== "undefined" && !validator.isEmpty(data.description)) {
+            objData.description = toCapitalize(validator.trim(data.description))
+        } 
+        if (typeof data.code !== "undefined" && !validator.isEmpty(data.code)) {
+            objData.code = validator.trim(data.code)
+        } 
+        if (typeof data.rate !== "undefined" && !validator.isEmpty(data.rate)) {
+            objData.rate = parseFloat(data.rate)
+        }
+        if (typeof data.minValue !== "undefined" && !validator.isEmpty(data.minValue)) {
+            objData.minValue = parseFloat(data.minValue)
+        }
+        if (typeof data.maxValue !== "undefined" && !validator.isEmpty(data.maxValue)) {
+            objData.maxValue = parseFloat(data.maxValue)
+        }
+        if (typeof data.usageLimit !== "undefined" && JSON.stringify(data.usageLimit) !== '{}') {
+            objData.usageLimit = {
+                limitType: validator.trim(data.usageLimit.limitType.toLowerCase()),
+                maxOfUse: parseInt(data.usageLimit.maxOfUse)
+            }
+        }
+        if (typeof data.status !== "undefined" && !validator.isEmpty(data.status)) {
+            objData.status = validator.trim(data.status.toLowerCase())
+        } 
+
+        // Set default values
+        if (crudOption === 'create') {
+            if (typeof data.status === "undefined" || validator.isEmpty(data.status)) {
+                objData.status = DEFAULT_VALUES.status
+            }
+            if (data.description != null){
+                objData.description = null
+            }
+            if (data.country != null){
+                objData.country = null
+            }
+        }
+        if (crudOption === 'update') {
+            objData.updatedAt = Date.now()
+        }
+        
+        return objData
+    },
+
     order: ({ ...data } = {}, crudOption = null) => {
         let objData = data
         if (typeof data.totalCost !== "undefined" && !validator.isEmpty(data.totalCost)) {
