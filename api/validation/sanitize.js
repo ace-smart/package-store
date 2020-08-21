@@ -262,13 +262,13 @@ module.exports = {
             objData.finalCost = parseFloat(data.finalCost)
         } 
         if (typeof data.currency !== "undefined" && !validator.isEmpty(data.currency)) {
-            objData.currency = validator.trim(data.currency.toUpperCase())
+            objData.currency = validator.trim(data.currency)
         }
         if (typeof data.paymentMethod !== "undefined" && !validator.isEmpty(data.paymentMethod)) {
             objData.paymentMethod = toCapitalize(validator.trim(data.paymentMethod))
         }
         if (typeof data.voucherCode !== "undefined" && !validator.isEmpty(data.voucherCode)) {
-            objData.voucherCode =validator.trim(data.voucherCode.toUpperCase())
+            objData.voucherCode =validator.trim(data.voucherCode)
         }
         if (typeof data.status !== "undefined" && !validator.isEmpty(data.status)) {
             objData.status = validator.trim(data.status.toLowerCase())
@@ -277,13 +277,7 @@ module.exports = {
         // Set default values
         if (crudOption === 'create') {
             if (typeof data.status === "undefined" || validator.isEmpty(data.status)) {
-                objData.status = DEFAULT_VALUES.status
-            }
-            if (data.description != null){
-                objData.description = null
-            }
-            if (data.country != null){
-                objData.country = null
+                objData.status = DEFAULT_VALUES.order.status
             }
         }
         if (crudOption === 'update') {

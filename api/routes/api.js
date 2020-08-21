@@ -8,6 +8,7 @@ const addressRouter = require('./admin/address.route')
 const productRouter = require('./admin/product.route')
 const providerRouter = require('./admin/provider.route')
 const voucherRouter = require('./admin/voucher.route')
+const orderRouter = require('./admin/order.route')
 
 // All below routes have prefix '/api/'
 // Client routes
@@ -21,5 +22,6 @@ router.use('/admin/addresses', addressRouter)
 router.use('/admin/products', productRouter)
 router.use('/admin/providers', providerRouter)
 router.use('/admin/vouchers', voucherRouter)
+router.use('/admin/orders', orderRouter)
 
 module.exports = router

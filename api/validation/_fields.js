@@ -2,6 +2,7 @@ module.exports = {
     DEFAULT_VALUES: {
         user: { role: "user", status: "deactivated" },
         status: "deactivated",
+        order: {status: 'processing'}
     },
     STATUS_VALUES: ["activated", "deactivated"],
     USER_ROLE: ["user", "admin"],
