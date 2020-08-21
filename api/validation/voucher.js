@@ -23,7 +23,7 @@ async function validate_add_inp({ ...data } = {}) {
     // description
     if (typeof data.description !== "undefined" && !validator.isEmpty(data.description)) {
         if (hasSpecialChars(validator.trim(data.description))) {
-            throw new Error("description must contain only numbers.")
+            throw new Error("description can not be filled in with special characters")
         }
         if (!validator.isLength(validator.trim(data.description), { max: 350 })) {
             throw new Error("description must be under 350 characters.")

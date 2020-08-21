@@ -54,7 +54,7 @@ async function validate_add_inp({ ...data } = {}) {
     // description
     if (typeof data.description !== "undefined" && !validator.isEmpty(data.description)) {
         if (hasSpecialChars(data.description)) {
-            throw new Error("description must contain only numbers,characters and spaces.")
+            throw new Error("description can not be filled in with special characters")
         }
         if (!validator.isLength(data.description, { max: 300 })) {
             throw new Error("description must be under 300 characters.")
@@ -131,7 +131,7 @@ async function validate_update_inp({ ...data } = {}, productId) {
     // description
     if (typeof data.description !== "undefined" && !validator.isEmpty(data.description)) {
         if (hasSpecialChars(data.description)) {
-            throw new Error("description must contain only numbers,characters and spaces.")
+            throw new Error("description can not be filled in with special characters")
         }
         if (!validator.isLength(data.description, { max: 300 })) {
             throw new Error("description must be under 300 characters.")

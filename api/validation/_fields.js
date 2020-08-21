@@ -16,5 +16,6 @@ module.exports = {
     ORDER_FIELDS: ["totalCost","shippingFee","finalCost","paymentMethod","userId","voucherCode","currency","status"],
     ORDER_STATUS_VALUES: ["processing","received","racking","delivering","done","refunded","canceled"],
     VOUCHER_FIELDS: ["name","description","code","rate","minValue","maxValue","usageLimit","validUntil","status"],
-    VOUCHER_LIMIT_TYPE: ["daily","weekly","seasonal","unlimited","personal","manually"]
+    VOUCHER_LIMIT_TYPE: ["daily","weekly","seasonal","unlimited","personal","manually"],
+    STORAGE_FIELDS: ["name","addressId","propertyType","capacity","description","status"],STORAGE_STATUS_VALUES: ["available","full"]
 }

@@ -107,8 +107,11 @@ async function validate_add_inp({ ...data } = {}) {
             }
         }
         if (data.details.description != null) {
-            if (!validator.isAlphanumeric(data.details.description)) {
-                throw new Error("details.description must be only numbers and characters")
+            if (hasSpecialChars(data.description)) {
+                throw new Error("description can not be filled in with special characters")
+            }
+            if (!validator.isLength(data.description, { max: 300 })) {
+                throw new Error("description must be under 300 characters.")
             }
         }
         if (data.details.madeIn != null) {
@@ -243,8 +246,11 @@ async function validate_update_inp({ ...data } = {}, productId) {
             }
         }
         if (data.details.description != null) {
-            if (!validator.isAlphanumeric(data.details.description)) {
-                throw new Error("details.description must be only numbers and characters")
+            if (hasSpecialChars(data.description)) {
+                throw new Error("description can not be filled in with special characters")
+            }
+            if (!validator.isLength(data.description, { max: 300 })) {
+                throw new Error("description must be under 300 characters.")
             }
         }
         if (data.details.madeIn != null) {

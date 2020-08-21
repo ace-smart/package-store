@@ -286,4 +286,31 @@ module.exports = {
         
         return objData
     },
+
+    storage: ({ ...data } = {}, crudOption = null) => {
+        let objData = data
+        if (typeof data.name !== "undefined" && !validator.isEmpty(data.name)) {
+            objData.name = toCapitalize(validator.trim(data.name))
+        }
+        if (typeof data.propertyType !== "undefined" && !validator.isEmpty(data.propertyType)) {
+            objData.shippingFee = validator.trim(data.name.toLowerCase())
+        } 
+        if (typeof data.capacity !== "undefined" && JSON.stringify(data.capacity) !== '{}') {
+            objData.capacity.size = parseFloat(data.capacity.size)
+            objData.capacity.unit = validator.trim(data.capacity.unit.toLowerCase())
+        } 
+        if (typeof data.description !== "undefined" && !validator.isEmpty(data.description)) {
+            objData.description = toCapitalize(validator.trim(data.description))
+        }
+        if (typeof data.status !== "undefined" && !validator.isEmpty(data.status)) {
+            objData.status = validator.trim(data.status.toLowerCase())
+        } 
+
+        // Set default values
+        if (crudOption === 'update') {
+            objData.updatedAt = Date.now()
+        }
+        
+        return objData
+    },
 }
