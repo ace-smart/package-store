@@ -1,7 +1,9 @@
-const express = require('express')
-const router = express.Router()
+const router = require('express').Router()
 const { showOrderList, getOrderById, createNewOrder, updateOrderById, removeOrderById } 
     = require('../../controllers/order.controller')
+const orderDetailRouter = require('./order_detail.route')
+
+router.use('/:id/details', orderDetailRouter)
 
 // @desc    Show list of orders
 // @route   GET /orders
@@ -22,5 +24,6 @@ router.put('/:id', updateOrderById)
 // @desc    Delete order
 // @route   DELETE /orders/:id
 router.delete('/:id', removeOrderById)
+
 
 module.exports = router

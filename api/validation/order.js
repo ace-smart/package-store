@@ -18,7 +18,7 @@ async function validate_add_inp({ ...data } = {}) {
         throw new Error("totalCost must contain only numbers.")
     }
     if (!validator.isLength(data.totalCost.toString(),{min: 1})) {
-        throw new Error("totalCost must larger 0 .")
+        throw new Error("totalCost must larger than 0 .")
     }
     // shippingFee [required]
     if (typeof data.shippingFee === "undefined" || validator.isEmpty(data.shippingFee)) {

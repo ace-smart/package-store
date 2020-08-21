@@ -287,6 +287,31 @@ module.exports = {
         return objData
     },
 
+    orderDetail: ({ ...data } = {}, crudOption = null) => {
+        let objData = data
+        if (typeof data.amount !== "undefined" && !validator.isEmpty(data.amount)) {
+            objData.amount = parseInt(data.amount)
+        }
+        if (typeof data.totalCost !== "undefined" && !validator.isEmpty(data.totalCost)) {
+            objData.totalCost = parseFloat(data.totalCost)
+        }
+        if (typeof data.status !== "undefined" && !validator.isEmpty(data.status)) {
+            objData.status = validator.trim(data.status.toLowerCase())
+        } 
+
+        // Set default values
+        if (crudOption === 'create') {
+            if (typeof data.status === "undefined" || validator.isEmpty(data.status)) {
+                objData.status = DEFAULT_VALUES.status
+            }
+        }
+        if (crudOption === 'update') {
+            objData.updatedAt = Date.now()
+        }
+        
+        return objData
+    },
+
     storage: ({ ...data } = {}, crudOption = null) => {
         let objData = data
         if (typeof data.name !== "undefined" && !validator.isEmpty(data.name)) {
