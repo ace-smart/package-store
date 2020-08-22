@@ -72,6 +72,16 @@ async function validate_add_inp({ ...data } = {}) {
             throw new Error("voucherCode is not existent.")
         }
     }
+    // deliverDay [required]
+    if (typeof data.deliveryDay === "undefined" || validator.isEmpty(data.deliveryDay)) {
+        throw new Error("deliveryDay is required.")
+    }
+    if (!validator.isDate(data.deliveryDay)) {
+        throw new Error("deliveryDay is in invalid format [YYYY/MM/DD]")
+    }
+    if (!validator.isAfter(data.deliveryDay, new Date().toString())) {
+        throw new Error("deliveryDay is invalid")
+    }
    
     // status
     if (typeof data.status !== "undefined" && !validator.isEmpty(data.status)) {
@@ -146,7 +156,15 @@ async function validate_update_inp({ ...data } = {}, orderId) {
             throw new Error("voucherCode is not existent.")
         }
     }
-    
+    // deliverDay
+    if (typeof data.deliveryDay !== "undefined" && !validator.isEmpty(data.deliveryDay)) {
+        if (!validator.isDate(data.deliveryDay)) {
+            throw new Error("deliveryDay is in invalid format [YYYY/MM/DD]")
+        }
+        if (!validator.isAfter(data.deliveryDay, new Date().toString())) {
+            throw new Error("deliveryDay is invalid")
+        }    
+    }
     if (typeof data.status !== "undefined" && !validator.isEmpty(data.status)) {
         if (!validator.isIn(data.status.toLowerCase(), ORDER_STATUS_VALUES)) {
             throw new Error("status is not valid.")

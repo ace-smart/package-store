@@ -15,6 +15,11 @@ module.exports = validation = {
                 return "Id is not valid"
             }
         }
+        // ObjectId from URL is not existent for [Update]
+        if (error.message === "Cannot read property '_id' of null"){
+            return 'The param for [Id] from Url is not existent.'
+        }
+
         // Custom errors
         if (typeof error.message !== "undefined") {
             return error.message

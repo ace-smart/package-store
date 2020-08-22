@@ -100,6 +100,7 @@ async function validate_update_inp({ ...data } = {}, restockId) {
     if (!(await isExistent(require("../models/ProductModel"), { _id: data.productId }))) {
         throw new Error("productId is not existent.")
     }
+    let restockAction = await require("../models/RestockModel").findOne({ _id: restockId }).lean().action
     // action
     if (typeof data.action !== "undefined" && !validator.isEmpty(data.action)) {
         if (hasSpecialChars(data.action)) {
@@ -108,6 +109,8 @@ async function validate_update_inp({ ...data } = {}, restockId) {
         if (!validator.isIn(data.action.toLowerCase(), RESTOCK_ACTION_VALUES)) {
             throw new Error("action is not valid.")
         }
+        // assign action from input
+        restockAction = data.action.toLowerCase()
     }
     if (typeof data.from !== "undefined" && !validator.isEmpty(data.from)) {
         if (!validator.isMongoId(data.from)) {
@@ -119,29 +122,28 @@ async function validate_update_inp({ ...data } = {}, restockId) {
             throw new Error("to is in invalid format.")
         }
     }
-    const restockAction = await require("../models/RestockModel").findOne({ _id: restockId }).lean()
     // check ObjectId existent or not
-    if (restockAction.action.toLowerCase() === "import") {
+    if (restockAction === "import") {
         // import from Provider to Storage
         if (data.from.toString() != null) {
-            if (!(await isExistent(require("../models/ProviderModel", { _id: data.from })))) {
+            if (!(await isExistent(require("../models/ProviderModel"), { _id: data.from }))) {
                 throw new Error("from is not existent")
             }
         }
         if (data.to.toString() != null) {
-            if (!(await isExistent(require("../models/StorageModel", { _id: data.to })))) {
+            if (!(await isExistent(require("../models/StorageModel"), { _id: data.to }))) {
                 throw new Error("to is not existent")
             }
         }
-    } else if (restockAction.action.toLowerCase() === "export") {
+    } else if (restockAction === "export") {
         // export from Storage to Customer (by Order)
         if (data.from.toString() != null) {
-            if (!(await isExistent(require("../models/StorageModel", { _id: data.from })))) {
+            if (!(await isExistent(require("../models/StorageModel"), { _id: data.from }))) {
                 throw new Error("from is not existent")
             }
         }
         if (data.to.toString() != null) {
-            if (!(await isExistent(require("../models/OrderModel", { _id: data.to })))) {
+            if (!(await isExistent(require("../models/OrderModel"), { _id: data.to }))) {
                 throw new Error("to is not existent")
             }
         }

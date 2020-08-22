@@ -20,7 +20,7 @@ module.exports = {
     getRestockById: async (req, res) => {
         try {
             const restock = await Restock.findOne({ _id: req.params.id }).lean()
-            if (provider)
+            if (restock)
                 return res.status(200).json({
                     success: true,
                     restock: restock,

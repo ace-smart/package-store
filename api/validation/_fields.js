@@ -21,6 +21,7 @@ module.exports = {
         "userId",
         "voucherCode",
         "currency",
+        "deliveryDay",
         "status",
     ],
     ORDER_STATUS_VALUES: [

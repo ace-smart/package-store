@@ -32,9 +32,13 @@ const OrderSchema = new mongoose.Schema({
         type: String,
         ref: 'Voucher.code'
     },
+    deliveryDay: {
+        type: Date,
+        required: true,
+    },
     status: {
         type: String,
-        enum: ['processing','received','racking', 'delivering','done', 'refunded', 'canceled'],
+        enum: ['processing','received','packing', 'delivering','done', 'refunded', 'canceled'],
         default: 'processing'
     }
 }, {timestamps: true})
