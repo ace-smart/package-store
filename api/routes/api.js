@@ -10,6 +10,7 @@ const providerRouter = require('./admin/provider.route')
 const voucherRouter = require('./admin/voucher.route')
 const orderRouter = require('./admin/order.route')
 const storageRouter = require('./admin/storage.route')
+const restockRouter = require('./admin/restock.route')
 
 // All below routes have prefix '/api/'
 // Client routes
@@ -25,5 +26,6 @@ router.use('/admin/providers', providerRouter)
 router.use('/admin/vouchers', voucherRouter)
 router.use('/admin/orders', orderRouter)
 router.use('/admin/storages', storageRouter)
+router.use('/admin/restock', restockRouter)
 
 module.exports = router

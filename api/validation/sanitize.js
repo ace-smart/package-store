@@ -338,4 +338,24 @@ module.exports = {
         
         return objData
     },
+
+    restock: ({ ...data } = {}, crudOption = null) => {
+        let objData = data
+        if (typeof data.action !== "undefined" && !validator.isEmpty(data.action)) {
+            objData.action = validator.trim(data.action.toLowerCase())
+        }
+        if (typeof data.amount !== "undefined" && !validator.isEmpty(data.amount)) {
+            objData.amount = parseInt(data.amount.toString())
+        } 
+        if (typeof data.status !== "undefined" && !validator.isEmpty(data.status)) {
+            objData.status = validator.trim(data.status.toLowerCase())
+        } 
+
+        // Set default values
+        if (crudOption === 'update') {
+            objData.updatedAt = Date.now()
+        }
+        
+        return objData
+    },
 }
