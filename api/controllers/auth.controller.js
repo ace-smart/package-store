@@ -16,23 +16,40 @@ module.exports = {
                         .json({ success: false, message: isAuthenticatedUser.message })
 
                 // Generate tokens
-                const accessToken = authHelper.generateAccessToken(isAuthenticatedUser, {
-                    expiresIn: "1d",
-                })
-                const refreshToken = await authHelper.generateRefreshToken(isAuthenticatedUser)
+                const newTokens = {}
+                console.log(isAuthenticatedUser.accessToken == null)
+                if (isAuthenticatedUser.accessToken == null){
+                    newTokens.accessToken = authHelper.generateAccessToken(isAuthenticatedUser, {
+                        expiresIn: "1d",
+                    })
+                } else if (authHelper.authenticateAccessToken(isAuthenticatedUser.accessToken).id != null){
+                    newTokens.accessToken = isAuthenticatedUser.accessToken
+                } else if (authHelper.authenticateAccessToken(isAuthenticatedUser.accessToken).error != null){
+                    newTokens.accessToken = authHelper.generateAccessToken(isAuthenticatedUser, {
+                        expiresIn: "1d",
+                    })
+                }
+                
+
+                if (isAuthenticatedUser.refreshToken == null) {
+                    newTokens.refreshToken = await authHelper.generateRefreshToken(isAuthenticatedUser) 
+                } else {
+                    newTokens.refreshToken = isAuthenticatedUser.refreshToken
+                }
                 const updated = await User.findOneAndUpdate(
                     { _id: isAuthenticatedUser._id },
                     {
-                        accessToken: accessToken,
-                        refreshToken: refreshToken,
+                        accessToken: newTokens.accessToken,
+                        refreshToken: newTokens.refreshToken,
                     },
                     { new: true }
                 )
                 if (updated)
                     return res.status(200).json({
                         success: true,
-                        accessToken: accessToken,
-                        refreshToken: refreshToken,
+                        user: updated,
+                        // accessToken: accessToken,
+                        // refreshToken: refreshToken,
                     })
                 else
                     return res
@@ -97,23 +114,23 @@ module.exports = {
     // @desc:   Logout by userId
     // @route:  POST /logout
     logout: async (req, res) => {
-        try {
-            const user = await User.findOne({ _id: req.body.id.toString() })
-
-            if (user) {
-                const updated = await User.findOneAndUpdate({_id: req.body.id}, {
+        if (req.user != null) {
+            try {
+                const updated = await User.findOneAndUpdate({_id: req.user.id}, {
                     accessToken: null,
                     refreshToken: null
                 }, {new: true})
-
+    
                 // Check given property
-                if (updated) return res.status(204)
+                if (updated) return res.sendStatus(200)
+            } catch (error) {
+                console.error(error)
+                return res.status(500).json({success: false, message: error.message})
             }
-
-            return res.status(404).json({ success: false, message: "Invalid id." })
-        } catch (error) {
-            console.error(error)
-            return res.status(500).json({success: false, message: error.message})
+            
         }
+
+        return res.status(403).json({ success: false, message: "No authentication found." })
+        
     },
 }

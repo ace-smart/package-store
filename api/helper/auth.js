@@ -52,14 +52,14 @@ module.exports = authHelper = {
         if (!accessToken) throw new Error("No access token is given.")
 
         return jwt.verify(accessToken, process.env.ACCESSTOKEN_SECRET, opts, (err, decoded) => {
-            if (err) return err
+            if (err) return {error: err}
             return decoded
         })
     },
 
     //@desc:    Middleware for checking access token
     //Return:   req.user = {user}
-    _ensureAccessToken: (req, res, next) => {
+    _ensureAccessToken: async (req, res, next) => {
         const accessTokenHeader = req.header("Authorization")
         // No token
         if (typeof accessTokenHeader === "undefined")
@@ -74,11 +74,17 @@ module.exports = authHelper = {
         try {
             const payload = authHelper.authenticateAccessToken(accessToken)
             // Jwt has errors 
-            if (typeof payload.message !== "undefined")
-                return res.status(401).json({ success: false, message: payload.message })
+            if (typeof payload.error !== "undefined")
+                return res.status(401).json({ success: false, message: payload.error.message })
 
-            req.user = payload
-            return next()
+            // Check accessToken is in database
+            const isExistent = await User.findOne({accessToken: accessToken})
+            if (isExistent) {
+                req.user = payload
+                return next()
+            }
+
+            return res.status(403).json({ success: false, message: 'Forbidden access.' })
         } catch (error) {
             console.error(error)
             return res.status(500).json({ success: false, message: error.message })
@@ -111,8 +117,10 @@ module.exports = authHelper = {
     //@desc:    Middleware for checking 'admin' role
     //Return:   req.user = {user}
     _ensureAdminRole: (req, res, next) => {
-        if (typeof req.user !== 'undefined' && req.user.role.toLowerCase() === 'admin' ){
-            return next()
+        console.log(typeof req.user.role !== 'undefined')
+        if (typeof req.user !== 'undefined' && req.user.role != null && req.user.role.toLowerCase() === 'admin'){
+            // if ()
+                return next()
         }
         
         return res.status(403).json({ success: false, message: 'Forbidden.' })

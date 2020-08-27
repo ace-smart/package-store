@@ -24,13 +24,7 @@ module.exports = {
             if (user)
                 return res.status(200).json({
                     success: true,
-                    user: {
-                        id: user._id,
-                        username: user.username,
-                        email: user.email,
-                        role: user.role,
-                        status: user.status,
-                    },
+                    user: user,
                 })
             // Not found
             return res.status(404).json({ success: false, message: "Not found" })
