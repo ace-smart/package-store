@@ -81,6 +81,7 @@ module.exports = authHelper = {
             const isExistent = await User.findOne({accessToken: accessToken})
             if (isExistent) {
                 req.user = payload
+                req.user.accessToken = accessToken
                 return next()
             }
 

@@ -17,7 +17,6 @@ module.exports = {
 
                 // Generate tokens
                 const newTokens = {}
-                console.log(isAuthenticatedUser.accessToken == null)
                 if (isAuthenticatedUser.accessToken == null){
                     newTokens.accessToken = authHelper.generateAccessToken(isAuthenticatedUser, {
                         expiresIn: "1d",
@@ -107,7 +106,29 @@ module.exports = {
             })
         } catch (error) {
             console.error(error)
-            return res.status(401).json({ success: false, message: error.message })
+            return res.status(500).json({ success: false, message: error.message })
+        }
+    },
+
+
+    // @desc:   get account information by accessTK
+    // @route:  GET /info/:id
+    getInfo: async (req, res) => {
+        try {
+            const user = await User.findOne({$and :[{_id: req.params.id},{accessToken: req.user.accessToken}]}).lean()
+            if (user != null) 
+                return res.status(200).json({
+                    success: true,
+                    user: user
+                })
+
+            return res.status(200).json({
+                success: false,
+                message: 'No user found.'
+            })
+        } catch (error) {
+            console.error(error)
+            return res.status(500).json({success: false, message: error.message})
         }
     },
 
