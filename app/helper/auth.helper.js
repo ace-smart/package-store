@@ -125,17 +125,19 @@ module.exports = authHelper = {
         const urlSegments = req.originalUrl.split("/")
         const admin = urlSegments.find((element) => element === "admin")
 
-        if (admin != null) res.redirect("/admin")
+        if (admin != null) 
+            return res.redirect("/admin")
 
-        res.redirect("/")
+        return res.redirect("/")
     },
 
     _redirectToLogin: (req, res, next) => {
         const urlSegments = req.originalUrl.split("/")
         const admin = urlSegments.find((element) => element === "admin")
 
-        if (admin != null) res.redirect("/admin/login")
+        if (admin != null) 
+            return res.redirect("/admin/login")
 
-        res.redirect("/login")
+        return res.redirect("/login")
     },
 }

@@ -5,7 +5,17 @@ const RememberMeSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         required: true
     },
-    token: {
+    remember_token: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    access_token: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    refresh_token: {
         type: String,
         required: true,
         unique: true

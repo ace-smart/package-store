@@ -1,4 +1,6 @@
 const axios = require("axios")
+const crypto = require('crypto')
+const RememberMeModel = require("../../models/RememberMeModel")
 const axiosInstance = axios.create({
     baseURL: `${process.env.BASE_URL}:${process.env.API_SERVER_PORT}/api`,
     timeout: 10000,
@@ -9,48 +11,51 @@ module.exports = {
     // @desc:   show login form
     // @route:  GET /login
     showLoginForm: (req, res) => {
-        res.render('templates/admin/auth/login', {
-            layout: 'admin/auth.layout.hbs',
-            csrfToken: req.csrfToken()
-        })  
+        res.render("templates/admin/auth/login", {
+            layout: "admin/auth.layout.hbs",
+            csrfToken: req.csrfToken(),
+        })
     },
 
     // @desc:   authenticate user
     // @route:  GET /login
-    login: async (req, res) => {
-        console.log(req.body)
-        const user = {
-            username: req.body.username,
-            password: req.body.password
+    rememberMeLogin: async (req, res, next) => {
+        console.log(req.user)
+        console.log((!req.body.remember_me))
+        if (!req.body.remember_me) {
+            return next()
         }
 
         try {
-            const response = await axiosInstance.post(
-                "/auth",
-                {
-                    username: "root",
-                    password: "1234",
-                },
-                {
-                    responseType: "json",
-                    responseEncoding: "utf-8",
-                }
-            )
-            if (response.status === 200 && response.statusText === "OK") {
-                if (response.data.success != null && response.data.success == true) {
-                    
-                    return {
-                        accessToken: response.data.accessToken,
-                        refreshToken: response.data.refreshToken,
+            const newRememberToken = crypto.randomBytes(16).toString('hex')
+            const rememberMeData = await RememberMeModel.findOne({userId: req.user._id}).lean()
+            if (rememberMeData == null) {
+                // first time using remember_me option
+                await RememberMeModel.create({
+                    userId: req.user._id,
+                    remember_token: newRememberToken,
+                    access_token: req.user.accessToken,
+                    refresh_token: req.user.refreshToken
+                })
+            }else {
+                await RememberMeModel.updateOne(
+                    {
+                        userId: req.user._id,
+                    },
+                    {
+                        remember_token: newRememberToken,
                     }
-                } else {
-                    return {
-                        error: response.data.message || "Failed",
-                    }
-                }
+                )
             }
 
-            throw new Error("Authenticated failed.")
+            // store in cookie
+            res.cookie("remember_me", newRememberToken, {
+                path: "/admin",
+                httpOnly: true,
+                maxAge: 3600*24*7,
+            })
+            
+            return next()
         } catch (error) {
             throw new Error(error)
         }
