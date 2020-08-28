@@ -1,9 +1,9 @@
 // Load environment variable
-require("dotenv").config({ path: "./config/config.env" })
+require("dotenv").config({ path: "./api/config.env" })
 
 const express = require("express")
 const app = express()
-const connectDB = require("./config/db")
+const connectDB = require("./api/db.js")
 
 // Connect to mongodb
 connectDB()
