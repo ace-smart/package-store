@@ -22,19 +22,21 @@ module.exports = {
                         expiresIn: "1d",
                     })
                 } else if (authHelper.authenticateAccessToken(isAuthenticatedUser.accessToken).id != null){
+                    // keep the old accessToken in DB if it was not expired
                     newTokens.accessToken = isAuthenticatedUser.accessToken
                 } else if (authHelper.authenticateAccessToken(isAuthenticatedUser.accessToken).error != null){
+                    // generate new accessToken when the old one was expired
                     newTokens.accessToken = authHelper.generateAccessToken(isAuthenticatedUser, {
                         expiresIn: "1d",
                     })
                 }
-                
 
                 if (isAuthenticatedUser.refreshToken == null) {
                     newTokens.refreshToken = await authHelper.generateRefreshToken(isAuthenticatedUser) 
                 } else {
                     newTokens.refreshToken = isAuthenticatedUser.refreshToken
                 }
+
                 const updated = await User.findOneAndUpdate(
                     { _id: isAuthenticatedUser._id },
                     {
@@ -43,6 +45,7 @@ module.exports = {
                     },
                     { new: true }
                 )
+                
                 if (updated)
                     return res.status(200).json({
                         success: true,

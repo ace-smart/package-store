@@ -103,7 +103,7 @@ module.exports = authHelper = {
             const userFromDb = await User.findOne({ username: user.username}).lean()
             if (userFromDb) {
                 // Check status
-                if (userFromDb.status === 'Activated') {
+                if (userFromDb.status === 'activated') {
                     // Check password
                     const matchedPwd = await bcrypt.compare(user.password, userFromDb.password)
                     if (matchedPwd) return userFromDb
