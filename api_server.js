@@ -1,5 +1,5 @@
 // Load environment variable
-require("dotenv").config({ path: "./api/config.env" })
+require("dotenv").config({ path: "./api/api_config.env" })
 
 const express = require("express")
 const app = express()
