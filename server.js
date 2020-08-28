@@ -11,9 +11,11 @@ const helmet = require("helmet")
 const bodyParser = require("body-parser")
 const cookieParser = require("cookie-parser")
 const csrf = require("csurf")
+const passport = require('passport')
+const adminPassport = require('./app/passport/admin')
+const flash = require('express-flash')
 const exphbs = require("express-handlebars")
 const MongoStore = require("connect-mongo")(session)
-const crypto = require("crypto")
 
 // Connect to mongodb
 connectDB()
@@ -32,7 +34,7 @@ app.use(
     session({
         name: "userSession",
         secret: process.env.SESSION_SECRET,
-        cookie: { path: "/", httpOnly: true, secure: false, maxAge: null },
+        cookie: { path: "/", httpOnly: true, secure: false, maxAge: 3600*24*7 },
         resave: true,
         saveUninitialized: false,
         store: new MongoStore({
@@ -40,10 +42,6 @@ app.use(
         }),
     })
 )
-app.use((req, res, next) => {
-    res.locals.cspNonce = crypto.randomBytes(16).toString("hex")
-    next()
-})
 //  helmet, cors, csurf
 app.use(
     helmet({
@@ -56,7 +54,12 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser())
 // csrfProtection
 app.use(csrf({ cookie: true }))
-
+// flash
+app.use(flash())
+// passport
+adminPassport(passport)
+app.use(passport.initialize())
+app.use(passport.session())
 // Routes
 app.use("/admin", require("./app/routes/admin/admin.js"))
 

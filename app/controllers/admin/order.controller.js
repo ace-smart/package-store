@@ -1,35 +1,37 @@
-const router = require("express").Router()
+module.exports = {
+    // @desc:   Show orders
+    // @route   GET /orders
+    showOrderList: async (req, res) => {
+        res.render('templates/admin/account',{
+            layout: 'admin/table.layout.hbs'
+        })
+    },
 
-const {
-    showOrderList,
-    showCreateOrderForm,
-    getOrderById,
-    updateOrderById,
-    removeOrderById,
-} = require("../../controllers/admin/order.controller")
+    // @desc:   Get orders by Id
+    // @route   GET /orders/:id
+    getOrderById: async (req, res) => {
+        // res.render('templates/admin/account',{
+        //     layout: 'admin/table.layout.hbs'
+        // })
+    },
 
-// @desc    Show list of orders
-// @route   GET /orders
-router.get("/", showOrderList)
+    // @desc    show create order form
+    // @route   GET /orders/add
+    showCreateOrderForm: async (req, res) => {
+        res.render('templates/admin/account_form',{
+            layout: 'admin/form.layout.hbs'
+        })
+    },
 
-// @desc    Get an order by id
-// @route   GET /orders/:id
-// router.get("/:id", getAccountById)
+    // @desc    Update order
+    // @route   PUT /orders/:id
+    updateOrderById: async (req, res) => {
+        return 'Update'
+    },
 
-// @desc    Add a new order
-// @route   get /orders/add
-router.get("/add", showCreateOrderForm)
-
-// @desc    Add a new order
-// @route   POST /orders/add
-// router.post("/add", createNewAccount)
-
-// @desc    Update an order by id
-// @route   PUT /orders/:id
-router.put("/:id", updateOrderById)
-
-// @desc    Delete an order by id
-// @route   DELETE /orders/:id
-router.delete("/:id", removeOrderById)
-
-module.exports = router
+    // @desc    Delete order
+    // @route   DELETE /orders/:id
+    removeOrderById: async (req, res) => {
+        return 'Remove'
+    },
+}

@@ -4,7 +4,8 @@ module.exports = {
     // @route:  GET ['/','/index','/home']
     showIndexPage: (req,res) => {
         res.render('templates/admin/index', {
-            layout: 'admin/index.layout.hbs'
+            layout: 'admin/index.layout.hbs',
+            user: req.user
         })
     },
 }

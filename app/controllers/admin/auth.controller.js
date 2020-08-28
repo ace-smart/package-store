@@ -9,10 +9,10 @@ module.exports = {
     // @desc:   show login form
     // @route:  GET /login
     showLoginForm: (req, res) => {
-        res.render('templates/admin/login', {
+        res.render('templates/admin/auth/login', {
             layout: 'admin/auth.layout.hbs',
             csrfToken: req.csrfToken()
-        })
+        })  
     },
 
     // @desc:   authenticate user
@@ -38,7 +38,7 @@ module.exports = {
             )
             if (response.status === 200 && response.statusText === "OK") {
                 if (response.data.success != null && response.data.success == true) {
-                    console.log(response.data)
+                    
                     return {
                         accessToken: response.data.accessToken,
                         refreshToken: response.data.refreshToken,

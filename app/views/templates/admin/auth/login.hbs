@@ -19,7 +19,7 @@
                     <input type="hidden" name="_csrf" value="{{csrfToken}}">
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input name="username" type="text" 
+                        <input name="username" type="text"  value="root"
                             {{#if messages.error }}
                             class="form-control parsley-error" 
                             {{/if}}
@@ -29,7 +29,7 @@
 
                     <div class="form-group">
                         <label for="userpassword">Password</label>
-                        <input name="password" type="password" 
+                        <input name="password" type="password"  value="1234"
                             {{#if messages.error }}
                             class="form-control parsley-error" 
                             {{/if}}
