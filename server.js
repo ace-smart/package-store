@@ -11,9 +11,9 @@ const helmet = require("helmet")
 const bodyParser = require("body-parser")
 const cookieParser = require("cookie-parser")
 const csrf = require("csurf")
-const passport = require('passport')
-const adminPassport = require('./app/passport/admin')
-const flash = require('express-flash')
+const passport = require("passport")
+const adminPassport = require("./app/passport/admin")
+const flash = require("express-flash")
 const exphbs = require("express-handlebars")
 const MongoStore = require("connect-mongo")(session)
 
@@ -21,7 +21,10 @@ const MongoStore = require("connect-mongo")(session)
 connectDB()
 // Template engine
 app.set("views", path.join(__dirname, "app/views"))
-app.engine(".hbs", exphbs({ extname: ".hbs", defaultLayout: false }))
+app.engine(
+    ".hbs",
+    exphbs({ extname: ".hbs", defaultLayout: false, helpers: require("./app/helper/hbs.helper") })
+)
 app.set("view engine", ".hbs")
 // Static folder
 app.use("/static", express.static(path.join(__dirname, "app/public/client")))
@@ -34,7 +37,7 @@ app.use(
     session({
         name: "userSession",
         secret: process.env.SESSION_SECRET,
-        cookie: { path: "/", httpOnly: true, secure: false, maxAge: 3600*24*7 },
+        cookie: { path: "/", httpOnly: true, secure: false, maxAge: 1000 * 3600 * 24 * 7 },
         resave: true,
         saveUninitialized: false,
         store: new MongoStore({
@@ -45,7 +48,7 @@ app.use(
 //  helmet, cors, csurf
 app.use(
     helmet({
-        contentSecurityPolicy: false
+        contentSecurityPolicy: false,
     })
 )
 // bodyParser
