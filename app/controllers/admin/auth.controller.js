@@ -52,7 +52,8 @@ module.exports = {
             res.cookie("remember_me", newRememberToken, {
                 path: "/admin",
                 httpOnly: true,
-                maxAge: 3600*24*7,
+                secure: false, 
+                maxAge: 1000*3600*24*7
             })
             
             return next()
