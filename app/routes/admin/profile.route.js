@@ -2,10 +2,8 @@ const router = require("express").Router()
 
 const {
     showProfilePage,
-    showCreateProfileForm,
-    getProfileById,
     updateProfile,
-    removeProfileById,
+    changePwd,
 } = require("../../controllers/admin/profile.controller")
 
 // @desc    Show list of profile
@@ -13,24 +11,11 @@ const {
 router.get("/", showProfilePage)
 
 // @desc    Update profile
-// @route   PUT /profile
-router.put("/", updateProfile)
+// @route   POST /profile
+router.post("/", updateProfile)
 
-// @desc    Get an admin by id
-// @route   GET /profile/:id
-// router.get("/:id", getAccountById)
-
-// @desc    Add a new admin
-// @route   get /profile/add
-router.get("/add", showCreateProfileForm)
-
-
-// @desc    Update an admin by id
-// @route   PUT /profile/:id
-// router.put("/:id", updateProfileById)
-
-// @desc    Delete an admin by id
-// @route   DELETE /profile/:id
-router.delete("/:id", removeProfileById)
+// @desc    Change password
+// @route   POST /profile/changePwd
+router.post("/changePwd", changePwd)
 
 module.exports = router

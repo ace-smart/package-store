@@ -1,6 +1,7 @@
 <div class="row p-3 m-2">
     <div class="col-12">
-        <form class="form-horizontal p-3" action="index.html">
+        <form class="form-horizontal p-3" action="/admin/profile/changePwd" method="POST">
+            {{> csrf}}
             <div class="form-group mt-2">
                 <label for="dateOfBirth" class="mb-2"><i class="mdi mdi-key mr-2"></i>Current Password</label>
                 <div class="input-group">

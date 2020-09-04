@@ -1,2 +1,18 @@
 <!-- X-editable css -->
 <link href="/admin/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
+
+<style>
+    input[type="file"]#avatar {
+        display: none;
+    }
+    label[for=male], label[for=female] {
+        cursor: pointer;
+    }
+    label[for=male].selected, label[for=female].selected {
+        border: 1px solid;
+        transition: ease-in;
+    }
+    label[for=male].selected i, label[for=female].selected i {
+        color: #67a8e4
+    }
+</style>

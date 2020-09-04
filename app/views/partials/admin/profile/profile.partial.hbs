@@ -1,49 +1,49 @@
-<div class="row p-3 m-2">
-    <div class="p-0 col-2 d-flex flex-column justify-content-start align-items-center">
-        <div class="my-3 ">
-            <img class="img-thumbnail" alt="200x200" style="width: 200px; height: 200px;"
-                src="/admin/static/assets/images/bg.jpg" data-holder-rendered="true">
-        </div>
-        <div class="my-2">
-            <form action="#" enctype="multipart/form-data">
-                <input type="file" name="avatar" id="avatar" hidden=true>
-                <button type="button" class="btn btn-primary waves-effect waves-light active" data-toggle="button"
-                aria-pressed="true" autocomplete="off"><i class="mdi mdi-cloud-upload mr-1"></i> Change avatar</button>
-            </form>
-            
-        </div>
+<form action="/admin/profile" method="POST" enctype="multipart/form-data">
+    {{> csrf}}
+    <div class="row p-3 m-2">
+        <div class="p-0 col-2 d-flex flex-column justify-content-start align-items-center">
+            <div class="my-3 ">
+                <img class="img-thumbnail" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
+                    src="/admin/static/assets/images/bg.jpg" data-holder-rendered="true">
+            </div>
+            <div class="my-2">
+                <label for="avatar" class="btn btn-primary waves-effect waves-light active" 
+                onclick="invokeAvatarInp" >
+                    <i class="mdi mdi-cloud-upload mr-1"></i> Change avatar
+                </label>
+                <input type="file" name="avatar" id="avatar" accept="image/*" onchange="loadFile(event)" /> 
+            </div>
 
-    </div>
-    <div class="pl-3 col-10">
-        <form class="form-horizontal p-3" action="index.html">
+        </div>
+        <div class="pl-3 col-10">
             <div class="form-group row mt-2">
                 <div class="col-6">
                     <label for="firstName" class="mb-2">
                         <i class="mdi mdi-account-card-details mr-2"></i>First Name</label>
                     <input type="text" class="form-control" id="firstName" name="firstName"
-                        placeholder="Enter first name">
+                        placeholder="Enter first name" value="{{{user.profile.firstName}}}">
                 </div>
 
                 <div class="col-6">
                     <label for="lastName" class="mb-2">
-                    <i class="mdi mdi-account-card-details mr-2"></i>Last Name</label>
-                    <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter last name">
+                        <i class="mdi mdi-account-card-details mr-2"></i>Last Name</label>
+                    <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter last name" value="{{{user.profile.lastName}}}">
                 </div>
             </div>
 
             <div class="form-group mt-2">
                 <label class="mb-2"><i class="mdi mdi-gender-transgender mr-2"></i>Gender</label>
                 <div class="col-5 my-auto d-flex flex-row justify-content-start align-items-center">
-                    <label for="male" class="btn btn-brown mr-2 my-auto">
-                        {{!-- <button type="button" class="btn btn-primary"> --}}
+                    <label for="male" id="male-lbl" 
+                    class="btn btn-brown mr-2 my-auto {{#ifeq user.profile.gender 'male'}} selected {{else}} {{/ifeq}}"
+                    onclick="selectGender(this)"> 
                         <i class="mdi mdi-gender-male mr-1"></i>Male
-                        {{!-- </button> --}}
                     </label>
                     <input value="male" id="male" type="radio" name="gender" class="form-control" hidden="true">
-                    <label for="female" class="mr-2 my-auto btn btn-pink ">
-                        {{!-- <button type="button" class="btn btn-pink"> --}}
+                    <label for="female" id="female-lbl" 
+                    class="mr-2 my-auto btn btn-pink {{#ifeq user.profile.gender 'female'}} selected {{else}} {{/ifeq}}"
+                    onclick="selectGender(this)">
                         <i class="mdi mdi-gender-female mr-1"></i>Female
-                        {{!-- </button> --}}
                     </label>
                     <input value="female" id="female" type="radio" name="gender" class="form-control" hidden="true">
                 </div>
@@ -53,7 +53,7 @@
                 <label for="dateOfBirth" class="mb-2"><i class="mdi mdi-cake-variant mr-2"></i>Date of birth</label>
                 <div class="input-group">
                     <input type="text" name="dateOfBirth" class="form-control" placeholder="mm/dd/yyyy"
-                        id="datepicker-autoclose">
+                        id="datepicker-autoclose" value="{{formatDate user.profile.dateOfBirth}}">
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                     </div>
@@ -64,7 +64,7 @@
                 <label for="phoneNumber" class="mb-2"><i class="mdi mdi-cellphone-basic mr-2"></i>Phone number</label>
                 <div class="input-group">
                     <input type="text" class="form-control" name="phoneNumber" id="phoneNumber"
-                        placeholder="Enter phone number">
+                        placeholder="Enter phone number" value="{{{user.profile.phoneNumber}}}">
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="ion-ios7-telephone"></i></span>
                     </div>
@@ -73,10 +73,9 @@
 
             <div class="form-group row m-t-30">
                 <div class="col-12 text-right">
-                    <button class="btn btn-primary w-md waves-effect waves-light" type="submit">Update</button>
+                    <button class="btn btn-primary w-md waves-effect waves-light" type="submit">Save changes</button>
                 </div>
             </div>
-
-        </form>
+        </div>
     </div>
-</div>
+</form>

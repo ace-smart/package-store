@@ -3,3 +3,33 @@
 
 <!-- Plugins Init js -->
 <script src="/admin/static/assets/pages/form-advanced.js"></script>
+
+<script>
+    function invokeAvatarInp() {
+        return document.getElementById('avatar').click()
+    }
+
+    var loadFile = function(event) {
+      var output = document.getElementById('avatar-block')
+      output.src = URL.createObjectURL(event.target.files[0])
+      output.onload = function() {
+        URL.revokeObjectURL(output.src) // free memory
+      }
+    }
+
+    function selectGender(element) {
+        let elementAttr = element.getAttribute('for')
+        let genderInp = document.getElementById(elementAttr)
+        if (elementAttr === 'male'){
+            element.classList.add('selected')
+            document.getElementById('female-lbl').classList.remove('selected')
+            genderInp.setAttribute('checked', 'true')
+            document.getElementById('female').removeAttribute('checked')
+        }else if (elementAttr === 'female'){
+            element.classList.add('selected')
+            document.getElementById('male-lbl').classList.remove('selected')
+            genderInp.setAttribute('checked', 'true')
+            document.getElementById('male').removeAttribute('checked')
+        }
+    }
+</script>
