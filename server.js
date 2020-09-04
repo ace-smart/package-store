@@ -17,22 +17,22 @@ const flash = require("express-flash")
 const exphbs = require("express-handlebars")
 const MongoStore = require("connect-mongo")(session)
 
-// Connect to mongodb
+// connect to mongodb
 connectDB()
-// Template engine
+// template engine
 app.set("views", path.join(__dirname, "app/views"))
 app.engine(
     ".hbs",
     exphbs({ extname: ".hbs", defaultLayout: false, helpers: require("./app/helper/hbs.helper") })
 )
 app.set("view engine", ".hbs")
-// Static folder
+// static folders
 app.use("/static", express.static(path.join(__dirname, "app/public/client")))
 app.use("/admin/static", express.static(path.join(__dirname, "app/public/admin")))
 app.use("/admin/plugins", express.static(path.join(__dirname, "app/public/admin/plugins")))
-// Logger
+// logger
 app.use(morgan("dev"))
-// Session
+// session
 app.use(
     session({
         name: "userSession",
@@ -51,6 +51,8 @@ app.use(
         contentSecurityPolicy: false,
     })
 )
+// multer setup
+app.use(require('./config/multer').single('avatar'))
 // bodyParser
 app.use(bodyParser.urlencoded({ extended: true }))
 // cookieParser
@@ -63,8 +65,9 @@ app.use(flash())
 adminPassport(passport)
 app.use(passport.initialize())
 app.use(passport.session())
-// Routes
+// routes
 app.use("/admin", require("./app/routes/admin/admin.js"))
+
 
 // Port
 const PORT = process.env.PORT || 5000
