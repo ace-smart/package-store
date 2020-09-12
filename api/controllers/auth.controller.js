@@ -1,5 +1,10 @@
 const User = require("../models/UserModel")
+const Profile = require("../models/ProfileModel")
+const bcrypt = require("bcrypt")
 const authHelper = require("../helper/auth")
+const { validate_add_inp, validate_update_inp } = require("../validation/profile")
+const sanitize = require("../validation/sanitize")
+const { outputErrors } = require("../validation/validation")
 
 module.exports = {
     // @desc    Authenticate
@@ -7,7 +12,6 @@ module.exports = {
     auth: async (req, res) => {
         try {
             const isAuthenticatedUser = await authHelper.isAuthenticatedUser({ ...req.body })
-            
             if (isAuthenticatedUser) {
                 // Not activated
                 if (isAuthenticatedUser.message != null)
@@ -17,14 +21,19 @@ module.exports = {
 
                 // Generate tokens
                 const newTokens = {}
-                if (isAuthenticatedUser.accessToken == null){
+                if (isAuthenticatedUser.accessToken == null) {
                     newTokens.accessToken = authHelper.generateAccessToken(isAuthenticatedUser, {
                         expiresIn: "1d",
                     })
-                } else if (authHelper.authenticateAccessToken(isAuthenticatedUser.accessToken).id != null){
+                } else if (
+                    authHelper.authenticateAccessToken(isAuthenticatedUser.accessToken).id != null
+                ) {
                     // keep the old accessToken in DB if it was not expired
                     newTokens.accessToken = isAuthenticatedUser.accessToken
-                } else if (authHelper.authenticateAccessToken(isAuthenticatedUser.accessToken).error != null){
+                } else if (
+                    authHelper.authenticateAccessToken(isAuthenticatedUser.accessToken).error !=
+                    null
+                ) {
                     // generate new accessToken when the old one was expired
                     newTokens.accessToken = authHelper.generateAccessToken(isAuthenticatedUser, {
                         expiresIn: "1d",
@@ -32,7 +41,9 @@ module.exports = {
                 }
 
                 if (isAuthenticatedUser.refreshToken == null) {
-                    newTokens.refreshToken = await authHelper.generateRefreshToken(isAuthenticatedUser) 
+                    newTokens.refreshToken = await authHelper.generateRefreshToken(
+                        isAuthenticatedUser
+                    )
                 } else {
                     newTokens.refreshToken = isAuthenticatedUser.refreshToken
                 }
@@ -45,7 +56,7 @@ module.exports = {
                     },
                     { new: true }
                 )
-                
+
                 if (updated)
                     return res.status(200).json({
                         success: true,
@@ -95,7 +106,8 @@ module.exports = {
                             expiresIn: "1d",
                         }),
                     },
-                    { new: true } )
+                    { new: true }
+                )
                 if (updated)
                     return res.status(200).json({
                         success: true,
@@ -113,25 +125,78 @@ module.exports = {
         }
     },
 
-
-    // @desc:   get account information by accessTK
-    // @route:  GET /info/:id
-    getInfo: async (req, res) => {
+    // @desc:   get profile by accessTK
+    // @route:  GET /profile
+    getProfile: async (req, res) => {
         try {
-            const user = await User.findOne({$and :[{_id: req.params.id},{accessToken: req.user.accessToken}]}).lean()
-            if (user != null) 
+            const user = await User.findOne({ accessToken: req.user.accessToken })
+                .populate({
+                    path: "profileId",
+                })
+                .lean()
+
+            if (user != null)
                 return res.status(200).json({
                     success: true,
-                    user: user
+                    user: user,
                 })
 
             return res.status(200).json({
                 success: false,
-                message: 'No user found.'
+                message: "No user found.",
             })
         } catch (error) {
             console.error(error)
-            return res.status(500).json({success: false, message: error.message})
+            return res.status(500).json({ success: false, message: error.message })
+        }
+    },
+
+    // @desc:   update profile by accessTK
+    // @route:  PUT /profile
+    updateProfile: async (req, res) => {
+        try {
+            const user = await User.findOne({ _id: req.user.id }).select('profileId')
+            if (user.profileId != null) {
+                // update profile
+                if (validate_update_inp({ ...req.body })) {
+                    let profileData = sanitize.profile({ ...req.body }, "update")
+                    await Profile.findOneAndUpdate({ _id: user.profileId }, profileData)
+                    return res.sendStatus(204)
+                }
+            } else {
+                // create profile
+                if (validate_add_inp({ ...req.body })) {
+                    let profileData = sanitize.profile({ ...req.body }, "create")
+                    const profile = await Profile.create(profileData)
+                    await User.findOneAndUpdate(
+                        { accessToken: req.user.accessToken },
+                        { profileId: profile._id }
+                    )
+                    return res.sendStatus(204)
+                }
+            }
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ success: false, error: outputErrors(error) })
+        }
+    },
+
+    // @desc:   change password by accessTK
+    // @route:  POST /changePwd
+    changePwd: async (req, res) => {
+        try {
+            const newPwd = await bcrypt.hash(req.body.password, await bcrypt.genSalt())
+            const updated = await User.findOneAndUpdate(
+                { _id: req.user.id },
+                { password: newPwd },
+                { new: true }
+            )
+            if (updated != null) return res.sendStatus(204)
+
+            return res.status(400).json({ success: false, message: "Failed to change password." })
+        } catch (error) {
+            console.error(error)
+            return res.status(500).json({ success: false, message: error.message })
         }
     },
 
@@ -140,21 +205,23 @@ module.exports = {
     logout: async (req, res) => {
         if (req.user != null) {
             try {
-                const updated = await User.findOneAndUpdate({_id: req.user.id}, {
-                    accessToken: null,
-                    refreshToken: null
-                }, {new: true})
-    
+                const updated = await User.findOneAndUpdate(
+                    { _id: req.user.id },
+                    {
+                        accessToken: null,
+                        refreshToken: null,
+                    },
+                    { new: true }
+                )
+
                 // Check given property
                 if (updated) return res.sendStatus(200)
             } catch (error) {
                 console.error(error)
-                return res.status(500).json({success: false, message: error.message})
+                return res.status(500).json({ success: false, message: error.message })
             }
-            
         }
 
         return res.status(403).json({ success: false, message: "No authentication found." })
-        
     },
 }
