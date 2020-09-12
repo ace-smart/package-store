@@ -59,7 +59,7 @@ async function validate_add_inp({ ...data } = {}) {
     return true
 }
 
-async function validate_update_inp({ ...data } = {}) {
+async function validate_update_inp({ ...data } = {}, userId) {
     if (JSON.stringify(data) === "{}") {
         throw new Error("No input data")
     }
@@ -75,7 +75,7 @@ async function validate_update_inp({ ...data } = {}) {
         if (!validator.isLength(data.email, { max: 255 })) {
             throw new Error("email must be less than 256 characters.")
         }
-        if (await isExistent(require("../models/UserModel"), { email: data.email })) {
+        if (await isExistent(require("../models/UserModel"), { email: data.email }, userId)) {
             throw new Error("email is already existent.")
         }
     }
@@ -87,7 +87,7 @@ async function validate_update_inp({ ...data } = {}) {
         if (!validator.isLength(data.username, { min: 4, max: 255 })) {
             throw new Error("username must be from 4 to 255 characters.")
         }
-        if (await isExistent(require("../models/UserModel"), { username: data.username })) {
+        if (await isExistent(require("../models/UserModel"), { username: data.username }, userId)) {
             throw new Error("username is already existent.")
         }
     }

@@ -25,6 +25,10 @@ const ProfileSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    avatar: {
+        type: Buffer,
+        default: 'default'
+    },
     status: {
       type: String,
       default: 'deactivated',

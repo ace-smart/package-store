@@ -40,10 +40,10 @@ module.exports = {
     profile: ({ ...data } = {}, crudOption = null) => {
         let objData = data
         if (typeof data.firstName !== "undefined" && !validator.isEmpty(data.firstName)) {
-            objData.firstName = validator.trim(data.firstName.toLowerCase())
+            objData.firstName = toCapitalize(validator.trim(data.firstName))
         }
         if (typeof data.lastName !== "undefined" && !validator.isEmpty(data.lastName)) {
-            objData.lastName = validator.trim(data.lastName.toLowerCase())
+            objData.lastName = toCapitalize(validator.trim(data.lastName))
         }
         if (typeof data.gender !== "undefined" && !validator.isEmpty(data.gender)) {
             objData.gender = validator.trim(data.gender.toLowerCase())
