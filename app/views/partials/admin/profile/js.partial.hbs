@@ -23,13 +23,24 @@
         if (elementAttr === 'male'){
             element.classList.add('selected')
             document.getElementById('female-lbl').classList.remove('selected')
+            document.getElementById('lgbt-lbl').classList.remove('selected')
             genderInp.setAttribute('checked', 'true')
             document.getElementById('female').removeAttribute('checked')
+            document.getElementById('lgbt').removeAttribute('checked')
         }else if (elementAttr === 'female'){
             element.classList.add('selected')
             document.getElementById('male-lbl').classList.remove('selected')
+            document.getElementById('lgbt-lbl').classList.remove('selected')
             genderInp.setAttribute('checked', 'true')
             document.getElementById('male').removeAttribute('checked')
+            document.getElementById('lgbt').removeAttribute('checked')
+        }else if (elementAttr === 'lgbt'){
+            element.classList.add('selected')
+            document.getElementById('male-lbl').classList.remove('selected')
+            document.getElementById('female-lbl').classList.remove('selected')
+            genderInp.setAttribute('checked', 'true')
+            document.getElementById('male').removeAttribute('checked')
+            document.getElementById('female').removeAttribute('checked')
         }
     }
 </script>

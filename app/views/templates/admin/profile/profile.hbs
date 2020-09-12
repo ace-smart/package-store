@@ -5,7 +5,8 @@
                 <!-- Nav tabs -->
                 <ul class="nav nav-tabs nav-tabs-custom nav-justified" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link active" data-toggle="tab" href="#account" role="tab">
+                        <a class="nav-link {{#ifeq tabpane 'account'}}active{{else}}{{/ifeq}}" 
+                            data-toggle="tab" href="#account" role="tab">
                             <span class="d-none d-md-block ">
                                 <h5 class="m-0">Account</h5>
                             </span><span class="d-block d-md-none">
@@ -13,7 +14,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link " data-toggle="tab" href="#profile" role="tab">
+                        <a class="nav-link {{#ifeq tabpane 'profile'}}active{{else}}{{/ifeq}}" 
+                            data-toggle="tab" href="#profile" role="tab">
                             <span class="d-none d-md-block ">
                                 <h5 class="m-0">Profile</h5>
                             </span><span class="d-block d-md-none">
@@ -21,7 +23,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#changePwd" role="tab">
+                        <a class="nav-link {{#ifeq tabpane 'changePwd'}}active{{else}}{{/ifeq}}" 
+                            data-toggle="tab" href="#changePwd" role="tab">
                             <span class="d-none d-md-block">
                                 <h5 class="m-0">Change password</h5>
                             </span><span class="d-block d-md-none"><i class="mdi mdi-account h5"></i></span>
@@ -32,15 +35,20 @@
                 <!-- Tab panes -->
                 <div class="tab-content">
                     {{!-- Account --}}
-                    <div class="tab-pane active p-3" id="account" role="tabpanel">
+                    <div id="account" role="tabpanel"
+                        class="tab-pane {{#ifeq tabpane 'account'}}active{{else}}{{/ifeq}} p-2 pt-4" >
                         {{> admin/profile/account.partial }}
                     </div>
                     {{!-- Profile --}}
-                    <div class="tab-pane  p-3" id="profile" role="tabpanel">
+                    <div id="profile" role="tabpanel"
+                        class="tab-pane {{#ifeq tabpane 'profile'}}active{{else}}{{/ifeq}} p-2 pt-4">
+                        {{> admin/flash.partial }}
                         {{> admin/profile/profile.partial }}
                     </div>
                     {{!-- Change password --}}
-                    <div class="tab-pane p-3" id="changePwd" role="tabpanel">
+                    <div id="changePwd" role="tabpanel"
+                        class="tab-pane {{#ifeq tabpane 'changePwd'}}active{{else}}{{/ifeq}} p-2 pt-4">
+                        {{> admin/flash.partial }}
                         {{> admin/profile/changePwd.partial }}
                     </div>
                 </div>

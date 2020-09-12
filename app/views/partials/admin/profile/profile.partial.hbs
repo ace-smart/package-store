@@ -3,8 +3,12 @@
     <div class="row p-3 m-2">
         <div class="p-0 col-2 d-flex flex-column justify-content-start align-items-center">
             <div class="my-3 ">
+                {{#if user.profile.avatar}}
                 <img class="img-thumbnail" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
-                    src="/admin/static/assets/images/bg.jpg" data-holder-rendered="true">
+                    src="data:image/jpeg;base64,{{{user.profile.avatar}}}" data-holder-rendered="true">
+                {{else}}
+                <img src="/static/default-user.png" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;" data-holder-rendered="true" class="img-thumbnail">
+                {{/if}}
             </div>
             <div class="my-2">
                 <label for="avatar" class="btn btn-primary waves-effect waves-light active" 
@@ -13,21 +17,37 @@
                 </label>
                 <input type="file" name="avatar" id="avatar" accept="image/*" onchange="loadFile(event)" /> 
             </div>
-
+            {{#ifeq error.field 'avatar'}} 
+                {{> admin/profile/error.partial }} 
+                {{{error.file_name}}}
+            {{else}} {{/ifeq}}
         </div>
         <div class="pl-3 col-10">
             <div class="form-group row mt-2">
                 <div class="col-6">
                     <label for="firstName" class="mb-2">
                         <i class="mdi mdi-account-card-details mr-2"></i>First Name</label>
-                    <input type="text" class="form-control" id="firstName" name="firstName"
-                        placeholder="Enter first name" value="{{{user.profile.firstName}}}">
+                    <input type="text" id="firstName" name="firstName" placeholder="Enter first name" 
+                        {{#ifeq error.field 'firstName'}} 
+                            value="{{{error.value}}}"
+                        {{else}} 
+                            value="{{{user.profile.firstName}}}"
+                        {{/ifeq}}
+                        class="form-control {{#ifeq error.field 'firstName'}}parsley-error{{else}} {{/ifeq}} ">
+                        {{#ifeq error.field 'firstName'}} {{> admin/profile/error.partial }} {{else}} {{/ifeq}}
                 </div>
 
                 <div class="col-6">
                     <label for="lastName" class="mb-2">
                         <i class="mdi mdi-account-card-details mr-2"></i>Last Name</label>
-                    <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Enter last name" value="{{{user.profile.lastName}}}">
+                    <input type="text" id="lastName" name="lastName" placeholder="Enter last name" 
+                        {{#ifeq error.field 'lastName'}} 
+                            value="{{{error.value}}}"
+                        {{else}} 
+                            value="{{{user.profile.lastName}}}"
+                        {{/ifeq}}
+                        class="form-control {{#ifeq error.field 'lastName'}}parsley-error{{else}} {{/ifeq}} "> 
+                        {{#ifeq error.field 'lastName'}} {{> admin/profile/error.partial }} {{else}} {{/ifeq}}
                 </div>
             </div>
 
@@ -35,40 +55,63 @@
                 <label class="mb-2"><i class="mdi mdi-gender-transgender mr-2"></i>Gender</label>
                 <div class="col-5 my-auto d-flex flex-row justify-content-start align-items-center">
                     <label for="male" id="male-lbl" 
-                    class="btn btn-brown mr-2 my-auto {{#ifeq user.profile.gender 'male'}} selected {{else}} {{/ifeq}}"
+                    class="btn btn-info mr-2 my-auto {{#ifeq user.profile.gender 'male'}} selected {{else}} {{/ifeq}}"
                     onclick="selectGender(this)"> 
                         <i class="mdi mdi-gender-male mr-1"></i>Male
                     </label>
-                    <input value="male" id="male" type="radio" name="gender" class="form-control" hidden="true">
+                    <input value="male" id="male" type="radio" name="gender" class="form-control" 
+                    hidden="true" {{#ifeq user.profile.gender 'male'}} checked {{else}} {{/ifeq}} >
                     <label for="female" id="female-lbl" 
                     class="mr-2 my-auto btn btn-pink {{#ifeq user.profile.gender 'female'}} selected {{else}} {{/ifeq}}"
                     onclick="selectGender(this)">
                         <i class="mdi mdi-gender-female mr-1"></i>Female
                     </label>
-                    <input value="female" id="female" type="radio" name="gender" class="form-control" hidden="true">
+                    <input value="female" id="female" type="radio" name="gender" class="form-control" 
+                    hidden="true" {{#ifeq user.profile.gender 'female'}} checked {{else}} {{/ifeq}}>
+                    <label for="lgbt" id="lgbt-lbl" 
+                    class="mr-2 my-auto btn btn-rainbow {{#ifeq user.profile.gender 'lgbt'}} selected {{else}} {{/ifeq}}"
+                    onclick="selectGender(this)">
+                        <i class="mdi mdi-gender-transgender mr-1"></i>LGBT
+                    </label>
+                    <input value="lgbt" id="lgbt" type="radio" name="gender" class="form-control" 
+                    hidden="true" {{#ifeq user.profile.gender 'lgbt'}} checked {{else}} {{/ifeq}}>
                 </div>
+                {{#ifeq error.field 'gender'}} {{> admin/profile/error.partial }} {{else}} {{/ifeq}}
             </div>
 
             <div class="form-group mt-2">
                 <label for="dateOfBirth" class="mb-2"><i class="mdi mdi-cake-variant mr-2"></i>Date of birth</label>
                 <div class="input-group">
-                    <input type="text" name="dateOfBirth" class="form-control" placeholder="mm/dd/yyyy"
-                        id="datepicker-autoclose" value="{{formatDate user.profile.dateOfBirth}}">
+                    <input type="text" name="dateOfBirth"  placeholder="mm/dd/yyyy"
+                        id="datepicker-autoclose" 
+                        {{#ifeq error.field 'dateOfBirth'}} 
+                            value="{{formatDate error.value}}"
+                        {{else}} 
+                            value="{{formatDate user.profile.dateOfBirth}}"
+                        {{/ifeq}}
+                        class="form-control {{#ifeq error.field 'dateOfBirth'}}parsley-error{{else}} {{/ifeq}} ">
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                     </div>
                 </div>
+                {{#ifeq error.field 'dateOfBirth'}} {{> admin/profile/error.partial }} {{else}} {{/ifeq}}
             </div>
 
             <div class="form-group mt-2">
                 <label for="phoneNumber" class="mb-2"><i class="mdi mdi-cellphone-basic mr-2"></i>Phone number</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" name="phoneNumber" id="phoneNumber"
-                        placeholder="Enter phone number" value="{{{user.profile.phoneNumber}}}">
+                    <input type="text" name="phoneNumber" id="phoneNumber" placeholder="Enter phone number"
+                        {{#ifeq error.field 'phoneNumber'}} 
+                            value="{{{error.value}}}"
+                        {{else}} 
+                            value="{{{user.profile.phoneNumber}}}"
+                        {{/ifeq}}
+                        class="form-control {{#ifeq error.field 'phoneNumber'}}parsley-error{{else}} {{/ifeq}} ">
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="ion-ios7-telephone"></i></span>
                     </div>
                 </div>
+                {{#ifeq error.field 'phoneNumber'}} {{> admin/profile/error.partial }} {{else}} {{/ifeq}}
             </div>
 
             <div class="form-group row m-t-30">

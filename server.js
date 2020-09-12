@@ -27,7 +27,8 @@ app.engine(
 )
 app.set("view engine", ".hbs")
 // static folders
-app.use("/static", express.static(path.join(__dirname, "app/public/client")))
+app.use("/static", express.static(path.join(__dirname, "app/public")))
+// app.use("/static", express.static(path.join(__dirname, "app/public/client")))
 app.use("/admin/static", express.static(path.join(__dirname, "app/public/admin")))
 app.use("/admin/plugins", express.static(path.join(__dirname, "app/public/admin/plugins")))
 // logger
@@ -52,7 +53,31 @@ app.use(
     })
 )
 // multer setup
-app.use(require('./config/multer').single('avatar'))
+app.use(
+// require('./config/multer').fields([
+//     { name: 'avatar', maxCount: 1 },
+// ]), 
+(req, res, next) => {
+    const multer = require("multer")
+    const upload = require("./config/multer").fields([
+        { name: 'avatar', maxCount: 1 },
+    ])
+    upload(req, res, (err) => {
+        if (err instanceof multer.MulterError) {
+            return res.status(500).json({
+                success: false,
+                error: {
+                    message: err.message,
+                    field: err.field,
+                },
+            })
+        } else if (err) {
+            return res.status(500).json({ success: false, error: err })
+        }
+        
+        return next()
+    })
+})
 // bodyParser
 app.use(bodyParser.urlencoded({ extended: true }))
 // cookieParser
