@@ -95,8 +95,8 @@ module.exports = async function (passport) {
     passport.deserializeUser(async function (adminData, done) {
         try {
             const admin = await authHelper.getUser({ ...adminData })
-
-            return done(admin.error, admin)
+            
+            return done(null, admin)
         } catch (error) {
             return done(error)
         }

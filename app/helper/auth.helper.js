@@ -53,13 +53,9 @@ module.exports = authHelper = {
                 if (response.data.success == true) {
                     return response.data.accessToken
                 }
-
-                return {
-                    error: response.data.message,
-                }
             }
 
-            throw new Error("Renewing token failed.")
+            throw new Error(response.data.message)
         } catch (error) {
             throw new Error(error)
         }
@@ -67,38 +63,26 @@ module.exports = authHelper = {
 
     getUser: async ({ id, accessToken, refreshToken } = {}) => {
         try {
-            const response = await axiosInstance.get(`/info/${id}`, {
+            const response = await axiosInstance.get(`/profile`, {
                 responseType: "json",
                 responseEncoding: "utf-8",
                 headers: { Authorization: "Bearer " + accessToken },
             })
-
+            
             if (response.status === 200 && response.statusText === "OK") {
                 if (response.data.success == true) {
                     return response.data.user
                 }
-                return {
-                    error: response.data.message,
-                }
             }
-
             if (response.status === 401 && response.data.message === "jwt expired") {
                 const newAccessTK = await authHelper.renewAccessToken(refreshToken)
-                if (newAccessTK.error == null) {
-                    return await authHelper.getUser({ id, newAccessTK, refreshToken })
-                }
-
-                return { error: newAccessTK.error }
+                return await authHelper.getUser({ id, accessToken: newAccessTK, refreshToken })
             }
 
-            throw new Error("Get user information failed.")
+            throw new Error(response.status.message)
         } catch (error) {
-            throw new Error(error)
+            throw new Error(error.message)
         }
-    },
-
-    _getEndpointUrl: (req, res, next) => {
-        res.locals.path = req.path
     },
 
     _checkAuthenticatedAdmin: (req, res, next) => {

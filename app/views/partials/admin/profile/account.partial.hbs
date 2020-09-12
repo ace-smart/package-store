@@ -1,0 +1,80 @@
+<div class="row p-3 m-2">
+    <div class="col-12">
+        <div class="row mb-2">
+            <div class="col-3 text-left pl-5 d-flex">
+                <span class="my-auto font-weight-bold font-20">
+                    <i class="mdi mdi-account-location mr-2"></i>Username
+                </span>
+            </div>
+            <div class="col-9 text-center border-bottom">
+                <p class="text-info my-auto font-20 p-2">
+                    <strong>
+                        {{{user.username}}}
+                    </strong>
+                </p>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-3 text-left pl-5 d-flex">
+                <span class="my-auto font-weight-bold font-20">
+                    <i class="ion-ios7-email mr-2"></i>Email
+                </span>
+            </div>
+            <div class="col-9 text-center border-bottom">
+                <p class="text-info my-auto font-20 p-2">
+                    <strong>
+                        {{{user.email}}}
+                    </strong>
+                </p>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-3 text-left pl-5 d-flex">
+                <span class="my-auto font-weight-bold font-20">
+                    <i class="ion-ribbon-b mr-2"></i>Role
+                </span>
+            </div>
+            <div class="col-9 text-center border-bottom">
+                <p class="text-info my-auto font-20 p-2 text-capitalize">
+                    <strong>
+                        {{{user.role}}}
+                    </strong>
+                </p>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-3 text-left pl-5 d-flex">
+                <span class="my-auto font-weight-bold font-20">
+                    <i class="ion-ios7-circle-filled mr-2"></i>Status
+                </span>
+            </div>
+            <div class="col-9 text-center border-bottom">
+                <p class="text-info my-auto font-20 p-2">
+                    <button type="button" 
+                        {{#ifeq user.status 'activated'}}
+                        class="btn btn-success text-capitalize">
+                        {{else}}
+                        class="btn btn-danger text-capitalize">
+                        {{/ifeq}}
+                        {{{user.status}}}
+                    </button>
+                </p>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-3 text-left pl-5 d-flex">
+                <span class="my-auto font-weight-bold font-20">
+                    <i class="ion-calendar mr-2"></i>Created at
+                </span>
+            </div>
+            <div class="col-9 text-center border-bottom">
+                <p class="text-info my-auto font-20 p-2">
+                    <strong>
+                        {{formatDate user.createdAt}}
+                    </strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

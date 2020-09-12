@@ -1,11 +1,5 @@
-const axios = require("axios")
 const crypto = require('crypto')
 const RememberMeModel = require("../../models/RememberMeModel")
-const axiosInstance = axios.create({
-    baseURL: `${process.env.BASE_URL}:${process.env.API_SERVER_PORT}/api`,
-    timeout: 10000,
-    // headers: {'Content-Type': 'application/json'}
-})
 
 module.exports = {
     // @desc:   show login form
@@ -20,8 +14,6 @@ module.exports = {
     // @desc:   authenticate user
     // @route:  GET /login
     rememberMeLogin: async (req, res, next) => {
-        console.log(req.user)
-        console.log((!req.body.remember_me))
         if (!req.body.remember_me) {
             return next()
         }
@@ -52,7 +44,8 @@ module.exports = {
             res.cookie("remember_me", newRememberToken, {
                 path: "/admin",
                 httpOnly: true,
-                maxAge: 3600*24*7,
+                secure: false, 
+                maxAge: 1000*3600*24*7
             })
             
             return next()

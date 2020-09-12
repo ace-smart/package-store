@@ -15,8 +15,7 @@
                 <p class="text-muted text-center">Sign in to continue to Admiria.</p>
 
                 <form class="form-horizontal m-t-30" action="/admin/login" method="POST">
-
-                    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                    {{> csrf}}
                     <div class="form-group">
                         <label for="username">Username</label>
                         <input name="username" type="text"  value="root"

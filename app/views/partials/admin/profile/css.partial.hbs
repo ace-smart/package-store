@@ -1,0 +1,34 @@
+<!-- X-editable css -->
+<link href="/admin/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
+
+<style>
+    input[type="file"]#avatar {
+        display: none;
+    }
+    label[for=male], 
+    label[for=female], 
+    label[for=lgbt] {
+        cursor: pointer;
+        color: white;
+    }
+    label[for=male].selected, 
+    label[for=female].selected, 
+    label[for=lgbt].selected {
+        border: 2px white solid;
+        transition: ease-in;
+    }
+    label[for=male].selected, 
+    label[for=male].selected i,
+    label[for=female].selected,
+    label[for=female].selected i,
+    label[for=lgbt].selected,
+    label[for=lgbt].selected i {
+        color: #253037
+    }
+    .btn-rainbow {
+        background-image: linear-gradient(180deg, #ff2400, #e8b71d, #1de840, #1ddde8, #dd00f3);
+    }
+    .btn-rainbow:hover{
+        background-image: linear-gradient(180deg, #dd00f3, #1ddde8, #1de840, #e8b71d,#ff2400);
+    }
+</style>
