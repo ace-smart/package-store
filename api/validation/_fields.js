@@ -8,6 +8,7 @@ module.exports = {
     USER_ROLE: ["user", "admin"],
     USER_FIELDS: ["username", "password", "email", "status", "role", "profileId"],
     PROFILE_FIELDS: ["firstName", "lastName", "gender", "dateOfBirth", "phoneNumber", "avatar","status"],
+    PROFILE_PASSWORD_FIELDS: ["currentPassword", "newPassword", "confirm_newPassword"],
     PROFILE_GENDER_VALUES: ["male", "female", "lgbt"],
     CATEGORY_FIELDS: ["name", "status", "subcategories"],
     ADDRESS_FIELDS: ["street", "district", "city", "country", "postalCode", "status"],

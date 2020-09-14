@@ -1,7 +1,7 @@
 const validator = require('validator')
 const {toFormatDateStr} = require('../helper/format')
 const { hasUnknownKeys  } = require("./validation")
-const { STATUS_VALUES, PROFILE_FIELDS, PROFILE_GENDER_VALUES } = require("./_fields")
+const { STATUS_VALUES, PROFILE_FIELDS, PROFILE_GENDER_VALUES, PROFILE_PASSWORD_FIELDS } = require("./_fields")
 const {InvalidError, UnknownInputError} = require('./error')
 
 function validate_add_inp({ ...data } = {}) {
@@ -119,4 +119,29 @@ function validate_update_inp({ ...data } = {}) {
     return true
 }
 
-module.exports = {validate_add_inp, validate_update_inp}
+function validate_password({ ...data } = {}) {
+    // inputs: [currentPassword, newPassword, confirm_newPassword]
+    if (JSON.stringify(data) === "{}") {
+        throw new Error("No input data")
+    }
+    const unknownKeys = hasUnknownKeys(PROFILE_PASSWORD_FIELDS, Object.keys(data))
+    if (unknownKeys.length > 0) {
+        throw new UnknownInputError(unknownKeys)
+    }
+    if (typeof data.currentPassword === "undefined" || validator.isEmpty(data.currentPassword)) {
+        throw new InvalidError('currentPassword', data.currentPassword, "Must be required.")
+    }
+    if (typeof data.newPassword === "undefined" || validator.isEmpty(data.newPassword)) {
+        throw new InvalidError('newPassword', data.newPassword, "Must be required.")
+    }
+    if (!validator.isLength(data.newPassword, { min: 4 })) {
+        throw new InvalidError('newPassword', data.newPassword, "Must be at least 4 characters.")
+    }
+    if (!validator.equals(data.confirm_newPassword, data.newPassword)) {
+        throw new InvalidError('confirm_newPassword', data.confirm_newPassword, "Must be matched with new password.")
+    }
+
+    return true
+}
+
+module.exports = {validate_add_inp, validate_update_inp, validate_password}
