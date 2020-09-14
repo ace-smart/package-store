@@ -1,37 +1,40 @@
 <div class="row p-3 m-2">
     <div class="col-12">
-        <form class="form-horizontal p-3" action="/admin/profile/changePwd" method="POST">
+        <form class="form-horizontal p-3" action="/admin/changePwd" method="POST">
             {{> csrf}}
             <div class="form-group mt-2">
-                <label for="dateOfBirth" class="mb-2"><i class="mdi mdi-key mr-2"></i>Current Password</label>
+                <label for="currentPassword" class="mb-2"><i class="mdi mdi-key mr-2"></i>Current Password</label>
                 <div class="input-group">
-                    <input type="password" name="current_password" class="form-control" placeholder="Enter CURRENT password" id="current_password">
+                    <input type="password" name="currentPassword" class="form-control" placeholder="Enter CURRENT password" id="currentPassword" required>
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="mdi mdi-key"></i></span>
                     </div>
                 </div>
+                {{#ifeq error.field 'currentPassword'}} {{> admin/profile/error.partial }} {{else}} {{/ifeq}}
             </div>
 
             <div class="form-group mt-2">
-                <label for="new_password" class="mb-2"><i class="mdi mdi-lock-plus mr-2"></i>New password</label>
+                <label for="newPassword" class="mb-2"><i class="mdi mdi-lock-plus mr-2"></i>New password</label>
                 <div class="input-group">
-                    <input type="password" class="form-control" name="new_password" id="new_password"
-                        placeholder="Enter NEW password">
+                    <input type="password" class="form-control" name="newPassword" id="newPassword"
+                        placeholder="Enter NEW password" required>
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="mdi mdi-lock-plus"></i></span>
                     </div>
                 </div>
+                {{#ifeq error.field 'newPassword'}} {{> admin/profile/error.partial }} {{else}} {{/ifeq}}
             </div>
 
             <div class="form-group mt-2">
-                <label for="confirm_new_password" class="mb-2"><i class="mdi mdi-lock-plus mr-2"></i>Confirm new password</label>
+                <label for="confirm_newPassword" class="mb-2"><i class="mdi mdi-lock-plus mr-2"></i>Confirm new password</label>
                 <div class="input-group">
-                    <input type="password" class="form-control" name="confirm_new_password" id="confirm_new_password"
-                        placeholder="Confirm NEW password">
+                    <input type="password" class="form-control" name="confirm_newPassword" id="confirm_newPassword"
+                        placeholder="Confirm NEW password" required>
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="mdi mdi-lock-plus"></i></span>
                     </div>
                 </div>
+                {{#ifeq error.field 'confirm_newPassword'}} {{> admin/profile/error.partial }} {{else}} {{/ifeq}}
             </div>
 
             <div class="form-group row m-t-30">
@@ -39,7 +42,6 @@
                     <button class="btn btn-primary w-md waves-effect waves-light" type="submit">Change</button>
                 </div>
             </div>
-
         </form>
     </div>
 </div>
