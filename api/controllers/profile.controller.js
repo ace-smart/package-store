@@ -66,21 +66,31 @@ module.exports = {
     // @desc:   change password by accessTK
     // @route:  PUT /changePwd
     changePwd: async (req, res) => {
-        // req.body contains {currentPassword, newPassword}
+        // req.body contains {currentPassword, newPassword, confirm_newPassword}
         try {
             const user = await User.findById(req.user.id).lean()
-            if (await bcrypt.compare(req.body.currentPassword, user.password)){
-                await User.findOneAndUpdate(
-                    { _id: req.user.id },
-                    { password: await bcrypt.hash(req.body.newPassword, await bcrypt.genSalt()) }
-                )
-                return res.sendStatus(204)
-            }else {
-                return res.status(400).json({ success: false, error: "Current password is not correct." })
+            if (require('../validation/profile').validate_password({...req.body})){
+                if (await bcrypt.compare(req.body.currentPassword, user.password)){
+                    await User.findOneAndUpdate(
+                        { _id: req.user.id },
+                        { password: await bcrypt.hash(req.body.newPassword, await bcrypt.genSalt()) }
+                    )
+                    return res.sendStatus(204)
+                }else {
+                    return res.status(500).json({
+                        success: false,
+                        error: {
+                            messages: "Current password is not correct.",
+                            field: "currentPassword",
+                            type: "InvalidCredentials",
+                            value: req.body.currentPassword
+                        },
+                    })
+                }
             }
         } catch (error) {
             console.error(error)
-            return res.status(500).json({ success: false, message: outputErrors(error) })
+            return res.status(500).json({ success: false, error: outputErrors(error) })
         }
     },
 
