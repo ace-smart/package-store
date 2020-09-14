@@ -12,7 +12,19 @@ const upload = multer({
             return cb(null, true)
         }
 
-        return cb(null, false)
+        return cb(
+            {
+                message: "Not image extension (*.jpeg/png/jpg)",
+                type: 'AvatarError',
+                field: file.fieldname,
+                file_name: file.originalname,
+                file_type: file.mimetype.split('/')[1]
+            },
+            false
+        )
+    },
+    limits: {
+        fileSize: 1048576, // 1Mb
     },
 })
 

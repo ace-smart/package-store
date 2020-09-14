@@ -3,26 +3,32 @@ const blacklistChars = new RegExp(
     "[\r\n\\t\\f\\v`~\\!@#\\$%\\^&\\*()_\\+\\=\\[\\]\\{\\};'\"<>\\?\\-\\/\\.\\,:]+",
     "g"
 )
+const {InvalidError, UnknownInputError} = require('./error')
 module.exports = validation = {
 
     // @desc    Output error message
     // Args:    {error}
     // Return:  'Error message'
     outputErrors: (error) => {
+        // InvalidError
+        if (error instanceof InvalidError || error instanceof UnknownInputError){
+            return {...error}
+        }
+        
         // Mongoose Errors
         if (typeof error.kind !== "undefined") {
             if (error.kind.toString() === "ObjectId") {
-                return "Id is not valid"
+                return {message: "Id is not valid"}
             }
         }
         // ObjectId from URL is not existent for [Update]
         if (error.message === "Cannot read property '_id' of null"){
-            return 'The param for [Id] from Url is not existent.'
+            return {message: 'The param for [Id] from Url is not existent.'}
         }
 
         // Custom errors
         if (typeof error.message !== "undefined") {
-            return error.message
+            return {message: error.message}
         }
 
         return null
@@ -36,12 +42,10 @@ module.exports = validation = {
         // check null input
         if (!validKeys || !inputKeys) return Array()
 
-        const unknownKeys = inputKeys.filter((ele) => {
+        return inputKeys.filter((ele) => {
             return !validKeys.includes(ele)
         })
 
-        if (unknownKeys.length > 0) return unknownKeys
-        return false
     },
 
     isExistent: async (model, criteria = {}, exceptionId = null) => {

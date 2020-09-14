@@ -13,13 +13,13 @@ const storageRouter = require('./admin/storage.route')
 const restockRouter = require('./admin/restock.route')
 
 // All below routes have prefix '/api/'
-// Client routes
 router.use(authRouter)
+router.use('/', _ensureAccessToken, profileRouter)
+// Client routes
 // Admin routes
 router.use('/admin/*', _ensureAccessToken, _ensureAdminRole)
 router.use('/admin/users', userRouter)
 router.use('/admin/categories', categoryRouter)
-router.use('/admin/profile', profileRouter)
 router.use('/admin/addresses', addressRouter)
 router.use('/admin/products', productRouter)
 router.use('/admin/providers', providerRouter)

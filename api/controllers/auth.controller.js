@@ -1,5 +1,9 @@
 const User = require("../models/UserModel")
+const Profile = require("../models/ProfileModel")
+const bcrypt = require("bcrypt")
 const authHelper = require("../helper/auth")
+const sanitize = require("../validation/sanitize")
+const { outputErrors } = require("../validation/validation")
 
 module.exports = {
     // @desc    Authenticate
@@ -7,7 +11,6 @@ module.exports = {
     auth: async (req, res) => {
         try {
             const isAuthenticatedUser = await authHelper.isAuthenticatedUser({ ...req.body })
-            
             if (isAuthenticatedUser) {
                 // Not activated
                 if (isAuthenticatedUser.message != null)
@@ -17,14 +20,19 @@ module.exports = {
 
                 // Generate tokens
                 const newTokens = {}
-                if (isAuthenticatedUser.accessToken == null){
+                if (isAuthenticatedUser.accessToken == null) {
                     newTokens.accessToken = authHelper.generateAccessToken(isAuthenticatedUser, {
                         expiresIn: "1d",
                     })
-                } else if (authHelper.authenticateAccessToken(isAuthenticatedUser.accessToken).id != null){
+                } else if (
+                    authHelper.authenticateAccessToken(isAuthenticatedUser.accessToken).id != null
+                ) {
                     // keep the old accessToken in DB if it was not expired
                     newTokens.accessToken = isAuthenticatedUser.accessToken
-                } else if (authHelper.authenticateAccessToken(isAuthenticatedUser.accessToken).error != null){
+                } else if (
+                    authHelper.authenticateAccessToken(isAuthenticatedUser.accessToken).error !=
+                    null
+                ) {
                     // generate new accessToken when the old one was expired
                     newTokens.accessToken = authHelper.generateAccessToken(isAuthenticatedUser, {
                         expiresIn: "1d",
@@ -32,7 +40,9 @@ module.exports = {
                 }
 
                 if (isAuthenticatedUser.refreshToken == null) {
-                    newTokens.refreshToken = await authHelper.generateRefreshToken(isAuthenticatedUser) 
+                    newTokens.refreshToken = await authHelper.generateRefreshToken(
+                        isAuthenticatedUser
+                    )
                 } else {
                     newTokens.refreshToken = isAuthenticatedUser.refreshToken
                 }
@@ -45,7 +55,7 @@ module.exports = {
                     },
                     { new: true }
                 )
-                
+
                 if (updated)
                     return res.status(200).json({
                         success: true,
@@ -95,7 +105,8 @@ module.exports = {
                             expiresIn: "1d",
                         }),
                     },
-                    { new: true } )
+                    { new: true }
+                )
                 if (updated)
                     return res.status(200).json({
                         success: true,
@@ -113,25 +124,23 @@ module.exports = {
         }
     },
 
-
-    // @desc:   get account information by accessTK
-    // @route:  GET /info/:id
-    getInfo: async (req, res) => {
+    // @desc:   register 
+    // @route:  PUT /changePwd
+    register: async (req, res) => {
+        // req.body contains {username, password, email}
+        const {validate_add_inp} = require("../validation/user")
         try {
-            const user = await User.findOne({$and :[{_id: req.params.id},{accessToken: req.user.accessToken}]}).lean()
-            if (user != null) 
-                return res.status(200).json({
-                    success: true,
-                    user: user
-                })
+            if (await validate_add_inp({ ...req.body })) {
+                const newUser = await User.create(await sanitize.user({ ...req.body }, "create"))
 
-            return res.status(200).json({
-                success: false,
-                message: 'No user found.'
-            })
+                return res.status(201).json({
+                    success: true,
+                    user: newUser,
+                })
+            }
         } catch (error) {
             console.error(error)
-            return res.status(500).json({success: false, message: error.message})
+            return res.status(500).json({ success: false, message: outputErrors(error) })
         }
     },
 
@@ -140,21 +149,23 @@ module.exports = {
     logout: async (req, res) => {
         if (req.user != null) {
             try {
-                const updated = await User.findOneAndUpdate({_id: req.user.id}, {
-                    accessToken: null,
-                    refreshToken: null
-                }, {new: true})
-    
+                const updated = await User.findOneAndUpdate(
+                    { _id: req.user.id },
+                    {
+                        accessToken: null,
+                        refreshToken: null,
+                    },
+                    { new: true }
+                )
+
                 // Check given property
                 if (updated) return res.sendStatus(200)
             } catch (error) {
                 console.error(error)
-                return res.status(500).json({success: false, message: error.message})
+                return res.status(500).json({ success: false, message: error.message })
             }
-            
         }
 
         return res.status(403).json({ success: false, message: "No authentication found." })
-        
     },
 }

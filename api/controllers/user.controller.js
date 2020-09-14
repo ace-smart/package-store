@@ -58,7 +58,7 @@ module.exports = {
             const user = await User.findOne({ _id: req.params.id }).lean()
 
             if (user) {
-                const isValidInp = await validate_update_inp({ ...req.body })
+                const isValidInp = await validate_update_inp({ ...req.body }, req.params.id)
                 if (isValidInp) {
                     await User.findOneAndUpdate(
                         { _id: req.params.id },
