@@ -1,26 +1,17 @@
 const express = require('express')
 const router = express.Router()
-const {  getProfileById, createNewProfile, updateProfileById, removeProfileById } 
-    = require('../../controllers/profile.controller')
+const { getProfile, updateProfile, changePwd } = require('../../controllers/profile.controller')
 
-// @desc    Show list of users
-// @route   GET /users
-// router.get('/', showUserList)
+// @desc:   get profile by accessTK
+// @route:  GET /profile
+router.get('/profile', getProfile)
 
-// @desc    Get user by Id
-// @route   GET /profile/:id
-router.get('/:id', getProfileById)
+// @desc:   update profile by accessTK
+// @route:  PUT /profile
+router.put('/profile', updateProfile)
 
-// @desc    Add new user
-// @route   POST /profile
-router.post('/', createNewProfile)
-
-// @desc    Update user
-// @route   PUT /profile/:id
-router.put('/:id', updateProfileById)
-
-// @desc    Delete user
-// @route   DELETE /profile/:id
-router.delete('/:id', removeProfileById)
+// @desc:   change password by accessTK
+// @route:  PUT /changePwd
+router.put('/changePwd', changePwd)
 
 module.exports = router
