@@ -26,6 +26,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: ['admin', 'user'],
+    default: 'user'
   },
   accessToken: {
     type: String

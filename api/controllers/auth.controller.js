@@ -2,7 +2,6 @@ const User = require("../models/UserModel")
 const Profile = require("../models/ProfileModel")
 const bcrypt = require("bcrypt")
 const authHelper = require("../helper/auth")
-const { validate_add_inp, validate_update_inp } = require("../validation/profile")
 const sanitize = require("../validation/sanitize")
 const { outputErrors } = require("../validation/validation")
 
@@ -125,78 +124,23 @@ module.exports = {
         }
     },
 
-    // @desc:   get profile by accessTK
-    // @route:  GET /profile
-    getProfile: async (req, res) => {
+    // @desc:   register 
+    // @route:  PUT /changePwd
+    register: async (req, res) => {
+        // req.body contains {username, password, email}
+        const {validate_add_inp} = require("../validation/user")
         try {
-            const user = await User.findOne({ accessToken: req.user.accessToken })
-                .populate({
-                    path: "profileId",
-                })
-                .lean()
+            if (await validate_add_inp({ ...req.body })) {
+                const newUser = await User.create(await sanitize.user({ ...req.body }, "create"))
 
-            if (user != null)
-                return res.status(200).json({
+                return res.status(201).json({
                     success: true,
-                    user: user,
+                    user: newUser,
                 })
-
-            return res.status(200).json({
-                success: false,
-                message: "No user found.",
-            })
-        } catch (error) {
-            console.error(error)
-            return res.status(500).json({ success: false, message: error.message })
-        }
-    },
-
-    // @desc:   update profile by accessTK
-    // @route:  PUT /profile
-    updateProfile: async (req, res) => {
-        try {
-            const user = await User.findOne({ _id: req.user.id }).select('profileId')
-            if (user.profileId != null) {
-                // update profile
-                if (validate_update_inp({ ...req.body })) {
-                    let profileData = sanitize.profile({ ...req.body }, "update")
-                    await Profile.findOneAndUpdate({ _id: user.profileId }, profileData)
-                    return res.sendStatus(204)
-                }
-            } else {
-                // create profile
-                if (validate_add_inp({ ...req.body })) {
-                    let profileData = sanitize.profile({ ...req.body }, "create")
-                    const profile = await Profile.create(profileData)
-                    await User.findOneAndUpdate(
-                        { accessToken: req.user.accessToken },
-                        { profileId: profile._id }
-                    )
-                    return res.sendStatus(204)
-                }
             }
         } catch (error) {
-            console.log(error)
-            return res.status(500).json({ success: false, error: outputErrors(error) })
-        }
-    },
-
-    // @desc:   change password by accessTK
-    // @route:  POST /changePwd
-    changePwd: async (req, res) => {
-        try {
-            const newPwd = await bcrypt.hash(req.body.password, await bcrypt.genSalt())
-            const updated = await User.findOneAndUpdate(
-                { _id: req.user.id },
-                { password: newPwd },
-                { new: true }
-            )
-            if (updated != null) return res.sendStatus(204)
-
-            return res.status(400).json({ success: false, message: "Failed to change password." })
-        } catch (error) {
             console.error(error)
-            return res.status(500).json({ success: false, message: error.message })
+            return res.status(500).json({ success: false, message: outputErrors(error) })
         }
     },
 
