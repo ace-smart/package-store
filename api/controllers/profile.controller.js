@@ -1,62 +1,85 @@
+const User = require("../models/UserModel")
 const Profile = require("../models/ProfileModel")
-const {validate_add_inp, validate_update_inp} = require("../validation/profile")
+const bcrypt = require("bcrypt")
 const sanitize = require("../validation/sanitize")
 const { outputErrors } = require("../validation/validation")
 
+
 module.exports = {
-    // @desc:   Get profile by Id
-    // @route   GET /profile/:id
-    getProfileById: async (req, res) => {
+    // @desc:   get profile by accessTK
+    // @route:  GET /profile
+    getProfile: async (req, res) => {
         try {
-            const profile = await Profile.findOne({ _id: req.params.id }).lean()
-            if (profile)
+            const user = await User.findOne({ accessToken: req.user.accessToken })
+                .populate({
+                    path: "profileId",
+                })
+                .lean()
+
+            if (user != null)
                 return res.status(200).json({
                     success: true,
-                    profile: profile,
+                    user: user,
                 })
-            // Not found
-            return res.status(404).json({ success: false, message: "Not found" })
+
+            return res.status(200).json({
+                success: false,
+                message: "No user found.",
+            })
         } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
+            console.error(error)
+            return res.status(500).json({ success: false, message: error.message })
         }
     },
 
-    // @desc    Add new profile
-    // @route   POST /profile
-    createNewProfile: async (req, res) => {
+    // @desc:   update profile by accessTK
+    // @route:  PUT /profile
+    updateProfile: async (req, res) => {
+        const { validate_add_inp, validate_update_inp } = require("../validation/profile")
         try {
-            const isValid = validate_add_inp({ ...req.body })
-            if (isValid) {
-                const newProfile = await Profile.create(sanitize.profile({ ...req.body }, "create"))
-
-                return res.status(201).json({
-                    success: true,
-                    newProfile,
-                })
-            }
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
-        }
-    },
-
-    // @desc    Update profile
-    // @route   PUT /profile/:id
-    updateProfileById: async (req, res) => {
-        try {
-            const profile = await Profile.findOne({ _id: req.params.id }).lean()
-            if (profile) {
-                const isValid = validate_update_inp({ ...req.body })
-                if (isValid) {
-                    await Profile.findOneAndUpdate(
-                        { _id: req.params.id },
-                        sanitize.profile({ ...req.body }, "update")
+            const user = await User.findOne({ _id: req.user.id }).select('profileId')
+            if (user.profileId != null) {
+                // update profile
+                if (validate_update_inp({ ...req.body })) {
+                    let profileData = sanitize.profile({ ...req.body }, "update")
+                    await Profile.findOneAndUpdate({ _id: user.profileId }, profileData)
+                    return res.sendStatus(204)
+                }
+            } else {
+                // create profile
+                if (validate_add_inp({ ...req.body })) {
+                    let profileData = sanitize.profile({ ...req.body }, "create")
+                    const profile = await Profile.create(profileData)
+                    await User.findOneAndUpdate(
+                        { accessToken: req.user.accessToken },
+                        { profileId: profile._id }
                     )
                     return res.sendStatus(204)
                 }
             }
-
-            return res.status(400).json({ success: false, message: "No profile found." })
         } catch (error) {
+            console.log(error)
+            return res.status(500).json({ success: false, error: outputErrors(error) })
+        }
+    },
+
+    // @desc:   change password by accessTK
+    // @route:  PUT /changePwd
+    changePwd: async (req, res) => {
+        // req.body contains {currentPassword, newPassword}
+        try {
+            const user = await User.findById(req.user.id).lean()
+            if (await bcrypt.compare(req.body.currentPassword, user.password)){
+                await User.findOneAndUpdate(
+                    { _id: req.user.id },
+                    { password: await bcrypt.hash(req.body.newPassword, await bcrypt.genSalt()) }
+                )
+                return res.sendStatus(204)
+            }else {
+                return res.status(400).json({ success: false, error: "Current password is not correct." })
+            }
+        } catch (error) {
+            console.error(error)
             return res.status(500).json({ success: false, message: outputErrors(error) })
         }
     },
