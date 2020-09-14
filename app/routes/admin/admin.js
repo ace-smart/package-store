@@ -16,7 +16,7 @@ const productRouter = require('./product.route')
 router.use(authRouter)
 router.use(_checkAuthenticatedAdmin)
 router.use(indexRouter)
-router.use('/profile', profileRouter)
+router.use(profileRouter)
 router.use('/customers', customerRouter)
 router.use('/administrators', administratorRouter)
 

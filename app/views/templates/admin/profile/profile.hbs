@@ -42,13 +42,17 @@
                     {{!-- Profile --}}
                     <div id="profile" role="tabpanel"
                         class="tab-pane {{#ifeq tabpane 'profile'}}active{{else}}{{/ifeq}} p-2 pt-4">
+                        {{#ifeq tabpane 'profile'}}
                         {{> admin/flash.partial }}
+                        {{else}}{{/ifeq}}
                         {{> admin/profile/profile.partial }}
                     </div>
                     {{!-- Change password --}}
                     <div id="changePwd" role="tabpanel"
                         class="tab-pane {{#ifeq tabpane 'changePwd'}}active{{else}}{{/ifeq}} p-2 pt-4">
+                        {{#ifeq tabpane 'changePwd'}}
                         {{> admin/flash.partial }}
+                        {{else}}{{/ifeq}}
                         {{> admin/profile/changePwd.partial }}
                     </div>
                 </div>

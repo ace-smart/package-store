@@ -1,13 +1,13 @@
 const axios = require("axios")
 const axiosInstance = axios.create({
-    baseURL: `${process.env.BASE_URL}:${process.env.API_SERVER_PORT}/api/profile`,
+    baseURL: `${process.env.BASE_URL}:${process.env.API_SERVER_PORT}/api`,
     timeout: 10000,
     headers: { "Content-Type": "application/json" },
     validateStatus: function (status) {
         return status < 500 // Resolve only if the status code is less than 500
     },
 })
-const {toDateFormat} = require('../../helper/hbs.helper')
+const {toDateFormat} = require('../../helper/helper')
 
 module.exports = {
     // @desc:   Show profile
@@ -48,7 +48,7 @@ module.exports = {
                 updateData.avatar = req.files.avatar[0].buffer
             
             const response = await axiosInstance.put(
-                "/",
+                "/profile",
                 updateData,
                 {
                     responseType: "json",
@@ -60,6 +60,7 @@ module.exports = {
             )
 
             if (response.status === 204) {
+                await require('../../helper/auth.helper').getUser({...req.user})
                 req.flash('success', 'Your profile was updated.')
                 return res.redirect("/admin/profile?tabpane=profile")
             }
@@ -113,47 +114,59 @@ module.exports = {
         }
     },
 
+    // @desc:   Change password
+    // @route   GET /changePwd
+    showChangePwdPage: (req,res) => {
+        return res.redirect('/admin/profile?tabpane=changePwd')
+    },
+
     // @desc    change password
-    // @route   POST /profile/changePwd
+    // @route   POST /changePwd
     changePwd: async (req, res) => {
+        // form inputs [currentPassword, newPassword]
         try {
-            if (req.user.profileId != null) {
-                // update profile
-                console.log("changPwd")
-                return console.log(req.body)
-                const response = await axiosInstance.put(
-                    "/profile",
-                    {
-                        firstName: req.body.firstName.toLowerCase(),
-                        lastName: req.body.lastName.toLowerCase(),
-                        gender: req.body.gender.toLowerCase(),
-                        dateOfBirth: req.body.dateOfBirth.toString(),
-                        phoneNumber: req.body.phoneNumber.toString(),
-                    },
-                    {
-                        responseType: "json",
-                        responseEncoding: "utf-8",
-                    }
-                )
-
-                if (response.status === 200 && response.statusText === "OK") {
-                    if (response.data.success == true) {
-                        if (response.data.user.role === role) return response.data.user
-
-                        return { error: "Your account has no access to this  site." }
+            const formData = require('../../helper/helper').removeCSRF(req.body)
+            const response = await axiosInstance.put(
+                "/changePwd",
+                {...formData}, 
+                {
+                    responseType: "json",
+                    responseEncoding: "utf-8",
+                    headers: { 
+                        Authorization: "Bearer " + req.user.accessToken,
                     }
                 }
+            )
 
-                return {
-                    error: response.data.message,
-                }
-            } else {
-                // create profile
-                console.log("create")
-                return console.log(req.body)
+            if (response.status === 204) {
+                await require('../../helper/auth.helper').getUser({...req.user})
+                req.flash('success', 'Your password was changed.')
+                return res.redirect("/admin/profile?tabpane=changePwd")
             }
 
-            return console.log(req.body)
-        } catch (error) {}
+        } catch (error) {
+            // Server return 500 with response
+            if(error.response){
+                if (error.response.data.error.type === 'InvalidInput' || error.response.data.error.type === 'UnknownInput' || error.response.data.error.type === 'InvalidCredentials'){
+                    return res.render("templates/admin/profile/profile", {
+                        layout: "admin/profile.layout.hbs",
+                        user: {
+                            username: req.user.username,
+                            email: req.user.email,
+                            role: req.user.role,
+                            profile: req.user.profileId,
+                            status: req.user.status,
+                            createdAt: req.user.createdAt,
+                        },
+                        csrfToken: req.csrfToken(),
+                        tabpane: 'changePwd',
+                        error: error.response.data.error
+                    })
+                }
+            }else {
+                // Not receive response
+                return res.send("An error has occurred.")
+            }
+        }
     },
 }

@@ -3,19 +3,24 @@ const router = require("express").Router()
 const {
     showProfilePage,
     updateProfile,
+    showChangePwdPage,
     changePwd,
 } = require("../../controllers/admin/profile.controller")
 
-// @desc    Show list of profile
+// @desc    Show profile page
 // @route   GET /profile
-router.get("/", showProfilePage)
+router.get("/profile", showProfilePage)
 
 // @desc    Update profile
 // @route   POST /profile
-router.post("/", updateProfile)
+router.post("/profile", updateProfile)
+
+// @desc    Show change password page
+// @route   GET /changePwd
+router.get("/changePwd", showChangePwdPage)
 
 // @desc    Change password
-// @route   POST /profile/changePwd
+// @route   POST /changePwd
 router.post("/changePwd", changePwd)
 
 module.exports = router
