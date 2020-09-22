@@ -49,13 +49,13 @@ module.exports = authHelper = {
                 responseEncoding: "utf-8",
                 headers: { "x-refresh-token": "Bearer " + refreshToken },
             })
-            if (response.status === 200 && response.statusText === "OK") {
+            if (response.status === 200) {
                 if (response.data.success == true) {
                     return response.data.accessToken
                 }
             }
 
-            throw new Error(response.data.message)
+            throw new Error(response.data.error.message)
         } catch (error) {
             throw new Error(error)
         }
@@ -64,8 +64,6 @@ module.exports = authHelper = {
     getUser: async ({ id, accessToken, refreshToken } = {}) => {
         try {
             const response = await axiosInstance.get(`/profile`, {
-                responseType: "json",
-                responseEncoding: "utf-8",
                 headers: { Authorization: "Bearer " + accessToken },
             })
             
@@ -74,7 +72,8 @@ module.exports = authHelper = {
                     return response.data.user
                 }
             }
-            if (response.status === 401 && response.data.message === "jwt expired") {
+            
+            if (response.status === 401 && response.data.error.message === "jwt expired") {
                 const newAccessTK = await authHelper.renewAccessToken(refreshToken)
                 return await authHelper.getUser({ id, accessToken: newAccessTK, refreshToken })
             }
@@ -84,25 +83,40 @@ module.exports = authHelper = {
             throw new Error(error.message)
         }
     },
-
+    
     _checkAuthenticatedAdmin: (req, res, next) => {
-        if (req.isAuthenticated() && req.user.status === "activated" && req.user.role === "admin")
-            return next()
+        if (req.isAuthenticated()){
+            if (req.user.status === "activated"){
+                if (req.user.role === "admin"){
+                    return next()
+                }
+            }
+            
+            return authHelper._redirectForNotAllowed(req,res,next)
+        }
 
         return authHelper._redirectToLogin(req, res, next)
+        // return res.redirect('/admin/login')
     },
 
     _checkAuthenticatedCustomer: (req, res, next) => {
         if (req.isAuthenticated() && req.user.status === "activated" && req.user.role === "user")
             return next()
 
-        return authHelper._redirectToLogin(req, res, next)
+        // return authHelper._redirectToLogin(req, res, next)
+        return res.redirect('/login')
     },
 
-    _checkUnauthenticated: (req, res, next) => {
+    _checkUnauthenticatedAdmin: (req, res, next) => {
         if (req.isUnauthenticated()) return next()
 
-        return authHelper._redirectToIndex(req, res, next)
+        return res.redirect('/admin')
+    },
+
+    _checkUnauthenticatedCustomer: (req, res, next) => {
+        if (req.isUnauthenticated()) return next()
+
+        return res.redirect('/')
     },
 
     _redirectToIndex: (req, res, next) => {
@@ -124,4 +138,23 @@ module.exports = authHelper = {
 
         return res.redirect("/login")
     },
+
+    _redirectForNotAllowed: (req, res, next) => {
+        const urlSegments = req.originalUrl.split("/")
+        const admin = urlSegments.find((element) => element === "admin")
+
+        if (admin != null){
+            req.flash('error', 'This account is not allowed for this site.')
+            return res.render("templates/admin/auth/login", {
+                layout: "admin/auth.layout.hbs",
+                csrfToken: req.csrfToken(),
+                // messages: {
+                //     error: "This account is not allowed for this site."
+                // }
+            })
+        }
+
+        return res.redirect("/login")
+    },
+
 }

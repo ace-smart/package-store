@@ -1,6 +1,12 @@
 <!doctype html>
 <html lang="en">
-{{> admin/table/head.partial }}
+    {{#ifMatch content 'list'}}
+    {{> admin/list/head.partial }}
+    {{/ifMatch}}
+    
+    {{#ifMatch content 'form'}}
+    {{> admin/form/head.partial }}
+    {{/ifMatch}}
 
 
 <body class="fixed-left">
@@ -17,16 +23,13 @@
             <!-- Start content -->
             <div class="content">
 
-                {{> admin/top-bar.partial}}
+                {{> admin/top-bar.partial }}
                 <!-- ==================
                          PAGE CONTENT START
                          ================== -->
                 <div class="page-content-wrapper">
 
                     <div class="container-fluid">
-                        
-                        {{> admin/table/title-bar.partial }}
-
                         {{{body}}}
                     </div>
                 </div>
@@ -42,8 +45,15 @@
     </div>
     <!-- END wrapper -->
 
-    {{> admin/table/js.partial}}
+    {{#ifMatch content 'list'}}
+    {{> admin/list/js.partial }}
+    {{/ifMatch}}
 
+    {{#ifMatch content 'form'}}
+    {{> admin/form/js.partial }}
+    {{/ifMatch}}
+
+    {{> admin/main/js.partial }}
 </body>
 
 </html>

@@ -1,0 +1,16 @@
+<div class="header-breadcrumb">
+    <ul class="text-center">
+        <li>
+            <a href="/admin/accounts">Account</a>
+        </li>
+        <li>
+            <a href="/admin/accounts/admins">Admin</a>
+        </li>
+        {{#ifMatch content 'list'}}
+        <li>List</li>
+        {{/ifMatch}}
+        {{#ifMatch content 'form'}}
+        <li>Add</li>
+        {{/ifMatch}}
+    </ul>
+</div>

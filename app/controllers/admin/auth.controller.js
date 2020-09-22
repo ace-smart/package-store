@@ -5,7 +5,7 @@ module.exports = {
     // @desc:   show login form
     // @route:  GET /login
     showLoginForm: (req, res) => {
-        res.render("templates/admin/auth/login", {
+        return res.render("templates/admin/auth/login", {
             layout: "admin/auth.layout.hbs",
             csrfToken: req.csrfToken(),
         })

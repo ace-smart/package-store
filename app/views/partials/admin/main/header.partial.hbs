@@ -1,0 +1,33 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card m-b-20">
+            <div class="card-body d-flex flex-row justify-content-between align-items-center">
+                <div>
+                    {{#ifMatch content 'list'}}
+                    <button onclick="toAddPage()" type="button" class="btn btn-primary waves-effect waves-light">
+                        <i class="ion-plus-circled mr-2"></i>Add
+                    </button>
+                    {{/ifMatch}}
+
+                    {{#ifMatch content 'form'}}
+                    <button onclick="backward()" type="button" class="btn btn-blue-grey waves-effect waves-light">
+                        <i class="ion-arrow-left-c"></i>
+                    </button>
+                    {{!-- <button onclick="window.history.go(-1); return false;" type="button" class="btn btn-blue-grey waves-effect waves-light">
+                        <i class="ion-arrow-left-c"></i> --}}
+                    </button>
+                    {{/ifMatch}}
+                </div>
+                <div>
+                    <h5 class="mb-0 mt-0 text-info text-center font-21">
+                        {{{header}}}
+                    </h5>
+                </div>
+
+                {{!-- breadcrumb --}}
+                {{> admin/account/breadcrumb.partial }}
+
+            </div>
+        </div>
+    </div>
+</div>

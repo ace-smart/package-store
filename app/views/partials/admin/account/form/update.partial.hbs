@@ -1,0 +1,116 @@
+<h4 class="mt-0 header-title">Update Form</h4>
+<p class="text-muted m-b-30 font-14">Edit the fields and submit <strong>Save changes</strong> button to save them.</p>
+
+<form action="/admin/accounts/edit/{{{user._id}}}" method="POST">
+    {{> csrf}}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" 
+                {{#ifeq error.field 'username'}} 
+                    value="{{{error.value}}}" 
+                {{else}}
+                    {{#if error.formInput.username}}
+                        value="{{{error.formInput.username}}}"
+                    {{else}}
+                        value="{{{user.username}}}"
+                    {{/if}}
+                {{/ifeq}}
+                    class="form-control {{#ifeq error.field 'username'}}parsley-error{{else}} {{/ifeq}}" required>
+
+                {{#ifeq error.field 'username'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="email">Email</label>
+                    <input id="email" name="email" type="email" 
+                {{#ifeq error.field 'email'}} 
+                    value="{{{error.value}}}"
+                {{else}}
+                    {{#if error.formInput.email}}
+                        value="{{{error.formInput.email}}}" 
+                    {{else}}
+                        value="{{{user.email}}}"
+                    {{/if}}
+                {{/ifeq}}
+                    class="form-control {{#ifeq error.field 'email'}}parsley-error{{else}} {{/ifeq}}" required>
+                
+                {{#ifeq error.field 'email'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="control-label">Role</label>
+                <select class="form-control select2" name="role" id="role" required>
+                    <option value="" selected disabled>Select a role</option>
+                    <option value="admin" 
+                    {{#ifeq error.field 'role'}} 
+                        {{#ifMatch error.value 'admin'}} selected {{/ifMatch}} 
+                    {{else}}
+                        {{#if error.formInput.role}}
+                            {{#ifMatch error.formInput.role 'admin'}} selected {{/ifMatch}}
+                        {{else}}
+                            {{#ifMatch user.role 'admin'}} selected {{/ifMatch}}
+                        {{/if}}
+                    {{/ifeq}}> Admin
+                    </option>
+                    <option value="user" 
+                    {{#ifeq error.field 'role'}} 
+                        {{#ifMatch error.value 'user'}} selected {{/ifMatch}} 
+                    {{else}} 
+                        {{#if error.formInput.role}}
+                            {{#ifMatch error.formInput.role 'user'}} selected {{/ifMatch}}
+                        {{else}}
+                            {{#ifMatch user.role 'user'}} selected {{/ifMatch}}
+                        {{/if}}
+                    {{/ifeq}}> Customer
+                    </option>
+                </select>
+            </div>
+            {{#ifeq error.field 'role'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
+        </div>
+    </div>
+
+    <div class="row mt-1 pt-2">
+        <div class="col-sm-2">
+            <div class="form-group">
+                <span class="control-label">Activated</span>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="form-group">
+                <input type="checkbox" id="switch5" name="status" switch="success"
+                {{#ifeq error.field 'status'}} 
+                    {{!-- {{#ifMatch error.value 'activated'}} checked {{/ifMatch}}  --}}
+                {{else}}
+                    {{#ifeq error.formInput.status 'activated'}} checked 
+                    {{else}}
+                        {{#ifMatch user.status 'activated'}} checked {{/ifMatch}}
+                    {{/ifeq}}
+                {{/ifeq}}
+                />
+                <label id="status-lbl" for="switch5" data-on-label="Yes" data-off-label="No"></label>
+            </div>
+        </div>
+        {{#ifeq error.field 'status'}}
+        <div class="col-sm-12">
+            {{> admin/form/error.partial }}
+        </div>
+        {{else}} {{/ifeq}}
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12 mr-0 text-right">
+            <button type="submit" class="btn btn-success waves-effect waves-light">Save Changes</button>
+            <button type="submit" class="btn btn-secondary waves-effect">Cancel</button>
+        </div>
+    </div>
+</form>

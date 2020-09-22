@@ -1,0 +1,18 @@
+<script>
+    function toAddPage() {
+        let forwardURL = document.URL.split('/');
+        forwardURL = forwardURL.filter((value) => {
+            return value != 'admins' && value != 'customers' && value != 'edit' && value != "#"
+        })
+        forwardURL = forwardURL.join('/') + '/add';
+        return window.location.href = forwardURL;
+    }
+    function backward() {
+        let backwardURL = document.URL.split('/');
+        backwardURL = backwardURL.filter((value) => {
+            return value != 'admins' && value != 'customers' && value != 'edit' && value != "#"
+        })
+        backwardURL.pop();
+        return window.location.href = backwardURL.join('/');
+    }
+</script>
