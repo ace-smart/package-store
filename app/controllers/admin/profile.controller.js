@@ -1,4 +1,5 @@
 const axios = require("axios")
+const helper = require("../../helper/helper")
 const axiosInstance = axios.create({
     baseURL: `${process.env.BASE_URL}:${process.env.API_SERVER_PORT}/api`,
     timeout: 10000,
@@ -40,8 +41,7 @@ module.exports = {
     // @route   POST /profile
     updateProfile: async (req, res) => {
         try {
-            let updateData = {...req.body}
-            delete updateData._csrf
+            let updateData = require('../../helper/helper').removeCSRF(req.body)
             if (updateData.dateOfBirth != null)
                 updateData.dateOfBirth = toDateFormat(req.body.dateOfBirth.toString())
             if (req.files.avatar != null) 
@@ -51,8 +51,6 @@ module.exports = {
                 "/profile",
                 updateData,
                 {
-                    responseType: "json",
-                    responseEncoding: "utf-8",
                     headers: { 
                         Authorization: "Bearer " + req.user.accessToken,
                     }

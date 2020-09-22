@@ -5,8 +5,7 @@
     <div class="topbar-left">
         <div class="">
             <!--<a href="index.html" class="logo text-center">Admiria</a>-->
-            <a href="/admin" class="logo"><img src="/admin/static/assets/images/logo-sm.png" height="36"
-                    alt="logo"></a>
+            <a href="/admin" class="logo"><img src="/admin/static/assets/images/logo-sm.png" height="36" alt="logo"></a>
         </div>
     </div>
 
@@ -26,14 +25,30 @@
                     </ul>
                 </li>
 
-                <li>
-                    <a href="/admin/administrators" class="waves-effect"><i class="ion-ribbon-b"></i><span> Admin
-                        </span></a>
+                <li class="has_sub">
+                    <a href="javascript:void(0);" class="waves-effect"><i class="dripicons-user-group"></i> <span>
+                            Accounts </span>
+                    </a>
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="/admin/accounts" class="waves-effect"><i class="ion-grid"></i><span>
+                                    All
+                                </span></a>
+                        </li>
+                        <li>
+                            <a href="/admin/accounts/admins" class="waves-effect"><i class="ion-ribbon-b"></i><span>
+                                    Admin
+                                </span></a>
+                        </li>
+                        <li>
+                            <a href="/admin/accounts/customers" class="waves-effect"><i class="ion-android-contacts"></i><span>
+                                    Customer
+                                </span></a>
+                        </li>
+                    </ul>
                 </li>
-                <li>
-                    <a href="/admin/customers" class="waves-effect"><i class="ion-android-contacts"></i><span> Customer
-                        </span></a>
-                </li>
+
+
                 <li>
                     <a href="widgets.html" class="waves-effect"><i class="ion-ios7-keypad"></i><span> Category
                         </span></a>

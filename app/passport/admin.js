@@ -85,7 +85,7 @@ module.exports = async function (passport) {
     )
 
     passport.serializeUser(function (admin, done) {
-        done(null, {
+        return done(null, {
             id: admin._id,
             accessToken: admin.accessToken,
             refreshToken: admin.refreshToken,
@@ -95,7 +95,6 @@ module.exports = async function (passport) {
     passport.deserializeUser(async function (adminData, done) {
         try {
             const admin = await authHelper.getUser({ ...adminData })
-            
             return done(null, admin)
         } catch (error) {
             return done(error)

@@ -1,15 +1,11 @@
 <head>
     {{> admin/meta.partial }}
-
-    <!-- App Icons -->
-    <link rel="shortcut icon" href="/admin/static/assets/images/favicon.ico">
+    <meta name="csrf-token" content="{{csrfToken}}">
 
     <!-- Select 2 -->
     <link href="/admin/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
-
-    <!-- Basic Css files -->
-    <link href="/admin/static/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-    <link href="/admin/static/assets/css/icons.css" rel="stylesheet" type="text/css">
-    <link href="/admin/static/assets/css/style.css" rel="stylesheet" type="text/css">
-
+    
+    {{> admin/css.partial }}
+    
+    {{> admin/main/css.partial }}
 </head>
