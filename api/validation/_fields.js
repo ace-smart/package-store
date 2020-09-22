@@ -6,7 +6,7 @@ module.exports = {
     },
     STATUS_VALUES: ["activated", "deactivated"],
     USER_ROLE: ["user", "admin"],
-    USER_FIELDS: ["username", "password", "email", "status", "role", "profileId"],
+    USER_FIELDS: ["username", "password","confirm_password", "email", "status", "role", "profileId"],
     PROFILE_FIELDS: ["firstName", "lastName", "gender", "dateOfBirth", "phoneNumber", "avatar","status"],
     PROFILE_PASSWORD_FIELDS: ["currentPassword", "newPassword", "confirm_newPassword"],
     PROFILE_GENDER_VALUES: ["male", "female", "lgbt"],

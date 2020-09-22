@@ -13,47 +13,51 @@ async function validate_add_inp({ ...data } = {}) {
     }
     // email [required]
     if (typeof data.email === "undefined" || validator.isEmpty(data.email)) {
-        throw new InvalidError('email', data.email.toString(), "Must be required.")
+        throw new InvalidError('email', data, "Must be required.")
     }
     if (!validator.isEmail(data.email)) {
-        throw new InvalidError('email', data.email.toString(), "Email is not valid.")
+        throw new InvalidError('email', data, "Email is not valid.")
     }
     if (!validator.isLength(data.email, { max: 255 })) {
-        throw new InvalidError('email', data.email.toString(), "Must be less than 256 characters.")
+        throw new InvalidError('email', data, "Must be less than 256 characters.")
     }
     if (await isExistent(require("../models/UserModel"), { email: data.email })) {
-        throw new InvalidError('email', data.email.toString(), "Email is already existent.")
+        throw new InvalidError('email', data, "Email is already existent.")
     }
     // username [required]
     if (typeof data.username === "undefined" || validator.isEmpty(data.username)) {
-        throw new InvalidError('username', data.username.toString(), "Must be required.")
+        throw new InvalidError('username', data, "Must be required.")
     }
     if (!validator.isAlphanumeric(data.username)) {
-        throw new InvalidError('username', data.username.toString(), "Must be only numbers and characters.")
+        throw new InvalidError('username', data, "Must be only numbers and characters.")
     }
     if (!validator.isLength(data.username, { min: 4, max: 255 })) {
-        throw new InvalidError('username', data.username.toString(), "Must be from 4 to 255 characters.")
+        throw new InvalidError('username', data, "Must be from 4 to 255 characters.")
     }
     if (await isExistent(require("../models/UserModel"), { username: data.username })) {
-        throw new InvalidError('username', data.username.toString(), "Username is already existent.")
+        throw new InvalidError('username', data, "Username is already existent.")
     }
     // password [required]
     if (typeof data.password === "undefined" || validator.isEmpty(data.password)) {
-        throw new InvalidError('password', data.password.toString(), "Must be required.")
+        throw new InvalidError('password', data, "Must be required.")
     }
     if (!validator.isLength(data.password, { min: 4, max: 255 })) {
-        throw new InvalidError('password', data.password.toString(), "Must be from 4 to 255 characters.")
+        throw new InvalidError('password', data, "Must be from 4 to 255 characters.")
+    }
+    // confirm_password [required]
+    if (!validator.equals(data.confirm_password,data.password)) {
+        throw new InvalidError('confirm_password', data, "Confirm password must match with password.")
     }
     // role
     if (typeof data.role !== "undefined" && !validator.isEmpty(data.role)) {
         if (!validator.isIn(data.role.toLowerCase(), USER_ROLE)) {
-            throw new InvalidError('role', data.role.toString(), "Role is not valid.")
+            throw new InvalidError('role', data, "Role is not valid.")
         }
     }
     // status
     if (typeof data.status !== "undefined" && !validator.isEmpty(data.status)) {
         if (!validator.isIn(data.status.toLowerCase(), STATUS_VALUES)) {
-            throw new InvalidError('status', data.status.toString(), "Status is not valid.")
+            throw new InvalidError('status', data, "Status is not valid.")
         }
     }
 
@@ -71,43 +75,37 @@ async function validate_update_inp({ ...data } = {}, userId) {
     // email
     if (typeof data.email !== "undefined" && !validator.isEmpty(data.email)) {
         if (!validator.isEmail(data.email)) {
-            throw new InvalidError('email', data.email.toString(), "Email is not valid.")
+            throw new InvalidError('email', data, "Email is not valid.")
         }
         if (!validator.isLength(data.email, { max: 255 })) {
-            throw new InvalidError('email', data.email.toString(), "Must be less than 256 characters.")
+            throw new InvalidError('email', data, "Must be less than 256 characters.")
         }
         if (await isExistent(require("../models/UserModel"), { email: data.email }, userId)) {
-            throw new InvalidError('email', data.email.toString(), "This email is already existent.")
+            throw new InvalidError('email', data, "Email is already existent.")
         }
     }
     // username
     if (typeof data.username !== "undefined" && !validator.isEmpty(data.username)) {
         if (!validator.isAlphanumeric(data.username)) {
-            throw new InvalidError('username', data.username.toString(), "Must be only numbers and characters.")
+            throw new InvalidError('username', data, "Must be only numbers and characters.")
         }
         if (!validator.isLength(data.username, { min: 4, max: 255 })) {
-            throw new InvalidError('username', data.username.toString(), "Must be from 4 to 255 characters.")
+            throw new InvalidError('username', data, "Must be from 4 to 255 characters.")
         }
         if (await isExistent(require("../models/UserModel"), { username: data.username }, userId)) {
-            throw new InvalidError('username', data.username.toString(), "This username is already existent.")
-        }
-    }
-    // password
-    if (typeof data.password !== "undefined" && !validator.isEmpty(data.password)) {
-        if (!validator.isLength(data.password, { min: 4, max: 255 })) {
-            throw new InvalidError('password', data.password.toString(), "Must be from 4 to 255 characters.")
+            throw new InvalidError('username', data, "Username is already existent.")
         }
     }
     // role
     if (typeof data.role !== "undefined" && !validator.isEmpty(data.role)) {
         if (!validator.isIn(data.role.toLowerCase(), USER_ROLE)) {
-            throw new InvalidError('role', data.role.toString(), "Role is not valid.")
+            throw new InvalidError('role', data, "Role is not valid.")
         }
     }
     // status
     if (typeof data.status !== "undefined" && !validator.isEmpty(data.status)) {
         if (!validator.isIn(data.status.toLowerCase(), STATUS_VALUES)) {
-            throw new InvalidError('status', data.status.toString(), "Status is not valid.")
+            throw new InvalidError('status', data, "Status is not valid.")
         }
     }
 

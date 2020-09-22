@@ -6,11 +6,13 @@ function UnknownInputError([...fields]) {
 
 UnknownInputError.prototype = new Error()
 
-function InvalidError(field, value, message) {
+function InvalidError(field, data, message) {
     this.field = field
-    this.value = value
+    this.value = data[field]
     this.message = message
     this.type = 'InvalidInput'
+    delete data[field]
+    this.formInput = data
 }
 
 InvalidError.prototype = new Error()
