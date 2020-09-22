@@ -86,13 +86,19 @@ module.exports = {
             const refreshTokenHeader = req.header("x-refresh-token")
             // No token
             if (typeof refreshTokenHeader === "undefined")
-                return res.status(401).json({ success: false, message: "Missing refresh token." })
+                return res.status(401).json({
+                    success: false,
+                    error: { type: "refreshToken", message: "Missing refresh token." },
+                })
 
             const refreshToken = req.header("x-refresh-token").split(" ")[1]
 
             // Not 'Bearer token'
             if (typeof refreshToken === "undefined")
-                return res.status(401).json({ success: false, message: "Invalid token." })
+                return res.status(401).json({
+                    success: false,
+                    error: { type: "refreshToken", message: "Invalid token." },
+                })
 
             const userFromToken = await User.findOne({ refreshToken: refreshToken }).lean()
 
@@ -107,6 +113,7 @@ module.exports = {
                     },
                     { new: true }
                 )
+
                 if (updated)
                     return res.status(200).json({
                         success: true,
@@ -116,11 +123,14 @@ module.exports = {
 
             return res.status(401).json({
                 success: false,
-                message: "Incorrect token.",
+                error: { type: "refreshToken", message: "Incorrect token." },
             })
         } catch (error) {
             console.error(error)
-            return res.status(500).json({ success: false, message: error.message })
+            return res.status(500).json({
+                success: false,
+                error: { type: "refreshToken", message: outputErrors(error.message) },
+            })
         }
     },
 
@@ -128,7 +138,7 @@ module.exports = {
     // @route:  PUT /changePwd
     register: async (req, res) => {
         // req.body contains {username, password, email}
-        const {validate_add_inp} = require("../validation/user")
+        const { validate_add_inp } = require("../validation/user")
         try {
             if (await validate_add_inp({ ...req.body })) {
                 const newUser = await User.create(await sanitize.user({ ...req.body }, "create"))

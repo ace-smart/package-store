@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken")
 const bcrypt = require('bcrypt')
 const User = require("../models/UserModel")
+const { outputErrors } = require("../validation/validation")
 
 module.exports = authHelper = {
     //@desc:    Generate access token
@@ -63,32 +64,49 @@ module.exports = authHelper = {
         const accessTokenHeader = req.header("Authorization")
         // No token
         if (typeof accessTokenHeader === "undefined")
-            return res.status(401).json({ success: false, message: "Missing access token." })
+            return res
+                .status(401)
+                .json({ success: false, error: { type: "accessToken", message: "Missing access token." } })
 
         const accessToken = req.header("Authorization").split(" ")[1]
 
         // Not 'Bearer token'
-        if (typeof accessToken === "undefined")
-            return res.status(401).json({ success: false, message: "Invalid token." })
+        if (typeof accessToken === "undefined" || !accessToken)
+            return res
+                .status(401)
+                .json({ success: false, error: { type: "accessToken", message: "Invalid token." } })
 
         try {
             const payload = authHelper.authenticateAccessToken(accessToken)
             // Jwt has errors 
             if (typeof payload.error !== "undefined")
-                return res.status(401).json({ success: false, message: payload.error.message })
+                return res
+                    .status(401)
+                    .json({
+                        success: false,
+                        error: { type: "accessToken", message: payload.error.message },
+                    })
 
             // Check accessToken is in database
             const isExistent = await User.findOne({accessToken: accessToken})
+            
             if (isExistent) {
                 req.user = payload
                 req.user.accessToken = accessToken
                 return next()
             }
 
-            return res.status(403).json({ success: false, message: 'Forbidden access.' })
+            return res
+                .status(401)
+                .json({ success: false, error: { type: "accessToken", message: "Invalid token." } })
         } catch (error) {
             console.error(error)
-            return res.status(500).json({ success: false, message: error.message })
+            return res
+                .status(500)
+                .json({
+                    success: false,
+                    error: { type: "accessToken", message: outputErrors(error.message) },
+                })
         }
     },
 
@@ -118,13 +136,11 @@ module.exports = authHelper = {
     //@desc:    Middleware for checking 'admin' role
     //Return:   req.user = {user}
     _ensureAdminRole: (req, res, next) => {
-        console.log(typeof req.user.role !== 'undefined')
         if (typeof req.user !== 'undefined' && req.user.role != null && req.user.role.toLowerCase() === 'admin'){
-            // if ()
-                return next()
+            return next()
         }
         
-        return res.status(403).json({ success: false, message: 'Forbidden.' })
+        return res.status(403).json({ success: false, error: {message: 'Forbidden.'} })
     },
     
 }

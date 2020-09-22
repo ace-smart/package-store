@@ -12,12 +12,13 @@ const orderRouter = require('./admin/order.route')
 const storageRouter = require('./admin/storage.route')
 const restockRouter = require('./admin/restock.route')
 
-// All below routes have prefix '/api/'
 router.use(authRouter)
-router.use('/', _ensureAccessToken, profileRouter)
+router.use(_ensureAccessToken)
+router.use('/', profileRouter)
 // Client routes
 // Admin routes
-router.use('/admin/*', _ensureAccessToken, _ensureAdminRole)
+// router.use('/admin/*', _ensureAccessToken, _ensureAdminRole)
+router.use(_ensureAdminRole)
 router.use('/admin/users', userRouter)
 router.use('/admin/categories', categoryRouter)
 router.use('/admin/addresses', addressRouter)
