@@ -80,7 +80,8 @@ module.exports = authHelper = {
 
             throw new Error(response.status.message)
         } catch (error) {
-            throw new Error(error.message)
+            console.log(error.message)
+            throw new Error("Server error")
         }
     },
     
