@@ -1,181 +1,115 @@
-const User = require("../models/UserModel")
-const Profile = require("../models/ProfileModel")
-const bcrypt = require("bcrypt")
-const authHelper = require("../helper/auth")
-const sanitize = require("../validation/sanitize")
-const { outputErrors } = require("../validation/validation")
+const ErrorObject = require("../objects/ErrorObject")
+const UserObject = require("../objects/UserObject")
+const TokenObject = require("../objects/TokenObject")
+const LoginObject = require("../objects/LoginObject")
+const RegisterObject = require("../objects/RegisterObject")
+const ValidationError = require("../errors/validation")
+const TokenError = require("../errors/token")
 
 module.exports = {
-    // @desc    Authenticate
-    // @route   POST /auth
-    auth: async (req, res) => {
-        try {
-            const isAuthenticatedUser = await authHelper.isAuthenticatedUser({ ...req.body })
-            if (isAuthenticatedUser) {
-                // Not activated
-                if (isAuthenticatedUser.message != null)
-                    return res
-                        .status(401)
-                        .json({ success: false, message: isAuthenticatedUser.message })
+  // @desc    Authenticate
+  // @route   POST /auth
+  auth: async (req, res) => {
+    try {
+      const loggedUser = await (new LoginObject({ ...req.body })).authenticate()
+      const isInitialized = loggedUser.initializeTokens() // regenerate tokens
+      if (isInitialized) {
+        await loggedUser.save()
+        return res.status(200).json({ user: loggedUser })
+      }
 
-                // Generate tokens
-                const newTokens = {}
-                if (isAuthenticatedUser.accessToken == null) {
-                    newTokens.accessToken = authHelper.generateAccessToken(isAuthenticatedUser, {
-                        expiresIn: "1d",
-                    })
-                } else if (
-                    authHelper.authenticateAccessToken(isAuthenticatedUser.accessToken).id != null
-                ) {
-                    // keep the old accessToken in DB if it was not expired
-                    newTokens.accessToken = isAuthenticatedUser.accessToken
-                } else if (
-                    authHelper.authenticateAccessToken(isAuthenticatedUser.accessToken).error !=
-                    null
-                ) {
-                    // generate new accessToken when the old one was expired
-                    newTokens.accessToken = authHelper.generateAccessToken(isAuthenticatedUser, {
-                        expiresIn: "1d",
-                    })
-                }
+      throw new Error("Authentication failed.")
+    } catch (error) {
+      console.log(error)
+      if (error instanceof TokenError) {
+        // Failed to initialize tokens
+        return res.status(401).json(ErrorObject.sendTokenError(error.data))
+      } else if (error instanceof ValidationError) {
+        // Validation failed
+        return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))
+      } else {
+        // Mongoose or other errors
+        return res.status(500).json(ErrorObject.sendServerError())
+      }
+    }
+  },
 
-                if (isAuthenticatedUser.refreshToken == null) {
-                    newTokens.refreshToken = await authHelper.generateRefreshToken(
-                        isAuthenticatedUser
-                    )
-                } else {
-                    newTokens.refreshToken = isAuthenticatedUser.refreshToken
-                }
+  // @desc:    Renew access token by refresh token
+  // @route:   GET /token
+  renewAccessToken: async (req, res) => {
+    try {
+      const refreshTokenHeader = req.header("x-refresh-token")
+      if (typeof refreshTokenHeader === "undefined") {
+        throw new TokenError({
+          name: "MissingTokenError",
+          message: "Missing refresh token",
+        })
+      }
 
-                const updated = await User.findOneAndUpdate(
-                    { _id: isAuthenticatedUser._id },
-                    {
-                        accessToken: newTokens.accessToken,
-                        refreshToken: newTokens.refreshToken,
-                    },
-                    { new: true }
-                )
+      const [BEARER, refreshToken] = req.header("x-refresh-token").split(" ")
+      // Not 'Bearer token'
+      if (BEARER !== "Bearer" || typeof refreshToken === "undefined") {
+        throw new TokenError({
+          name: "InvalidTokenError",
+          message: "Given refresh token is not valid"
+        })
+      }
 
-                if (updated)
-                    return res.status(200).json({
-                        success: true,
-                        user: updated,
-                        // accessToken: accessToken,
-                        // refreshToken: refreshToken,
-                    })
-                else
-                    return res
-                        .status(500)
-                        .json({ success: false, message: "Authentication failed." })
-            }
-            // Bad username or password
-            return res.status(401).json({
-                success: false,
-                message: "Authentication failed. Please check username or password.",
-            })
-        } catch (error) {
-            console.error(error)
-            return res.status(401).json({ success: false, message: error.message })
-        }
-    },
+      let userFromRT = await UserObject.getDataByToken("refresh", refreshToken)
+      const token = new TokenObject()
+      token.setPayload = { ...userFromRT }
+      userFromRT.setAccessToken = token.generateToken("access")
+      await userFromRT.save()
+      return res.status(200).json({
+        accessToken: userFromRT.getAccessToken,
+      })
 
-    // @desc:    Renew access token by refresh token
-    // @route:   POST /token
-    renewAccessToken: async (req, res) => {
-        try {
-            const refreshTokenHeader = req.header("x-refresh-token")
-            // No token
-            if (typeof refreshTokenHeader === "undefined")
-                return res.status(401).json({
-                    success: false,
-                    error: { type: "refreshToken", message: "Missing refresh token." },
-                })
+    } catch (error) {
+      if (error instanceof TokenError) {
+        return res.status(401).json(ErrorObject.sendTokenError(error.data))
+      } else {
+        return res.status(500).json(ErrorObject.sendServerError())
+      }
+    }
+  },
 
-            const refreshToken = req.header("x-refresh-token").split(" ")[1]
+  // @desc    Register
+  // @route   POST /register
+  register: async (req, res) => {
+    /*  req.body = {username, password, email}
+        default: role => "user", status => "deactivated"
+    */
+    try {
+      const validation = await (new RegisterObject({ ...req.body })).validate()
+      const user = await UserObject.create({...validation})
+      return res.status(200).json({ user: user })
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))
+      } else {
+        return res.status(500).json(ErrorObject.sendServerError())
+      }
+    }
+  },
 
-            // Not 'Bearer token'
-            if (typeof refreshToken === "undefined")
-                return res.status(401).json({
-                    success: false,
-                    error: { type: "refreshToken", message: "Invalid token." },
-                })
+  // @desc:   Logout to reset both accessToken and refreshToken
+  // @route:  POST /logout
+  logout: async (req, res) => {
+    try {
+      const userObject = await UserObject.getDataByToken("access", req.user.accessToken)
+      const isUpdated = await userObject.update(
+          {accessToken: null, refreshToken: null})
+      if (isUpdated) {
+        return res.sendStatus(204)
+      }
 
-            const userFromToken = await User.findOne({ refreshToken: refreshToken }).lean()
-
-            if (userFromToken) {
-                // Generate new access token
-                const updated = await User.findOneAndUpdate(
-                    { _id: userFromToken._id },
-                    {
-                        accessToken: authHelper.generateAccessToken(userFromToken, {
-                            expiresIn: "1d",
-                        }),
-                    },
-                    { new: true }
-                )
-
-                if (updated)
-                    return res.status(200).json({
-                        success: true,
-                        accessToken: updated.accessToken,
-                    })
-            }
-
-            return res.status(401).json({
-                success: false,
-                error: { type: "refreshToken", message: "Incorrect token." },
-            })
-        } catch (error) {
-            console.error(error)
-            return res.status(500).json({
-                success: false,
-                error: { type: "refreshToken", message: outputErrors(error.message) },
-            })
-        }
-    },
-
-    // @desc:   register 
-    // @route:  PUT /changePwd
-    register: async (req, res) => {
-        // req.body contains {username, password, email}
-        const { validate_add_inp } = require("../validation/user")
-        try {
-            if (await validate_add_inp({ ...req.body })) {
-                const newUser = await User.create(await sanitize.user({ ...req.body }, "create"))
-
-                return res.status(201).json({
-                    success: true,
-                    user: newUser,
-                })
-            }
-        } catch (error) {
-            console.error(error)
-            return res.status(500).json({ success: false, message: outputErrors(error) })
-        }
-    },
-
-    // @desc:   Logout by userId
-    // @route:  POST /logout
-    logout: async (req, res) => {
-        if (req.user != null) {
-            try {
-                const updated = await User.findOneAndUpdate(
-                    { _id: req.user.id },
-                    {
-                        accessToken: null,
-                        refreshToken: null,
-                    },
-                    { new: true }
-                )
-
-                // Check given property
-                if (updated) return res.sendStatus(200)
-            } catch (error) {
-                console.error(error)
-                return res.status(500).json({ success: false, message: error.message })
-            }
-        }
-
-        return res.status(403).json({ success: false, message: "No authentication found." })
-    },
+      throw new Error("Failed to logout.")
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))
+      } else {
+        return res.status(500).json(ErrorObject.sendServerError())
+      }
+    }
+  },
 }
