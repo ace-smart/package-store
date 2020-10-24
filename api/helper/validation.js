@@ -64,7 +64,7 @@ module.exports = validation = {
             }
         }
 
-        throw new Error("Can find object with the model.")
+        throw new Error("Can not find object with the model.")
     },
 
     hasSpecialChars: (string = null) => {

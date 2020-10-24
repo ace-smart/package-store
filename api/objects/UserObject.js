@@ -6,10 +6,9 @@ const { isExistent } = require("../helper/validation")
 const TokenError = require("../errors/token")
 const ObjectError = require("../errors/object")
 const ValidationError = require("../errors/validation")
-const connectMongo = require("connect-mongo")
 const MongooseError = require("mongoose").Error
 const USER_ROLES = ["user", "admin"]
-const STATUS_VALUES = ["deactivated", "activated"]
+const STATUS_VALUES = ["deactivated", "activated", "pending", "reset password"]
 
 class UserObject {
   constructor({
@@ -19,17 +18,18 @@ class UserObject {
     password,
     status,
     role,
+    confirmString,
+    createdAt,
     profileId,
-    // accessToken,
-    // refreshToken,
-    // refresh_secret,
   } = {}) {
     this.id = _id
     this.username = username
     this.email = email
     this.password = password
     this.role = role
+    this.confirmString = confirmString
     this.status = status
+    this.createdAt = createdAt
     this.profileId = profileId
   }
 
@@ -66,20 +66,70 @@ class UserObject {
     return this.status
   }
 
+  set setProfileId(profileId) {
+    this.profileId = profileId
+  }
+
+  get getProfileId() {
+    return this.profileId
+  }
+
+  set setConfirmString(confirmString) {
+    this.confirmString = confirmString
+  }
+
+  get getConfirmString() {
+    return this.confirmString
+  }
+
+  // @desc:     Get profileId by Id
+  static async getProfileIdById(userId = null) {
+    if (!userId || !(await isExistent(UserModel, { _id: userId }))) {
+      throw new ObjectError({
+        name: "UserObject",
+        message: "Id is not valid",
+      })
+    }
+
+    try {
+      const user = await UserModel.findOne({ _id: userId }).lean()
+      if (user) {
+        return user.profileId
+      }
+
+      throw new ObjectError({
+        name: "UserObject",
+        message: "Id is not valid",
+      })
+    } catch (error) {
+      if (error instanceof ObjectError) {
+        throw new ObjectError(error)
+      }
+      throw new Error(error)
+    }
+  }
+
   // @desc:     Get user by criteria
   // @return:   UserObject
   static async getOneUserBy(criteria = {}, selectFields = null) {
     try {
       const user = await UserModel.findOne(criteria, selectFields).lean()
-      const userObject = new UserObject({ ...user })
-      // Avoid showing tokens
-      delete userObject.accessToken
-      delete userObject.refreshToken
-      // delete userObject.refresh_secret
+      if (user) {
+        const userObject = new UserObject({ ...user })
+        // Avoid showing tokens
+        delete userObject.accessToken
+        delete userObject.refreshToken
+        // delete userObject.refresh_secret
 
-      return userObject
+        return userObject
+      }
+
+      throw new ObjectError({ name: "UserObject", message: "User does not exist." })
     } catch (error) {
-      if (error instanceof require("mongoose").Error && error.kind === "ObjectId") {
+      if (error instanceof ObjectError) {
+        throw new ObjectError(error)
+      }
+      if (error instanceof MongooseError && error.kind === "ObjectId") {
         throw new Error("Id is not valid.")
       } else {
         throw new Error(error)
@@ -92,43 +142,28 @@ class UserObject {
   static async getUsersBy(criteria = {}, selectFields = null) {
     try {
       const listOfUsers = await UserModel.find(criteria, selectFields).lean()
-      let userObjects = new Array()
-      listOfUsers.forEach((element) => {
-        const object = new UserObject({ ...element })
-        object.clean()
-        // Avoid showing tokens
-        delete object.accessToken
-        delete object.refreshToken
-        // delete object.refresh_secret
+      if (listOfUsers.length > 0) {
+        let userObjects = new Array()
+        listOfUsers.forEach((element) => {
+          const object = new UserObject({ ...element })
+          object.clean()
+          // Avoid showing tokens
+          delete object.accessToken
+          delete object.refreshToken
+          // delete object.refresh_secret
 
-        userObjects.push(object)
-      })
+          userObjects.push(object)
+        })
 
-      return userObjects
-    } catch (error) {
-      throw new Error(error)
-    }
-  }
-
-  // @desc:     Reset pwd by email
-  static async resetPwd(email = null) {
-    if (email == null || ! (await isExistent(UserModel, { email: email }))) {
-      throw new TypeError("Email is null or not existent")
-    }
-
-    try {
-      const user = await this.getOneUserBy({ email: email })
-      if (user) {
-        user.setStatus = "reset password"
-        await user.save()
-        // send email
-        
-        //
-        return true
+        return userObjects
       }
-      return false
+
+      throw new ObjectError({name: 'UserObject', message: 'Users do not exist.'})
     } catch (error) {
-      console.log(error)
+      if (error instanceof ObjectError) {
+        throw new ObjectError(error)
+      }
+
       throw new Error(error)
     }
   }
@@ -154,12 +189,13 @@ class UserObject {
           message: "Must be required.",
         })
       }
+
+      // has errors
+      if (errors.length > 0) {
+        throw new ValidationError(errors)
+      }
     }
 
-    if (errors.length > 0) {
-      // has errors
-      throw new ValidationError(errors)
-    }
     // username   [required]
     if (typeof this.username !== "undefined" && !validator.isEmpty(this.username)) {
       const _username = this.username.toLowerCase()
@@ -262,30 +298,6 @@ class UserObject {
     return userObject
   }
 
-  // @desc:     Update an user
-  // @return:   <Boolean> True
-  // static async update(criteria = {}, info = {}) {
-  //   let userObject = new UserObject({ ...info })
-
-  //   if (JSON.stringify(criteria) !== '{}' && criteria._id == null){
-  //     throw new Error("Can not update with undefined or null of criteria._id ")
-  //   }
-
-  //   try {
-  //     const validation = await userObject.validate("update", criteria._id)
-  //     if (validation instanceof UserObject) {
-  //       await UserModel.updateOne(criteria, info)
-  //       return true
-  //     }
-  //   } catch (error) {
-  //     if (error instanceof ValidationError) {
-  //       throw new ValidationError(error.validation)
-  //     } else {
-  //       throw new Error(error)
-  //     }
-  //   }
-  // }
-
   // @desc:     Create a user
   // @fields:   [username, email, password, role, status]
   // @return:   UserObject
@@ -303,9 +315,10 @@ class UserObject {
       }
 
       userObject.password = await bcrypt.hash(password, await bcrypt.genSalt())
+      userObject.status = "pending"
       userObject = userObject.clean() // set [role, status] to default if not provided.
-      await UserModel.create(userObject)
-      return await this.getOneUserBy({ username: userObject.username })
+      const newUser = new UserObject(await UserModel.create(userObject))
+      return newUser
     } catch (error) {
       console.log(error)
       if (error instanceof ValidationError) {
@@ -327,10 +340,9 @@ class UserObject {
     try {
       const validation = await userObject.validate("update", this.id)
       if (validation instanceof UserObject) {
-        await UserModel.updateOne({ _id: this.id }, info)
-        return true
+        const updatedUser = await UserModel.findOneAndUpdate({ _id: this.id }, info, { new: true })
+        return updatedUser
       }
-      return false
     } catch (error) {
       if (error instanceof ValidationError) {
         throw new ValidationError(error.validation)
@@ -428,7 +440,14 @@ class UserObject {
     const userToSave = this.clean()
     if (this.id != null) {
       try {
-        await UserModel.updateOne({ _id: userToSave.id }, { ...userToSave }).lean()
+        const updatedUser = new UserObject(
+          await UserModel.findOneAndUpdate(
+            { _id: userToSave.id },
+            { ...userToSave }, 
+            {new: true}).lean() 
+          )
+
+        return updatedUser
       } catch (error) {
         throw new Error(error)
       }

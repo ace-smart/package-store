@@ -14,7 +14,7 @@ const restockRouter = require('./admin/restock.route')
 
 router.use(authRouter)
 router.use(_ensureAccessToken)
-router.use('/', profileRouter)
+router.use('/profile', profileRouter)
 // Client routes
 // Admin routes
 // router.use('/admin/*', _ensureAccessToken, _ensureAdminRole)

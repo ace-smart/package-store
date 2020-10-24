@@ -1,22 +1,53 @@
-const express = require('express')
+const express = require("express")
 const router = express.Router()
-const { auth, renewAccessToken, register, logout } = require('../controllers/auth.controller')
-const { _ensureAccessToken } = require('../helper/auth')
+const {
+  auth,
+  renewAccessToken,
+  register,
+  confirmEmail,
+  resendConfirmEmail,
+  sendEmailForResetPWd,
+  resetPassword,
+  updateNewPassword,
+  resetToken,
+} = require("../controllers/auth.controller")
+const { _ensureAccessToken } = require("../helper/auth")
 
 // @desc    Generate tokens
 // @route   POST /auth
-router.post('/auth', auth)
+router.post("/auth", auth)
 
 // @desc    Renew access token
 // @route   GET /token
-router.get('/token', renewAccessToken)
+router.get("/token", renewAccessToken)
+
+// @desc    Remove tokens
+// @route   POST /token/reset
+router.post("/token/reset", _ensureAccessToken, resetToken)
 
 // @desc    Register
 // @route   POST /register
-router.post('/register', register)
+router.post("/register", register)
 
-// @desc    Remove tokens
-// @route   POST /logout
-router.post('/logout', _ensureAccessToken, logout)
+// @desc    Email confirmation
+// @route   GET /confirm-email
+router.get("/confirm-email", confirmEmail)
+
+// @desc    Email confirmation
+// @route   GET /resend-confirm-email
+router.post("/resend-confirm-email", resendConfirmEmail)
+
+// @desc    Send email to reset password
+// @route   POST /reset-password
+router.post("/reset-password", sendEmailForResetPWd)
+
+// @desc    Reset password
+// @route   POST /reset-password
+router.get("/reset-password", resetPassword)
+
+// @desc    Update new password
+// @route   PUT /reset-password
+router.put("/reset-password", updateNewPassword)
+
 
 module.exports = router

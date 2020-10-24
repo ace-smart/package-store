@@ -44,7 +44,6 @@ module.exports = authHelper = {
         })
       }
     } catch (error) {
-      console.log(error)
       if (error instanceof TokenError) {
         return res.status(401).json(ErrorObject.sendTokenError(error.data))
       } else {

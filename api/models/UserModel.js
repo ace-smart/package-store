@@ -38,6 +38,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: require('crypto').randomBytes(12).toString('hex')
   },
+  confirmString: {
+    type: String,
+    default: require('crypto').randomBytes(64).toString('hex')
+  },
   status: {
     type: String,
     default: 'deactivated',
