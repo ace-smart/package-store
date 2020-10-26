@@ -335,12 +335,12 @@ class UserObject {
     if (this.id == null) {
       throw new TypeError("Can not update with undefined or null Id.")
     }
-
+    
     let userObject = new UserObject({ ...info })
     try {
       const validation = await userObject.validate("update", this.id)
       if (validation instanceof UserObject) {
-        const updatedUser = await UserModel.findOneAndUpdate({ _id: this.id }, info, { new: true })
+        const updatedUser = new UserObject(await UserModel.findOneAndUpdate({ _id: this.id }, {...info}, { new: true }))
         return updatedUser
       }
     } catch (error) {

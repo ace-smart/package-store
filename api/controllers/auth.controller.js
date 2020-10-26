@@ -183,10 +183,10 @@ module.exports = {
         const isUpdated = await user.update({ status: "activated", confirmString: null })
         if (isUpdated) {
           return res.sendStatus(204)
-        } else {
-          throw new Error("Failed to send confirm email. Please request another confirm email.")
         }
       }
+      
+      throw new Error("Failed to send confirm email. Please request another confirm email.")
     } catch (error) {
       if (error instanceof ObjectError) {
         return res.status(404).json(error.message)
@@ -344,7 +344,6 @@ module.exports = {
       })
 
       if (user && user.getStatus === "reset password") {
-        console.log(req.body)
         const isValidPassword = await ResetPwdObject.validateNewPassword({...req.body})
         if (isValidPassword) {
           const bcrypt = require('bcrypt')

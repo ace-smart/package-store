@@ -12,26 +12,6 @@ connectDB()
 // Middleware
 app.use(bodyParser.json({limit: '10mb',  extended: true}))
 
-app.use((req, res, next) => {
-    const multer = require("multer")
-    const upload = require("./config/multer").fields([
-        { name: 'avatar', maxCount: 1 },
-    ])
-    upload(req, res, (err) => {
-        if (err instanceof multer.MulterError) {
-            return res.status(500).json({
-                success: false,
-                error: {
-                    message: err.message,
-                    field: err.field,
-                },
-            })
-        } else if (err) return res.status(500).json({ success: false, error: err })
-        
-        return next()
-    })
-})
-
 // Api routes
 app.use("/api", require("./api/routes/api"))
 

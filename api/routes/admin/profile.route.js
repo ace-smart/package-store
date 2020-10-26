@@ -1,18 +1,18 @@
 const express = require('express')
 const router = express.Router()
-const { getProfile, updateProfile, changePwd } = require('../../controllers/profile.controller')
-const {_ensureAccessToken} = require('../../helper/auth')
+const { getProfile, updateProfile, changePasswordByUserId } = require('../../controllers/profile.controller')
+const {_getAvatar } = require('../../helper/file')
 
 // @desc:   get profile by accessTK
 // @route:  GET /profile
-router.get('/profile', _ensureAccessToken, getProfile)
+router.get('/', getProfile)
 
 // @desc:   update profile by accessTK
 // @route:  PUT /profile
-router.put('/profile', _ensureAccessToken, updateProfile)
+router.put('/', _getAvatar, updateProfile)
 
 // @desc:   change password by accessTK
-// @route:  PUT /changePwd
-router.put('/changePwd', _ensureAccessToken, changePwd)
+// @route:  PUT /change-password
+router.put('/change-password', changePasswordByUserId)
 
 module.exports = router
