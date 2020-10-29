@@ -45,19 +45,20 @@ module.exports = {
     try {
       // get profileId by accessToken
       const profileId = await UserObject.getProfileIdById(req.user.id)
-      console.log(profileId == null)
       const profileObject = new ProfileObject({...req.body})
       if (req.file != null) {
         profileObject.setAvatar = req.file.buffer.toString('base64')
       }
       if (profileId == null) {
+        // create as the 1st time
         const createdProfile = await ProfileObject.create(req.user.id, profileObject)
         if (createdProfile) {
           return res.sendStatus(204)
         }
       } else {
+        // update
         profileObject.id = profileId
-        const updatedProfile = await profileObject.save()
+        const updatedProfile = await profileObject.update(req.user.id, profileObject)
         if (updatedProfile) {
           return res.sendStatus(204)
         }

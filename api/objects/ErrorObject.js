@@ -1,46 +1,50 @@
 class ErrorObject {
-  constructor({ statusCode, data } = {}) {
+  constructor({ statusCode, error } = {}) {
     if (statusCode != null && statusCode < 400) {
-      throw new Error("[ErrorObject] statusCode must be greater than 400")
+      throw new TypeError("[ErrorObject] statusCode must be greater than 400")
     }
     this.statusCode = statusCode
-    // this.message = message
-    this.data = data
+    this.error = error
   }
 
-  // get getErrorObject() {
-  //   return this
-  // }
-
-  // static isErrorObject(object) {
-  //   if (object instanceof ErrorObject) {
-  //     return true
-  //   }
-
-  //   return false
-  // }
-
-  static sendServerError(error) {
-    const msg = (error != null) ? error : {message: "An error occurred from the server."}
+  static sendServerError() {
     return new ErrorObject({
       statusCode: 500,
-      data: {
-        error:  msg
+      error: {
+        name: 'ServerError',
+        message:  "An error has occurred from the server!"
       }
     })
   }
 
-  static sendInvalidInputError(errors) {
+  static sendInvalidationError({name, message, invalidation}) {
     return new ErrorObject({
       statusCode: 400,
-      data: {errors: errors}
+      error: {name, message, invalidation}
+    })
+  }
+  
+  static sendNotFoundError({name, message}) {
+    return new ErrorObject({
+      statusCode: 404,
+      error: {name, message}
     })
   }
 
-  static sendTokenError(error) {
+  static sendTokenError({name, message}) {
     return new ErrorObject({
       statusCode: 401,
-      data: {error: error},
+      error: {name, message}
+    })
+  }
+
+  static sendForbiddenError({name, message}) {
+    return new ErrorObject({
+      statusCode: 403,
+      error: {
+        name: "ForbiddenError", 
+        message: "Not allowed to access."
+      }
     })
   }
 }

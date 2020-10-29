@@ -1,11 +1,10 @@
 const validator = require("validator")
 const ProfileModel = require("../models/ProfileModel")
 const ValidationError = require("../errors/validation")
-const MongooseError = require("mongoose").Error
-const { isExistent } = require("../helper/validation")
 const {toFormatDateStr} = require('../helper/format')
 const UserObject = require("./UserObject")
 const ObjectError = require("../errors/object")
+const NotFoundError = require("../errors/not_found")
 const PROFILE_GENDER_VALUES = ["male", "female", "lgbt"]
 const STATUS_VALUES = ["deactivated", "activated"]
 
@@ -33,22 +32,18 @@ class ProfileObject {
   // Existed:     => return ProfileObject
   // Not Existed  => return null
   static async getProfile(profileId = null) {
-    if (profileId != null) {
       try {
-        const profile = await ProfileModel.findOne({ _id: profileId }).lean()
-        if (profile) {
-          return new ProfileObject({ ...profile })
+        if (profileId != null) {
+          const profile = await ProfileModel.findOne({ _id: profileId }).lean()
+          if (profile) {
+            return new ProfileObject({ ...profile })
+          }
         }
+        throw new NotFoundError("No profile found.")
       } catch (error) {
-        if (error instanceof MongooseError && error.kind === "ObjectId") {
-          throw new Error("Id is not valid.")
-        } else {
-          throw new Error(error)
-        }
+        throw error
       }
-    }
 
-    return null
   }
 
   validate(type = "create") {
@@ -194,21 +189,35 @@ class ProfileObject {
     }
   }
 
+  // @desc:     Remove undefined props and lowercase fields.
+  clean() {
+    let profileObject = this
+    const lowerCaseFields = ["gender", "status"]
+    for (const [key, value] of Object.entries(profileObject)) {
+      if (value != null) {
+        const isFound = lowerCaseFields.find((field) => key === field)
+        if (isFound) {
+          profileObject[key] = value.toString().toLowerCase()
+        }
+      }
+
+      if (typeof value === "undefined") {
+        delete profileObject[key]
+      }
+    }
+
+    return profileObject
+  }
+
   static async create(userId = null, profileData = {}) {
     if (!userId) {
       throw new TypeError('userId can not be undefined or null')
     }
     
-
     try {
-      if (!(profileData instanceof ProfileObject)) {
-        const profileObject = new ProfileObject({...profileData})
-        profileObject.validate('create')
-      } else {
-        profileData.validate('create')
-      }
-
-      const profile = await ProfileModel.create(profileData)
+      profileData = profileData.validate('create')
+      profileData = profileData.clean()
+      const profile = await ProfileModel.create({...profileData})
       const userObject = new UserObject({_id: userId})
       userObject.setProfileId = profile._id
       const isUpdated = await userObject.save()
@@ -218,39 +227,64 @@ class ProfileObject {
 
       throw new Error("Failed to create profile.")
     } catch (error) {
-      throw new Error(error)
+      throw error
+    }
+  }
+
+  async update(userId = null, profileData = {}) {
+    if (!userId) {
+      throw new TypeError('userId can not be undefined or null')
+    }
+    
+    try {
+      profileData = profileData.validate('create')
+      profileData = profileData.clean()
+      const profile = await ProfileModel.findOneAndUpdate({_id: this.id}, {...profileData}, {new: true})
+      const userObject = new UserObject({_id: userId})
+      userObject.setProfileId = profile._id
+      const isUpdated = await userObject.save()
+      if (isUpdated) {
+        return new ProfileObject({...profile})
+      }
+
+      throw new Error("Failed to update profile.")
+    } catch (error) {
+      throw error
     }
   }
 
   async save() {
+    const profileToSave = this.clean()
     if (this.id == null) {
       throw new ObjectError({
-        name: 'ProfileObject',
-        message: "Id is not valid",
-        instance: this
+        objectName: 'ProfileObject',
+        errorProperty: 'Id',
+        message: "Id is not valid"
       })
     }
 
     try {
-      return await ProfileModel.findOneAndUpdate({ _id: this.id }, this)
+      const profileObject = await ProfileModel.findOneAndUpdate({ _id: this.id }, {...profileToSave}, {new: true})
+      return profileObject
     } catch (error) {
-      throw new Error(error)
+      throw error
     }
   }
 
   async remove() {
     if (this.id == null) {
       throw new ObjectError({
-        name: 'ProfileObject',
-        message: "Id is not valid",
-        instance: this
+        objectName: 'ProfileObject',
+        errorProperty: 'Id',
+        message: "Id is not valid"
       })
     }
 
     try {
-      return await ProfileModel.findOneAndDelete({_id: this.id})
+      const profileObject = await ProfileModel.findOneAndDelete({_id: this.id})
+      return profileObject
     } catch (error) {
-      throw new Error(error)
+      throw error
     }
   }
 }

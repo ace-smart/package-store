@@ -1,3 +1,4 @@
+const NotFoundError = require('../errors/not_found')
 const {isExistent} = require('../helper/validation')
 const UserModel = require('../models/UserModel')
 
@@ -27,14 +28,10 @@ class ConfirmEmailObject {
       if (isExistentObject) {
         return this
       }
-
-      throw new TypeError("email or confirmString is not valid.")
+      // not existent
+      throw new NotFoundError("The link does not exist. Failed to activate.")
     } catch (error) {
-      if (error instanceof TypeError) {
-        throw new TypeError (error)
-      } else {
-        throw new Error(error)
-      }
+      throw error
     }
   }
 }

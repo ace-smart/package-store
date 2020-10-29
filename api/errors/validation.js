@@ -23,7 +23,7 @@ class ValidationError extends Error {
     */
     this.name = "ValidationError"
     this.message = "Validation failed."
-    this.validation = errors
+    this.invalidation = errors
   }
 }
 

@@ -25,13 +25,27 @@ class RegisterObject {
   async validate() {
     let errors = new Array()
     
-    // Validate [password, confirm password] -- [required]
+    // [password] -- [required]
     if (typeof this.password === "undefined" || validator.isEmpty(this.password)) {
       errors.push({
         field: "password",
         message: "Must be required.",
       })
-    } else {
+    } 
+    // confirm_password -- [required]
+    if (typeof this.confirm_password === "undefined" ||
+      validator.isEmpty(this.confirm_password)) {
+      errors.push({
+        field: "confirm_password",
+        message: "Must be required.",
+      })
+    } 
+    // throw empty errors
+    if (errors.length > 0) {
+      throw new ValidationError(errors)
+    }
+
+    if (this.password != null && !validator.isEmpty(this.password)) {
       if (!validator.isLength(this.password, { min: 4, max: 255 })) {
         errors.push({
           field: "password",
@@ -44,14 +58,7 @@ class RegisterObject {
       }
     }
 
-    // confirm_password -- [required]
-    if (typeof this.confirm_password === "undefined" ||
-      validator.isEmpty(this.confirm_password)) {
-      errors.push({
-        field: "confirm_password",
-        message: "Must be required.",
-      })
-    } else {
+    if (this.confirm_password != null && !validator.isEmpty(this.confirm_password)) {
       if (!validator.equals(this.confirm_password, this.password)) {
         errors.push({
           field: "confirm_password",
@@ -70,11 +77,14 @@ class RegisterObject {
 
     // Validate the fields of UserObject
     try {
-      const userObject = new UserObject({...this})
-      await userObject.validate() 
-      return this
+      const isValidated = (new UserObject({...this})).validate() 
+      if (isValidated) {
+        return this
+      }
+
+      throw new Error("Validation failed.")
     } catch (error) {
-      throw new ValidationError(error)
+      throw error
     }
     
   }

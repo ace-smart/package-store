@@ -10,6 +10,7 @@ const mailer = require("../helper/mailer")
 const registerTemplate = require("../../email_templates/register")
 const ObjectError = require("../errors/object")
 const ResetPwdObject = require("../objects/ResetPwdObject")
+const ErrorHandler = require("../helper/errorHandler")
 
 module.exports = {
   // @desc    Authenticate
@@ -25,16 +26,7 @@ module.exports = {
 
       throw new Error("Authentication failed.")
     } catch (error) {
-      if (error instanceof TokenError) {
-        // Failed to initialize tokens
-        return res.status(401).json(ErrorObject.sendTokenError(error.data))
-      } else if (error instanceof ValidationError) {
-        // Validation failed
-        return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))
-      } else {
-        // Mongoose or other errors
-        return res.status(500).json(ErrorObject.sendServerError())
-      }
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -63,16 +55,15 @@ module.exports = {
       const token = new TokenObject()
       token.setPayload = { ...userFromRT }
       userFromRT.setAccessToken = token.generateToken("access")
-      await userFromRT.save()
-      return res.status(200).json({
-        accessToken: userFromRT.getAccessToken,
-      })
-    } catch (error) {
-      if (error instanceof TokenError) {
-        return res.status(401).json(ErrorObject.sendTokenError(error.data))
-      } else {
-        return res.status(500).json(ErrorObject.sendServerError())
+      const isSaved = await userFromRT.save()
+      if (isSaved) {
+        return res.status(200).json({
+          accessToken: userFromRT.getAccessToken,
+        })
       }
+      throw new Error("Failed to renew token.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -110,11 +101,7 @@ module.exports = {
         error: { message: "Failed to send confirm email. Please request to send a new one." },
       })
     } catch (error) {
-      if (error instanceof ValidationError) {
-        return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))
-      } else {
-        return res.status(500).json(ErrorObject.sendServerError())
-      }
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -147,7 +134,10 @@ module.exports = {
             },
           })
         }
-      } else {
+      }
+      
+      // already requested
+      if (user.getStatus === "activated") {
         return res
           .status(400)
           .json({
@@ -156,15 +146,22 @@ module.exports = {
             },
           })
       }
-    } catch (error) {
-      if (error instanceof ValidationError) {
-        return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))
-      } else {
-        return res.status(500).json(ErrorObject.sendServerError())
+
+      // deactivated
+      if (user.getStatus === "deactivated") {
+        return res.status(400).json({
+          error: {
+            email: req.body.email,
+            message: "Your account is not activated. The request is not allowed.",
+          },
+        })
       }
+
+      throw new Error("Failed to resend confirm email.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
     }
   },
-
 
   // @desc    Email confirmation
   // @route   GET /confirm-email?email=email@exmaple.com&confirmString=12345qwerty
@@ -188,16 +185,13 @@ module.exports = {
       
       throw new Error("Failed to send confirm email. Please request another confirm email.")
     } catch (error) {
-      if (error instanceof ObjectError) {
-        return res.status(404).json(error.message)
-      }
-      if (error instanceof TypeError) {
-        return res
-          .status(404)
-          .json({ error: { message: "The link does not exist. Failed to activate." } })
-      }
+      // if (error instanceof TypeError) {
+      //   return res
+      //     .status(404)
+      //     .json({ error: { message: "The link does not exist. Failed to activate." } })
+      // }
 
-      return res.status(500).json(ErrorObject.sendServerError())
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -269,19 +263,7 @@ module.exports = {
 
       throw new Error("Failed to send reset password email.")
     } catch (error) {
-      if (error instanceof ObjectError) {
-        return res.status(404).json(error.message)
-      }
-      if (error instanceof TypeError) {
-        return res
-          .status(404)
-          .json({ error: { message: "The link does not exist. Failed to activate." } })
-      }
-      if (error instanceof ValidationError) {
-        return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))
-      }
-
-      return res.status(500).json(ErrorObject.sendServerError())
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -304,22 +286,13 @@ module.exports = {
         if (isUpdated) {
           return res.sendStatus(204)
         }
-      } else if (user.getStatus === 'reset password') {
+      } else if (user && user.getStatus === 'reset password') {
         return res.status(400).json({error: {message: 'The account has already reset password. Please set a new password.'}})
       }
 
       throw new Error("Failed to reset password.")
     } catch (error) {
-      if (error instanceof ObjectError) {
-        return res.status(404).json(error.message)
-      }
-      if (error instanceof TypeError) {
-        return res
-          .status(404)
-          .json({ error: { message: "The link does not exist. Failed to activate." } })
-      }
-
-      return res.status(500).json(ErrorObject.sendServerError())
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -362,19 +335,7 @@ module.exports = {
 
       throw new Error("Failed to set new password.")
     } catch (error) {
-      if (error instanceof ValidationError){
-        return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))
-      }
-      if (error instanceof ObjectError) {
-        return res.status(404).json(error.message)
-      }
-      if (error instanceof TypeError) {
-        return res
-          .status(404)
-          .json({ error: { message: "The link does not exist. Failed to activate." } })
-      }
-
-      return res.status(500).json(ErrorObject.sendServerError())
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -388,13 +349,9 @@ module.exports = {
         return res.sendStatus(204)
       }
 
-      return res.status(400).json({ error: { message: "Failed to reset token." } })
+      throw new Error("Failed to reset token.")
     } catch (error) {
-      if (error instanceof ValidationError) {
-        return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))
-      } else {
-        return res.status(500).json(ErrorObject.sendServerError())
-      }
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 }

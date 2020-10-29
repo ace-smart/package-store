@@ -75,7 +75,9 @@ module.exports = {
       validation.setRole = (req.body.role != null) ? req.body.role : undefined
       validation.setStatus = (req.body.status != null) ? req.body.status : undefined
       const user = await UserObject.create({...validation})
-      return res.status(200).json({ user: user })
+      if (user instanceof UserObject) {
+        return res.sendStatus(201)
+      }
     } catch (error) {
       if (error instanceof ValidationError) {
         return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))

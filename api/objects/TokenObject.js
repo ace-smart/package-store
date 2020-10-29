@@ -27,7 +27,7 @@ class TokenObject {
         role: role,
       }
     } else {
-      throw new PayloadError({ id, username, status, role }, "Payload can not have null property.")
+      throw new PayloadError({ id, username, status, role })
     }
   }
 
@@ -76,7 +76,7 @@ class TokenObject {
       }
       
     } else {
-      throw new TypeError(`Type ${type} is not valid.`)
+      throw new PayloadError({...this.payload})
     }
   }
 

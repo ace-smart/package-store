@@ -92,11 +92,7 @@ class ChangePwdObject {
       }
       throw new Error("The user does not exist.")
     } catch (error) {
-      if (error instanceof ValidationError) {
-        throw new ValidationError(error.validation)
-      } else {
-        throw new Error(error)
-      }
+      throw error
     }
   }
 }

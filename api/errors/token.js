@@ -1,5 +1,7 @@
+const { token } = require("morgan")
+
 class TokenError extends Error {
-  constructor (tokenError, ...params) {
+  constructor ({name, message, expiredAt}, ...params) {
     super(...params)
 
     if(Error.captureStackTrace) {
@@ -7,19 +9,22 @@ class TokenError extends Error {
     }
 
     // === EXAMPLE ===
-    //  data: {
+    //  TokenError: {
     //    name: 'TokenExpiredError',
     //    message: 'jwt expired',
-    //    ...
+    //    expiredAt: '11/1/2020'
     //  }
     //
     // Names of token's types:
-    //  -- MissingTokenError
+    //  -- MissingTokenError 
     //  -- InvalidTokenError
     //  -- (from JWT) [TokenExpiredError, JsonWebTokenError, NotBeforeError]
 
-    this.name = 'TokenError'
-    this.data = tokenError
+    this.name = (name == null) ? 'TokenError' : name
+    this.message = message
+    if (expiredAt != null) {
+      this.expiredAt = expiredAt
+    }
   }
 }
 

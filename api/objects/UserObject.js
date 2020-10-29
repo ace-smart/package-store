@@ -6,7 +6,7 @@ const { isExistent } = require("../helper/validation")
 const TokenError = require("../errors/token")
 const ObjectError = require("../errors/object")
 const ValidationError = require("../errors/validation")
-const MongooseError = require("mongoose").Error
+const NotFoundError = require("../errors/not_found")
 const USER_ROLES = ["user", "admin"]
 const STATUS_VALUES = ["deactivated", "activated", "pending", "reset password"]
 
@@ -16,6 +16,7 @@ class UserObject {
     username,
     email,
     password,
+    addressId,
     status,
     role,
     confirmString,
@@ -26,6 +27,7 @@ class UserObject {
     this.username = username
     this.email = email
     this.password = password
+    this.addressId = addressId
     this.role = role
     this.confirmString = confirmString
     this.status = status
@@ -82,11 +84,33 @@ class UserObject {
     return this.confirmString
   }
 
+  set setAddress(addressId = null){
+    console.log(this.addressId)
+    // create array
+    if (this.addressId == null) {
+      this.addressId = new Array()
+      this.addressId.push(addressId)
+    }
+    // push 
+    if (this.addressId instanceof Array) {
+      this.addressId.push(addressId)
+    }
+    console.log(this.addressId)
+  }
+
+  get getAddress() {
+    return this.addressId
+  }
+
   // @desc:     Get profileId by Id
   static async getProfileIdById(userId = null) {
-    if (!userId || !(await isExistent(UserModel, { _id: userId }))) {
+    if (!userId) {
+      throw new TypeError("userId can not be null or undefined.")
+    }
+    if (!(await isExistent(UserModel, { _id: userId }))) {
       throw new ObjectError({
-        name: "UserObject",
+        objectName: "UserObject",
+        errorProperty: 'Id',
         message: "Id is not valid",
       })
     }
@@ -97,15 +121,34 @@ class UserObject {
         return user.profileId
       }
 
+      throw new NotFoundError("No user found.")
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // @desc:     Get addresses by Id
+  static async getAddressById(userId = null) {
+    if (!userId) {
+      throw new TypeError("userId can not be null or undefined.")
+    }
+    if (!(await isExistent(UserModel, { _id: userId }))) {
       throw new ObjectError({
-        name: "UserObject",
+        objectName: "UserObject",
+        errorProperty: 'Id',
         message: "Id is not valid",
       })
-    } catch (error) {
-      if (error instanceof ObjectError) {
-        throw new ObjectError(error)
+    }
+
+    try {
+      const user = await UserModel.findOne({ _id: userId }).lean()
+      if (user) {
+        return user.addressId
       }
-      throw new Error(error)
+
+      throw new NotFoundError("No user found.")
+    } catch (error) {
+      throw error
     }
   }
 
@@ -124,16 +167,9 @@ class UserObject {
         return userObject
       }
 
-      throw new ObjectError({ name: "UserObject", message: "User does not exist." })
+      throw new NotFoundError("No user found.")
     } catch (error) {
-      if (error instanceof ObjectError) {
-        throw new ObjectError(error)
-      }
-      if (error instanceof MongooseError && error.kind === "ObjectId") {
-        throw new Error("Id is not valid.")
-      } else {
-        throw new Error(error)
-      }
+      throw error
     }
   }
 
@@ -158,13 +194,9 @@ class UserObject {
         return userObjects
       }
 
-      throw new ObjectError({name: 'UserObject', message: 'Users do not exist.'})
+      throw new NotFoundError("No user found.")
     } catch (error) {
-      if (error instanceof ObjectError) {
-        throw new ObjectError(error)
-      }
-
-      throw new Error(error)
+      throw new error
     }
   }
 
@@ -284,7 +316,7 @@ class UserObject {
     const lowerCaseFields = ["username", "email", "role", "status"]
     for (const [key, value] of Object.entries(userObject)) {
       if (value != null) {
-        const isFound = lowerCaseFields.find((field, value) => key === field)
+        const isFound = lowerCaseFields.find((field) => key === field)
         if (isFound) {
           userObject[key] = value.toString().toLowerCase()
         }
@@ -315,17 +347,12 @@ class UserObject {
       }
 
       userObject.password = await bcrypt.hash(password, await bcrypt.genSalt())
-      userObject.status = "pending"
+      userObject.setStatus = "pending"
       userObject = userObject.clean() // set [role, status] to default if not provided.
       const newUser = new UserObject(await UserModel.create(userObject))
       return newUser
     } catch (error) {
-      console.log(error)
-      if (error instanceof ValidationError) {
-        throw new ValidationError(error.validation)
-      } else {
-        throw new Error(error)
-      }
+      throw error
     }
   }
 
@@ -333,22 +360,24 @@ class UserObject {
   // @return:   <Boolean> True
   async update(info = {}) {
     if (this.id == null) {
-      throw new TypeError("Can not update with undefined or null Id.")
+      throw new ObjectError({
+        objectName: 'UserObject',
+        errorProperty: 'Id',
+        message: "Id is not valid"
+      })
     }
     
-    let userObject = new UserObject({ ...info })
     try {
+      let userObject = new UserObject({ ...info })
+      userObject = userObject.clean()
       const validation = await userObject.validate("update", this.id)
       if (validation instanceof UserObject) {
-        const updatedUser = new UserObject(await UserModel.findOneAndUpdate({ _id: this.id }, {...info}, { new: true }))
+        const updatedUser = new UserObject(await UserModel.findOneAndUpdate({ _id: this.id }, {...userObject}, { new: true }))
         return updatedUser
       }
+      throw new Error("Failed to update.")
     } catch (error) {
-      if (error instanceof ValidationError) {
-        throw new ValidationError(error.validation)
-      } else {
-        throw new Error(error)
-      }
+      throw error
     }
   }
 
@@ -374,6 +403,10 @@ class UserObject {
       condition = { refreshToken: token }
     }
 
+    if (condition == null) {
+      throw new TypeError("Can not get data with unknown type")
+    }
+
     if (condition != null && token != null) {
       try {
         const user = await UserModel.findOne({ ...condition }).lean()
@@ -384,20 +417,17 @@ class UserObject {
           userObject.setRefreshToken = user.refreshToken
           return userObject
         }
-
-        throw new TokenError(token)
+        // No user found => token is not valid
+        throw new NotFoundError("No user found.")
       } catch (error) {
-        if (error instanceof TokenError) {
+        if (error instanceof NotFoundError) {
           throw new TokenError({
             name: "InvalidTokenError",
             message: "Token is not valid.",
           })
-        } else {
-          throw new Error(error)
         }
+        throw error
       }
-    } else {
-      throw new TypeError("Can not get data with undefined or null of either type or token")
     }
   }
 
@@ -408,7 +438,7 @@ class UserObject {
     const token = new TokenObject()
     try {
       token.setPayload = { ...this }
-
+      
       if (this.refreshToken == null) {
         this.refreshToken = token.generateToken("refresh", this.refresh_secret)
       }
@@ -421,14 +451,11 @@ class UserObject {
       }
     } catch (error) {
       if (error instanceof TokenError) {
-        // expired
-        if (error.data.name === "TokenExpiredError") {
+        if (error.name === "TokenExpiredError") {
           this.accessToken = token.generateToken("access")
-        } else {
-          throw new TokenError(error.data)
         }
       } else {
-        throw new Error(error)
+        throw error
       }
     }
 
@@ -438,45 +465,47 @@ class UserObject {
   // @return:   void
   async save() {
     const userToSave = this.clean()
-    if (this.id != null) {
       try {
-        const updatedUser = new UserObject(
-          await UserModel.findOneAndUpdate(
-            { _id: userToSave.id },
-            { ...userToSave }, 
-            {new: true}).lean() 
+        if (this.id != null) {
+          const updatedUser = new UserObject(
+            await UserModel.findOneAndUpdate(
+              { _id: userToSave.id },
+              { ...userToSave },
+              { new: true }
+            ).lean()
           )
 
-        return updatedUser
+          return updatedUser
+        }
+
+        throw new ObjectError({
+          objectName: "UserObject",
+          errorProperty: 'Id',
+          message: "Can not save object with undefined or null id."
+        })
       } catch (error) {
-        throw new Error(error)
+        throw error
       }
-    } else {
-      throw new ObjectError({
-        name: "UserObject",
-        message: "Can not save object with undefined or null id.",
-        instance: userToSave,
-      })
-    }
   }
 
   // @return:   void
   async remove() {
     const userToRemove = this.clean()
-    if (this.id != null) {
       try {
-        await UserModel.findOneAndDelete({ _id: userToRemove.id })
+        if (this.id != null) {
+          const deletedUser = new UserObject(await UserModel.findOneAndDelete({ _id: userToRemove.id }))
+          return deletedUser
+        }
+
+        throw new ObjectError({
+          name: "UserObject",
+          errorProperty: "Id",
+          message: "Can not delete object with undefined or null id.",
+        })
       } catch (error) {
-        throw new Error(error)
+        throw error
       }
-    } else {
-      throw new ObjectError({
-        name: "UserObject",
-        message: "Can not delete object with undefined or null id.",
-        instance: userToRemove,
-      })
     }
-  }
 }
 
 module.exports = UserObject

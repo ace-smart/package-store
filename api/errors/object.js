@@ -1,5 +1,5 @@
 class ObjectError extends Error {
-  constructor(object, ...params){
+  constructor({objectName, errorProperty, message}, ...params){
     super(...params)
 
     if (Error.captureStackTrace) {
@@ -7,15 +7,14 @@ class ObjectError extends Error {
     }
 
     // ---- EXAMPLE ----
-    // object: {
-    //  name: 'UserObject',
-    //  message: 'Can not save with undefined or null id',
-    //  instance: UserObject {username: 'abcd', email: 'abcd@mail.com' }
+    // UserObject: {
+    //  objectName: 'UserObject',
+    //  errorProperty: 'Id',
+    //  message: 'UserObject.Id is not valid.',
     // }
     this.name = 'ObjectError'
-    this.message = `${object.name} is not valid.`
-    this.description = object.message
-    this.object = object
+    this.message = `${objectName}.${errorProperty} is not valid.`
+    this.description = message
   }
 
 }

@@ -13,21 +13,17 @@ class LoginObject {
   // Valid: => return UserObject
   async authenticate(role = null) {
     let errors = new Array()
-    if (this.username == null || this.password == null) {
-      if (this.username == null) {
-        errors.push({
-          field: "username",
-          message: "Username can not be empty",
-          value: this.username,
-        })
-      }
-      if (this.password == null) {
-        errors.push({
-          field: "password",
-          message: "Password can not be empty",
-          value: this.password,
-        })
-      }
+    if (this.username == null) {
+      errors.push({
+        field: "username",
+        message: "Username can not be empty"
+      })
+    }
+    if (this.password == null) {
+      errors.push({
+        field: "password",
+        message: "Password can not be empty"
+      })
     }
 
     if (errors.length > 0) {
@@ -78,11 +74,7 @@ class LoginObject {
         throw new ValidationError(errors)
       }
     } catch (error) {
-      if (error instanceof ValidationError){
-        throw new ValidationError(error.validation)
-      } else {
-        throw new Error(error)  
-      }
+      throw error
     }
   }
 }

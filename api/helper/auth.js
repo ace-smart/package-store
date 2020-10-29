@@ -4,6 +4,7 @@ const ErrorObject = require("../objects/ErrorObject")
 const TokenObject = require("../objects/TokenObject")
 const UserObject = require("../objects/UserObject")
 const TokenError = require("../errors/token")
+const ErrorHandler = require('../helper/errorHandler')
 
 module.exports = authHelper = {
   //@desc:    Middleware for checking access token
@@ -15,7 +16,7 @@ module.exports = authHelper = {
       if (accessTokenHeader == null) {
         throw new TokenError({
           name: "MissingTokenError",
-          message: "Missing token.",
+          message: "Missing token."
         })
       } else {
         // ["Bearer", <tokenString>]
@@ -24,7 +25,7 @@ module.exports = authHelper = {
         if (BEARER !== "Bearer") {
           throw new TokenError({
             name: "InvalidTokenError",
-            message: "The token must be a Bearer token.",
+            message: "The token must be a Bearer token."
           })
         }
         
@@ -44,11 +45,7 @@ module.exports = authHelper = {
         })
       }
     } catch (error) {
-      if (error instanceof TokenError) {
-        return res.status(401).json(ErrorObject.sendTokenError(error.data))
-      } else {
-        return res.status(500).json(ErrorObject.sendServerError())
-      }
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -86,12 +83,6 @@ module.exports = authHelper = {
       return next()
     }
 
-    return res.status(403).json(
-      new ErrorObject({
-        statusCode: 403,
-        message: "Not allowed to access.",
-        data: req.user,
-      })
-    )
+    return ErrorHandler.sendErrors(error)
   },
 }
