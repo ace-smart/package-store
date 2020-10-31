@@ -7,6 +7,7 @@ const ObjectError = require("../errors/object")
 const NotFoundError = require("../errors/not_found")
 const PROFILE_GENDER_VALUES = ["male", "female", "lgbt"]
 const STATUS_VALUES = ["deactivated", "activated"]
+const {toCapitalize} = require('../helper/format')
 
 class ProfileObject {
   constructor({ _id, firstName, lastName, gender, dateOfBirth, phoneNumber, avatar } = {}) {
@@ -39,7 +40,8 @@ class ProfileObject {
             return new ProfileObject({ ...profile })
           }
         }
-        throw new NotFoundError("No profile found.")
+
+        return null
       } catch (error) {
         throw error
       }
@@ -192,12 +194,20 @@ class ProfileObject {
   // @desc:     Remove undefined props and lowercase fields.
   clean() {
     let profileObject = this
-    const lowerCaseFields = ["gender", "status"]
+    const fieldsToClean = ["firstName", "lastName", "gender", "status"]
     for (const [key, value] of Object.entries(profileObject)) {
       if (value != null) {
-        const isFound = lowerCaseFields.find((field) => key === field)
+        const isFound = fieldsToClean.find((field) => key === field)
         if (isFound) {
-          profileObject[key] = value.toString().toLowerCase()
+          if(key === 'firstName' || key === 'lastName') {
+            profileObject[key] = toCapitalize(validator.trim(value.toString().toLowerCase()))
+          }
+          if(key === 'gender' || key === 'status') {
+            profileObject[key] = validator.trim(value.toString().toLowerCase())
+          }
+        }
+        if (key === 'updatedAt') {
+          profileObject[key] = Date.now()
         }
       }
 

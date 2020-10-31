@@ -6,6 +6,7 @@ const ValidationError = require("../errors/validation")
 const ObjectError = require("../errors/object")
 const UserObject = require("./UserObject")
 const NotFoundError = require("../errors/not_found")
+const {toCapitalize} = require('../helper/format')
 const STATUS_VALUES = ["activated", "deactivated"]
 
 class AddressObject {
@@ -39,7 +40,7 @@ class AddressObject {
         return addressList
       }
 
-      throw new NotFoundError("No address found")
+      return null
     } catch (error) {
       throw error
     }
@@ -69,7 +70,7 @@ class AddressObject {
         }
       }
 
-      throw new NotFoundError("No address found.")
+      return null
     } catch (error) {
       throw error
     }
@@ -215,12 +216,24 @@ class AddressObject {
   // @desc:     Remove undefined props and lowercase fields.
   clean() {
     let addressObject = this
-    const lowerCaseFields = ["status"]
+    const fieldsToClean = ["street", "district", "city", "country", "postalCode", "status"]
     for (const [key, value] of Object.entries(addressObject)) {
       if (value != null) {
-        const isFound = lowerCaseFields.find((field) => key === field)
+        const isFound = fieldsToClean.find((field) => key === field)
         if (isFound) {
-          addressObject[key] = value.toString().toLowerCase()
+          if (key === 'postalCode') {
+            addressObject[key] = parseInt(value.toString())
+          }
+          if (key === 'district' || key === 'city' || key ==='country'){
+            addressObject[key] = toCapitalize(validator.trim(value.toString().toLowerCase()))
+          } 
+          if (key === 'street' || key === 'status'){
+            addressObject[key] = validator.trim(value.toString().toLowerCase())
+          }
+        }
+        
+        if (key === 'updatedAt') {
+          addressObject[key] = Date.now()
         }
       }
 

@@ -6,13 +6,14 @@ const { isExistent, hasSpecialChars, STATUS_VALUES } = require("../helper/valida
 const ValidationError = require('../errors/validation')
 
 class ProductObject {
-  constructor({ _id, subcategoryId, name, details, price, status }) {
+  constructor({ _id, subcategoryId, name, details, price, status, createdAt }) {
     this.id = _id
     this.subcategoryId = subcategoryId
     this.name = name
     this.details = details
     this.price = price
     this.status = status
+    this.createdAt = createdAt
   }
 
   // @desc:     Get product by criteria
@@ -347,6 +348,10 @@ class ProductObject {
             productObject[key].value = parseFloat(value.value.toString())
             productObject[key].currency = validator.trim(value.currency.toUpperCase())
           }
+        }
+
+        if (key === 'updatedAt') {
+          productObject[key] = Date.now()
         }
       }
 

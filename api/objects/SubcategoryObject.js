@@ -8,37 +8,21 @@ const validator = require('validator')
 const { STATUS_VALUES, isExistent } = require("../helper/validation")
 
 class SubcategoryObject {
-  constructor({ _id, name, status }) {
+  constructor({ _id, name, status, createdAt }) {
     this.id = _id
     this.name = name
     this.status = status
+    this.createdAt = createdAt
   }
-
-  // static async getSubcategoriesBy(criteria = {}, selectFields = null) {
-  //   try {
-  //     const subcategories = await SubcategoryModel.find(criteria, selectFields).lean()
-  //     if (subcategories.length > 0) {
-  //       const subcategoryList = subcategories.map((value) => new SubcategoryObject({ ...value }))
-  //       // for (let i = 0;i < subcategories.length ; i++){
-
-  //       // }
-  //       return subcategoryList
-  //     }
-
-  //     throw new NotFoundError("No subcategory found.")
-  //   } catch (error) {
-  //     throw error
-  //   }
-  // }
 
   static async getOneSubcategoryBy(criteria = {}, selectFields = null) {
     try {
       const subcategory = await SubcategoryModel.findOne(criteria, selectFields).lean()
-      // if (subcategory) {
+      if (subcategory) {
         return new SubcategoryObject({ ...subcategory })
-      // }
+      }
 
-      // throw new NotFoundError("No subcategory found.")
+      return null
     } catch (error) {
       throw error
     }
@@ -99,12 +83,21 @@ class SubcategoryObject {
 
   clean() {
     let subcategoryObject = this
-    const lowerCaseFields = ["status"]
+    const fieldsToClean = ["name", "status"]
     for (const [key, value] of Object.entries(subcategoryObject)) {
       if (value != null) {
-        const isFound = lowerCaseFields.find((field) => key === field)
+        const isFound = fieldsToClean.find((field) => key === field)
         if (isFound) {
-          subcategoryObject[key] = value.toString().toLowerCase()
+          if (key === 'name') {
+            subcategoryObject[key] = validator.trim(value.toString())
+          }
+          if (key === 'status') {
+            subcategoryObject[key] = validator.trim(value.toString().toLowerCase())
+          }
+        }
+        
+        if (key === 'updatedAt') {
+          subcategoryObject[key] = Date.now()
         }
       }
 

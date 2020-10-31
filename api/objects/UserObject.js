@@ -121,7 +121,7 @@ class UserObject {
         return user.profileId
       }
 
-      throw new NotFoundError("No user found.")
+      return null
     } catch (error) {
       throw error
     }
@@ -146,7 +146,7 @@ class UserObject {
         return user.addressId
       }
 
-      throw new NotFoundError("No user found.")
+      return null
     } catch (error) {
       throw error
     }
@@ -167,7 +167,7 @@ class UserObject {
         return userObject
       }
 
-      throw new NotFoundError("No user found.")
+      return null
     } catch (error) {
       throw error
     }
@@ -194,7 +194,7 @@ class UserObject {
         return userObjects
       }
 
-      throw new NotFoundError("No user found.")
+      return null
     } catch (error) {
       throw error
     }
@@ -313,12 +313,16 @@ class UserObject {
   // @desc:     Remove undefined props and lowercase fields.
   clean() {
     let userObject = this
-    const lowerCaseFields = ["username", "email", "role", "status"]
+    const fieldsToClean = ["username", "email", "role", "status"]
     for (const [key, value] of Object.entries(userObject)) {
       if (value != null) {
-        const isFound = lowerCaseFields.find((field) => key === field)
+        const isFound = fieldsToClean.find((field) => key === field)
         if (isFound) {
-          userObject[key] = value.toString().toLowerCase()
+          userObject[key] = validator.trim(value.toString().toLowerCase())
+        }
+        
+        if (key === 'updatedAt') {
+          userObject[key] = Date.now()
         }
       }
 
@@ -368,7 +372,7 @@ class UserObject {
     }
 
     if (!(await isExistent(UserModel, {_id: this.id}))){
-      throw new ObjectError({
+      throw new ObjectEarror({
         objectName: 'UserObject',
         errorProperty: 'Id',
         message: "Id is not valid"

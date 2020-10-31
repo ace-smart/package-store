@@ -2,7 +2,6 @@ const { default: validator } = require("validator")
 const ValidationError = require("../errors/validation")
 const CategoryModel = require("../models/CategoryModel")
 const { isExistent, STATUS_VALUES } = require("../helper/validation")
-const NotFoundError = require("../errors/not_found")
 const ObjectError = require("../errors/object")
 const SubcategoryModel = require("../models/SubcategoryModel")
 
@@ -74,7 +73,7 @@ class CategoryObject {
         return categoryObjects
       }
 
-      throw new NotFoundError("No category found.")
+      return null
     } catch (error) {
       throw error
     }
@@ -87,7 +86,7 @@ class CategoryObject {
         return new CategoryObject({ ...category })
       }
 
-      throw new NotFoundError("No category found.")
+      return null
     } catch (error) {
       throw error
     }
@@ -148,12 +147,21 @@ class CategoryObject {
 
   clean() {
     let categoryObject = this
-    const lowerCaseFields = ["status"]
+    const fieldsToClean = ["name", "status"]
     for (const [key, value] of Object.entries(categoryObject)) {
       if (value != null) {
-        const isFound = lowerCaseFields.find((field) => key === field)
+        const isFound = fieldsToClean.find((field) => key === field)
         if (isFound) {
-          categoryObject[key] = value.toString().toLowerCase()
+          if (key === 'name') {
+            categoryObject[key] = validator.trim(value.toString())
+          }
+          if (key === 'status') {
+            categoryObject[key] = validator.trim(value.toString().toLowerCase())
+          }
+        }
+
+        if (key === 'updatedAt') {
+          categoryObject[key] = Date.now()
         }
       }
 
