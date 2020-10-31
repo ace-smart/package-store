@@ -5,6 +5,7 @@ const TokenObject = require("../objects/TokenObject")
 const UserObject = require("../objects/UserObject")
 const TokenError = require("../errors/token")
 const ErrorHandler = require('../helper/errorHandler')
+const ForbiddenError = require("../errors/forbidden")
 
 module.exports = authHelper = {
   //@desc:    Middleware for checking access token
@@ -83,6 +84,6 @@ module.exports = authHelper = {
       return next()
     }
 
-    return ErrorHandler.sendErrors(error)
+    return ErrorHandler.sendErrors(res, new ForbiddenError())
   },
 }

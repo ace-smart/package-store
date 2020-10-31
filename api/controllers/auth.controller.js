@@ -83,7 +83,7 @@ module.exports = {
         `/api/confirm-email?email=${validation.email}&confirmString=${confirmString}`
       const body = registerTemplate.setRegisterTemplate(
         { btnLink: confirmEmailURL, btnText: 'Confirm email address' })
-      const mailResponse = await mailer.sendEmail(["phat.tran2905@gmail.com"], {
+      const mailResponse = await mailer.sendEmail([req.body.email], {
         subject: "EcommerceStore - Confirmation",
         htmlBody: body,
       })
@@ -120,7 +120,7 @@ module.exports = {
 
         const body = registerTemplate.setRegisterTemplate(
           { btnLink: confirmEmailURL, btnText: 'Confirm email address' } )
-        const mailResponse = await mailer.sendEmail(["phat.tran2905@gmail.com"], {
+        const mailResponse = await mailer.sendEmail([req.body.email], {
           subject: "EcommerceStore - Confirmation",
           htmlBody: body,
         })
@@ -216,7 +216,7 @@ module.exports = {
 
           const body = registerTemplate.setRegisterTemplate(
             { btnLink: confirmEmailURL, btnText: 'Reset password' })
-          const mailResponse = await mailer.sendEmail(["phat.tran2905@gmail.com"], {
+          const mailResponse = await mailer.sendEmail([req.body.email], {
             subject: "EcommerceStore - Reset password",
             htmlBody: body,
           })

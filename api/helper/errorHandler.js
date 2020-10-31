@@ -3,7 +3,6 @@ const ValidationError = require('../errors/validation')
 const NotFoundError = require('../errors/not_found')
 const TokenError = require('../errors/token')
 const ForbiddenError = require('../errors/forbidden')
-const MongooseError = require('mongoose').Error
 
 const ErrorHandler = {
   sendErrors: (res, error) => {
