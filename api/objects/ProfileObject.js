@@ -235,6 +235,14 @@ class ProfileObject {
     if (!userId) {
       throw new TypeError('userId can not be undefined or null')
     }
+
+    if (!(await isExistent(ProfileModel, {_id: this.id}))){
+      throw new ObjectError({
+        objectName: 'ProfileObject',
+        errorProperty: 'Id',
+        message: "Id is not valid"
+      })
+    }
     
     try {
       profileData = profileData.validate('create')

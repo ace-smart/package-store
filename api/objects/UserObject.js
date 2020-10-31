@@ -196,7 +196,7 @@ class UserObject {
 
       throw new NotFoundError("No user found.")
     } catch (error) {
-      throw new error
+      throw error
     }
   }
 
@@ -360,6 +360,14 @@ class UserObject {
   // @return:   <Boolean> True
   async update(info = {}) {
     if (this.id == null) {
+      throw new ObjectError({
+        objectName: 'UserObject',
+        errorProperty: 'Id',
+        message: "Id is not valid"
+      })
+    }
+
+    if (!(await isExistent(UserModel, {_id: this.id}))){
       throw new ObjectError({
         objectName: 'UserObject',
         errorProperty: 'Id',
