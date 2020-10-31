@@ -1,3 +1,9 @@
+const validator = require("validator")
+const blacklistChars = new RegExp(
+    "[\r\n\\t\\f\\v`~\\!@#\\$%\\^&\\*()_\\+\\=\\[\\]\\{\\};'\"<>\\?\\-\\/\\.\\,:]+",
+    "g"
+)
+
 module.exports = validation = {
     STATUS_VALUES: ["activated", "deactivated"],
 
@@ -18,6 +24,21 @@ module.exports = validation = {
         }
 
         throw new Error("Can not find object with the model.")
-    }
+    },
+
+    hasSpecialChars: (string = null) => {
+        if (string) {
+            if (validator.matches(validator.trim(string), blacklistChars)) {
+                return true
+            }
+            if (!validator.matches(validator.trim(string), RegExp("(\\w+|\\w+ \\w+)+", "g"))) {
+                return true
+            }
+
+            return false
+        }
+
+        return false
+    },
     
 }
