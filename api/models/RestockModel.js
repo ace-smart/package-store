@@ -6,14 +6,14 @@ const RestockSchema = new mongoose.Schema({
         ref: 'Product',
         required: true
     },
-    from: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true
-    },
-    to: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true
-    },
+    // from: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     required: true
+    // },
+    // to: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     required: true
+    // },
     amount: {
         type: Number,
         required: true

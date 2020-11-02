@@ -176,8 +176,6 @@ class OrderDetailObject {
     try {
       let orderDetailObject = new OrderDetailObject({ ...orderDetailData })
       orderDetailObject = orderDetailObject.clean()
-      console.log(orderDetailData)
-      console.log(orderDetailObject)
       const validation = await orderDetailObject.validate("create")
       if (validation) {
         const createdOrderDetail = await OrderDetailModel.create({ ...validation })
