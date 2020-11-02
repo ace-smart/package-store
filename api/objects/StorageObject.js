@@ -225,7 +225,7 @@ class StorageObject {
           if (key === 'description') {
             storageObject[key] = toCapitalize(validator.trim(value.toString()))
           }
-          if (key === 'propertyType') {
+          if (key === 'propertyType' || key === 'status') {
             storageObject[key] = validator.trim(value.toString().toLowerCase())
           }
           if (key === 'capacity') {
@@ -235,9 +235,6 @@ class StorageObject {
             if (value.unit != null){
               storageObject[key].unit = validator.trim(value.unit.toString().toLowerCase())
             }
-          }
-          if (key === 'status') {
-            storageObject[key] = validator.trim(value.toString().toLowerCase())
           }
         }
         
