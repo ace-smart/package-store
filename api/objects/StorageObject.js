@@ -6,7 +6,6 @@ const STORAGE_STATUS_VALUES = ["available", "full"]
 const {toCapitalize} = require('../helper/format')
 const ValidationError = require('../errors/validation')
 const ObjectError = require('../errors/object')
-const MongooseError = require('mongoose').Error
 
 class StorageObject {
   constructor({_id, name, addressId, propertyType, capacity, description, status, createdAt}) {
