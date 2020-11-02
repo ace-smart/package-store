@@ -8,7 +8,7 @@ module.exports = {
   showProviderList: async (req, res) => {
     try {
       const providerList = await ProviderObject.getProvidersBy({})
-      if (providerList) {
+      if (providerList && providerList.length > 0) {
         return res.status(200).json(providerList)
       }
       // Not found
