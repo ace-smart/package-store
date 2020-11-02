@@ -3,8 +3,6 @@ const { showOrderList, getOrderById, createNewOrder, updateOrderById, removeOrde
     = require('../../controllers/order.controller')
 const orderDetailRouter = require('./order_detail.route')
 
-router.use('/:id/details', orderDetailRouter)
-
 // @desc    Show list of orders
 // @route   GET /orders
 router.get('/', showOrderList)
@@ -25,5 +23,7 @@ router.put('/:id', updateOrderById)
 // @route   DELETE /orders/:id
 router.delete('/:id', removeOrderById)
 
+/** === Order details ===*/
+router.use('/:id/details', orderDetailRouter)
 
 module.exports = router
