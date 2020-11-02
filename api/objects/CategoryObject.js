@@ -1,4 +1,4 @@
-const { default: validator } = require("validator")
+const validator = require("validator")
 const ValidationError = require("../errors/validation")
 const CategoryModel = require("../models/CategoryModel")
 const { isExistent, STATUS_VALUES } = require("../helper/validation")
@@ -81,9 +81,10 @@ class CategoryObject {
 
   static async getOneCategoryBy(criteria = {}, selectFields = null) {
     try {
-      const category = await CategoryModel.findOne(criteria, selectFields).lean()
+      let category = await CategoryModel.findOne(criteria, selectFields).lean()
       if (category) {
-        return new CategoryObject({ ...category })
+        category = new CategoryObject({ ...category })
+        return category
       }
 
       return null
@@ -259,9 +260,9 @@ class CategoryObject {
     }
 
     try {
-      const isSaved = await CategoryModel.findOneAndDelete({_id: this.id}).lean()
-      if (isSaved) {
-        return new CategoryObject({...isSaved})
+      const isRemoved = await CategoryModel.findOneAndDelete({_id: this.id}).lean()
+      if (isRemoved) {
+        return new CategoryObject({...isRemoved})
       }
 
       throw new Error("Failed to remove category.")
