@@ -1,19 +1,19 @@
 const express = require('express')
 const router = express.Router()
-const { showUserList, showAdminList,showCustomerList, getUserById, createNewUser, updateUserById, removeUserById } 
+const { showUserList, showAdminList,showCustomerList, getUserById, createNewUser, updateUserById, resetPasswordById, removeUserById } 
     = require('../../controllers/user.controller')
-const {_ensureAccessToken, _ensureAdminRole} = require('../../helper/auth')
+
 // @desc    Show list of admins
 // @route   GET /users
-router.get('/', _ensureAccessToken, _ensureAdminRole ,showUserList)
+router.get('/',showUserList)
 
 // @desc    Show list of admins
 // @route   GET /users/admins
-router.get('/admins', _ensureAccessToken, _ensureAdminRole ,showAdminList)
+router.get('/admins', showAdminList)
 
 // @desc    Show list of users
 // @route   GET /users/customers
-router.get('/customers', _ensureAccessToken, _ensureAdminRole ,showCustomerList)
+router.get('/customers', showCustomerList)
 
 // @desc    Get user by Id
 // @route   GET /users/:id
@@ -22,6 +22,10 @@ router.get('/:id', getUserById)
 // @desc    Add new user
 // @route   POST /users
 router.post('/', createNewUser)
+
+// @desc    Update user
+// @route   PUT /users/reset-password
+router.put('/reset-password', resetPasswordById)
 
 // @desc    Update user
 // @route   PUT /users/:id

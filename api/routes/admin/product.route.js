@@ -1,11 +1,20 @@
 const express = require('express')
 const router = express.Router()
-const { showProductList, getProductById, createNewProduct, updateProductById, removeProductById } 
+const { showProductList, showProductsByCategoryId, showProductsBySubcategoryId, getProductById, createNewProduct, updateProductById, removeProductById } 
     = require('../../controllers/product.controller')
 
 // @desc    Show list of products
 // @route   GET /products
 router.get('/', showProductList)
+
+// @desc    Show list of products by categoryId
+// @route   GET /products/by-category?categoryId='1234qwer'
+router.get('/by-category', showProductsByCategoryId)
+
+// @desc    Show list of products by subcategoryId
+// @route   GET /products/by-subcategory?subcategoryId='1234qwer'
+router.get('/by-subcategory', showProductsBySubcategoryId)
+
 
 // @desc    Get product by Id
 // @route   GET /products/:id
