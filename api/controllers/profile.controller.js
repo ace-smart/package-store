@@ -1,14 +1,8 @@
-const User = require("../models/UserModel")
-const Profile = require("../models/ProfileModel")
 const bcrypt = require("bcrypt")
-const sanitize = require("../validation/sanitize")
-const { outputErrors } = require("../validation/validation")
 const UserObject = require("../objects/UserObject")
-const UserModel = require("../models/UserModel")
 const ProfileObject = require("../objects/ProfileObject")
 const ErrorObject = require("../objects/ErrorObject")
 const ValidationError = require("../errors/validation")
-const { profile } = require("../validation/sanitize")
 const ChangePwdObject = require("../objects/ChangePwdObject")
 
 module.exports = {

@@ -1,6 +1,5 @@
 const AddressObject = require("../objects/AddressObject")
 const NotFoundError = require('../errors/not_found')
-const ObjectError = require("../errors/object")
 const ErrorHandler = require('../helper/errorHandler')
 
 module.exports = {
@@ -15,7 +14,6 @@ module.exports = {
 
       throw new NotFoundError("No address found.")
     } catch (error) {
-      console.log(error)
       return ErrorHandler.sendErrors(res, error)
     }
   },
