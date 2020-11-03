@@ -1,9 +1,11 @@
 const bcrypt = require("bcrypt")
 const UserObject = require("../objects/UserObject")
 const ProfileObject = require("../objects/ProfileObject")
+const ChangePwdObject = require("../objects/ChangePwdObject")
 const ErrorObject = require("../objects/ErrorObject")
 const ValidationError = require("../errors/validation")
-const ChangePwdObject = require("../objects/ChangePwdObject")
+const NotFoundError = require('../errors/not_found')
+const ErrorHandler = require('../helper/errorHandler')
 
 module.exports = {
 
@@ -12,14 +14,16 @@ module.exports = {
   getProfile: async (req, res) => {
     try {
       const profileId = await UserObject.getProfileIdById(req.user.id)
-      const profile = await ProfileObject.getProfile(profileId)
-      if (profile) {
-        return res.status(200).json({ profile: profile })
+      if (profileId) {
+        const profile = await ProfileObject.getProfile(profileId)
+        if (profile) {
+          return res.status(200).json(profile)
+        }
       }
-
-      throw new Error("Failed to get profile")
+      
+      throw new NotFoundError("No profile found.")
     } catch (error) {
-      return res.status(500).json(ErrorObject.sendServerError())
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -60,11 +64,7 @@ module.exports = {
 
       throw new Error("Failed to update profile")
     } catch (error) {
-      if (error instanceof ValidationError){
-        return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))
-      } else {
-        return res.status(500).json(ErrorObject.sendServerError())
-      }
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -83,17 +83,15 @@ module.exports = {
           if (isUpdated instanceof UserObject) {
             return res.sendStatus(204)
           }
+
+          throw new Error("Failed to change password.")
         }
+
+        throw new NotFoundError("No user found.")
       }
 
-      throw new Error("Failed to change password.")
     } catch (error) {
-      if (error instanceof ValidationError) {
-        return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))
-      } else {
-        console.log(error)
-        return res.status(500).json(ErrorObject.sendServerError(error))
-      }
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -102,14 +100,18 @@ module.exports = {
   removeProfileById: async (req, res) => {
     try {
       const profileObject = new ProfileObject({_id: req.user.id})
-      const isRemoved = await profileObject.remove()
-      if (isRemoved) {
-        return res.sendStatus(204)
+      if (profileObject) {
+        const isRemoved = await profileObject.remove()
+        if (isRemoved) {
+          return res.sendStatus(204)
+        }
+  
+        throw new Error("Failed to remove profile.")
       }
 
-      throw new Error("Failed to remove profile.")
+      throw new NotFoundError("No profile found.")
     } catch (error) {
-      return res.status(500).json({ success: false, message: outputErrors(error) })
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 }
