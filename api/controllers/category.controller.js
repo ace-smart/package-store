@@ -1,6 +1,5 @@
 const NotFoundError = require("../errors/not_found")
 const ErrorHandler = require("../helper/errorHandler")
-const SubcategoryModel = require("../models/SubcategoryModel")
 const CategoryObject = require("../objects/CategoryObject")
 const SubcategoryObject = require("../objects/SubcategoryObject")
 

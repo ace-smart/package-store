@@ -18,7 +18,7 @@ module.exports = {
       const isInitialized = loggedUser.initializeTokens() // regenerate tokens
       if (isInitialized) {
         await loggedUser.save()
-        return res.status(200).json({ user: loggedUser })
+        return res.status(200).json(loggedUser)
       }
 
       throw new Error("Authentication failed.")
@@ -182,12 +182,6 @@ module.exports = {
       
       throw new Error("Failed to send confirm email. Please request another confirm email.")
     } catch (error) {
-      // if (error instanceof TypeError) {
-      //   return res
-      //     .status(404)
-      //     .json({ error: { message: "The link does not exist. Failed to activate." } })
-      // }
-
       return ErrorHandler.sendErrors(res, error)
     }
   },
