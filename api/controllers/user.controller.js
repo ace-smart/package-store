@@ -1,9 +1,8 @@
 const UserObject = require("../objects/UserObject")
-const ErrorObject = require("../objects/ErrorObject")
 const RegisterObject = require('../objects/RegisterObject')
 const ResetPwdObject = require("../objects/ResetPwdObject")
-const ValidationError = require("../errors/validation")
-const MongooseError = require("mongoose").Error
+const ErrorHandler = require('../helper/errorHandler')
+const NotFoundError = require("../errors/not_found")
 
 module.exports = {
   // @desc:     Get all users
@@ -11,12 +10,15 @@ module.exports = {
   // @return:   UserObject[]
   showUserList: async (req, res) => {
     try {
-      const selectFields = "username email status role createdAt profileId"
+      const selectFields = "username email status role confirmString createdAt profileId"
       const users = await UserObject.getUsersBy({}, selectFields)
+      if (users & users.length > 0) {
+        return res.status(200).json(users)
+      }
 
-      return res.status(200).json({ users: users })
+      throw new NotFoundError("No user found.")
     } catch (error) {
-      return res.status(500).json(ErrorObject.sendServerError(error))
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -26,10 +28,13 @@ module.exports = {
     try {
       const selectFields = "username email status role confirmString createdAt profileId"
       const users = await UserObject.getUsersBy({ role: "admin" }, selectFields)
+      if (users & users.length > 0) {
+        return res.status(200).json(users)
+      }
 
-      return res.status(200).json({ users: users })
+      throw new NotFoundError("No user found.")
     } catch (error) {
-      return res.status(500).json(ErrorObject.sendServerError(error))
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -37,13 +42,16 @@ module.exports = {
   // @route   GET /users/customers
   showCustomerList: async (req, res) => {
     try {
-      const selectFields = "username email status role createdAt profileId"
+      const selectFields = "username email status role confirmString createdAt profileId"
       const users = await UserObject.getUsersBy({ role: "user" }, selectFields)
 
-      return res.status(200).json({ users: users })
+      if (users & users.length > 0) {
+        return res.status(200).json(users)
+      }
+
+      throw new NotFoundError("No user found.")
     } catch (error) {
-      console.log(error)
-      return res.status(500).json(ErrorObject.sendServerError(error))
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -54,16 +62,12 @@ module.exports = {
       const user = await UserObject.getOneUserBy({ _id: req.params.id })
       
       if (user) {
-        return res.status(200).json({ user: user })
+        return res.status(200).json(user)
       }
       // Not found
-      return res.status(404).json(new ErrorObject({ statusCode: 404, message: "No user found" }))
+      throw new NotFoundError("No user found.")
     } catch (error) {
-      if (error instanceof MongooseError) {
-        return res.status(500).json(ErrorObject.sendServerError(error.message))
-      } else {
-        return res.status(500).json(ErrorObject.sendServerError())
-      }
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -78,12 +82,10 @@ module.exports = {
       if (user instanceof UserObject) {
         return res.sendStatus(201)
       }
+
+      throw new Error("Failed to create new user.")
     } catch (error) {
-      if (error instanceof ValidationError) {
-        return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))
-      } else {
-        return res.status(500).json(ErrorObject.sendServerError())
-      }
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -99,11 +101,7 @@ module.exports = {
 
       throw new Error("Failed to update.")
     } catch (error) {
-      if (error instanceof ValidationError) {
-        return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))
-      } else {
-        return res.status(500).json(ErrorObject.sendServerError())
-      }
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -175,19 +173,13 @@ module.exports = {
 
       throw new Error("Failed to send reset password email.")
     } catch (error) {
-      if (error instanceof ObjectError) {
-        return res.status(404).json(error.message)
-      }
       if (error instanceof TypeError) {
         return res
           .status(404)
           .json({ error: { message: "The link does not exist. Failed to activate." } })
       }
-      if (error instanceof ValidationError) {
-        return res.status(400).json(ErrorObject.sendInvalidInputError(error.validation))
-      }
 
-      return res.status(500).json(ErrorObject.sendServerError(error))
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 
@@ -196,11 +188,18 @@ module.exports = {
   removeUserById: async (req, res) => {
     try {
       const user = new UserObject({ _id: req.params.id })
-      await user.remove()
-      return res.sendStatus(204)
+      if (user) {
+        const isRemoved = await user.remove()
+        if (isRemoved) {
+          return res.sendStatus(204)
+        }
+
+        throw new Error("Failed to remove user.")
+      }
+
+      throw new Error("No user found.")
     } catch (error) {
-      console.log(error)
-      return res.status(500).json(ErrorObject.sendServerError())
+      return ErrorHandler.sendErrors(res, error)
     }
   },
 }

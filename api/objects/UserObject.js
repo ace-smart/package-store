@@ -182,7 +182,7 @@ class UserObject {
         let userObjects = new Array()
         listOfUsers.forEach((element) => {
           const object = new UserObject({ ...element })
-          object.clean()
+          // object.clean()
           // Avoid showing tokens
           delete object.accessToken
           delete object.refreshToken
