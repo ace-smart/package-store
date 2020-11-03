@@ -51,7 +51,7 @@ module.exports = validation = {
     isExistent: async (model, criteria = {}, exceptionId = null) => {
         if (typeof model.findOne !== "undefined") {
             try {
-                const object = await model.findOne(criteria).exec()
+                const object = await model.findOne(criteria).lean()
                 if (!object) return false
 
                 if (exceptionId && object._id.toString() === exceptionId.toString()) {

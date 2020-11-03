@@ -2,7 +2,6 @@ const express = require('express')
 const router = express.Router()
 const { showAddressList, getAddressById, createNewAddress, updateAddressById, removeAddressById } 
     = require('../../controllers/address.controller')
-const { createNewProfile } = require('../../controllers/profile.controller')
 
 // @desc    Show list of addresses
 // @route   GET /addresses

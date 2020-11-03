@@ -6,10 +6,6 @@ const VoucherSchema = new mongoose.Schema({
         required: true,
         max: 200,
     },
-    description: {
-        type: String,
-        max: 350,
-    },
     code: {
         type: String,
         required: true,
@@ -43,8 +39,12 @@ const VoucherSchema = new mongoose.Schema({
     validUntil: {
         type: Date,
         required: true
-    }
-    ,status: {
+    },
+    description: {
+        type: String,
+        max: 350,
+    },
+    status: {
         type: String,
         default: 'deactivated'
     }
