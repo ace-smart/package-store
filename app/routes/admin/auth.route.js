@@ -1,10 +1,10 @@
 const router = require("express").Router()
 const passport = require("passport")
 const { rememberMeLogin, showLoginForm } = require("../../controllers/admin/auth.controller")
-const { _checkUnauthenticatedAdmin, _redirectToIndex } = require('../../helper/auth.helper')
+const { _checkUnauthenticatedAdmin } = require('../../helper/auth.helper')
 // @desc    Show login form
 // @route   GET /login
-router.get("/login", 
+router.get("/login",
 _checkUnauthenticatedAdmin,
 showLoginForm)
 
@@ -14,7 +14,6 @@ router.post(
     "/login",
     _checkUnauthenticatedAdmin,
     passport.authenticate("local", {
-        // successRedirect: "/admin",
         failureRedirect: "/admin/login",
         failureFlash: true,
     }),

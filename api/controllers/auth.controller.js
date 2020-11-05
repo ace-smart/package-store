@@ -47,6 +47,44 @@ module.exports = {
     }
   },
 
+  // @desc    GET rememberToken by tokens
+  // @route   GET /remember-token?rememberToken=example
+  getUserByRememberToken: async (req, res) => {
+    try {
+      if (req.query.rememberToken == null) {
+        throw new Error("Can not find with null token.")
+      }
+      const userObject = await UserObject.getDataByToken("access", req.user.accessToken)
+      if (userObject && userObject.rememberToken == req.query.rememberToken) {
+        return res.status(200).json(userObject)
+      }
+
+      throw new NotFoundError("No user found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc    Update rememberToken
+  // @route   PUT /remember-token
+  updateRememberToken: async (req, res) => {
+    try {
+      const userObject = await UserObject.getDataByToken("access", req.user.accessToken)
+      if (userObject) {
+        const isUpdated = userObject.update({...req.body})
+        if (isUpdated) {
+          return res.sendStatus(204)
+        }
+
+        throw new Error("Failed to update remember token.")
+      }
+
+      throw new NotFoundError("No user found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
   // @desc:    Renew access token by refresh token
   // @route:   GET /token
   renewAccessToken: async (req, res) => {

@@ -1,7 +1,5 @@
 const LocalStrategy = require("passport-local").Strategy
 const RememberStrategy = require("passport-remember-me").Strategy
-const RememberMeModel = require("../models/RememberMeModel")
-const crypto = require("crypto")
 const authHelper = require("../helper/auth.helper")
 
 module.exports = async function (passport) {
@@ -22,16 +20,17 @@ module.exports = async function (passport) {
         }
     }
 
-    const issueRememberTK = async ({ id, accessToken, refreshToken }, done) => {
-        const newRememberMeTk = crypto.randomBytes(16).toString("hex")
+    const issueRememberTK = async ({ accessToken, refreshToken }, done) => {
         try {
-            const updatedToken = await RememberMeModel.findOneAndUpdate(
-                { userId: id },
-                { remember_token: newRememberMeTk },
-                { new: true }
-            ).lean()
+            const newRememberMeTk = await authHelper.updateRememberToken({accessToken, refreshToken})
 
-            if (updatedToken) return done(null, newRememberMeTk)
+            if (newRememberMeTk) {
+                return done(null, {
+                    rememberToken: newRememberMeTk,
+                    accessToken: accessToken,
+                    refreshToken: refreshToken
+                })
+            }
 
             return done(null, false, { message: "Failed to create new remember token." })
         } catch (error) {
@@ -39,23 +38,15 @@ module.exports = async function (passport) {
         }
     }
 
-    const consumeRememberTK = async (token, done) => {
+    const consumeRememberTK = async ({rememberToken, accessToken, refreshToken}, done) => {
         try {
-            const isExistentTK = await RememberMeModel.findOne({ remember_token: token }).lean()
+            const userData = await authHelper.getUserByRememberToken({accessToken, refreshToken, rememberToken})
 
-            if (isExistentTK) {
-                const updatedToken = await RememberMeModel.findOneAndUpdate(
-                    { remember_token: token },
-                    { remember_token: null },
-                    { new: true }
-                )
-
-                if (updated)
-                    return done(null, {
-                        id: updatedToken.userId,
-                        accessToken: updatedToken.access_token,
-                        refreshToken: updatedToken.refresh_token,
-                    })
+            if (userData.user) {
+                const newRememberTK = await authHelper.updateRememberToken({accessToken, refreshToken})
+                if (newRememberTK){
+                    return done(null, userData.user)
+                }
             }
 
             return done(null, false, { message: "Invalid remember token." })
@@ -83,7 +74,6 @@ module.exports = async function (passport) {
 
     passport.serializeUser(function (admin, done) {
         return done(null, {
-            id: admin.id,
             accessToken: admin.accessToken,
             refreshToken: admin.refreshToken,
         })

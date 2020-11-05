@@ -20,6 +20,7 @@ class UserObject {
     status,
     role,
     confirmString,
+    rememberToken,
     createdAt,
     profileId,
   } = {}) {
@@ -30,6 +31,7 @@ class UserObject {
     this.addressId = addressId
     this.role = role
     this.confirmString = confirmString
+    this.rememberToken = rememberToken
     this.status = status
     this.createdAt = createdAt
     this.profileId = profileId
@@ -85,7 +87,6 @@ class UserObject {
   }
 
   set setAddress(addressId = null){
-    console.log(this.addressId)
     // create array
     if (this.addressId == null) {
       this.addressId = new Array()
@@ -95,7 +96,6 @@ class UserObject {
     if (this.addressId instanceof Array) {
       this.addressId.push(addressId)
     }
-    console.log(this.addressId)
   }
 
   get getAddress() {
