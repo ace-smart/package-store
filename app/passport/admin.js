@@ -7,19 +7,16 @@ const authHelper = require("../helper/auth.helper")
 module.exports = async function (passport) {
     const validate = async function (username, password, done) {
         try {
-            const admin = await authHelper.validateUser(username, password, "admin")
+            const validation = await authHelper.validateUser(username, password, "admin")
+            if (validation.error != null ) {
+                if (validation.error.name === 'ValidationError') {
+                    return done(null, false, {message: validation.error.invalidation[0].message})
+                }else {
+                    throw new Error(validation.error.message)
+                }
+            } 
 
-            if (admin.error != null) return done(null, false, { message: admin.error })
-
-            if (admin.status !== "activated")
-                return done(null, false, { message: "Your account is not allowed to log in." })
-
-            if (admin.role !== "admin")
-                return done(null, false, {
-                    message: "Your account does not have access to this site",
-                })
-
-            return done(null, admin)
+            return done(null, validation.user)
         } catch (error) {
             return done(error)
         }
@@ -86,7 +83,7 @@ module.exports = async function (passport) {
 
     passport.serializeUser(function (admin, done) {
         return done(null, {
-            id: admin._id,
+            id: admin.id,
             accessToken: admin.accessToken,
             refreshToken: admin.refreshToken,
         })
@@ -94,8 +91,12 @@ module.exports = async function (passport) {
 
     passport.deserializeUser(async function (adminData, done) {
         try {
-            const admin = await authHelper.getUser({ ...adminData })
-            return done(null, admin)
+            const data = await authHelper.getUser({ ...adminData })
+            if (data.user) {
+                return done(null, data.user)
+            }
+
+            return done(data.error)
         } catch (error) {
             return done(error)
         }

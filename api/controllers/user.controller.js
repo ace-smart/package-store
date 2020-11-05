@@ -12,7 +12,7 @@ module.exports = {
     try {
       const selectFields = "username email status role confirmString createdAt profileId"
       const users = await UserObject.getUsersBy({}, selectFields)
-      if (users & users.length > 0) {
+      if (users && users.length > 0) {
         return res.status(200).json(users)
       }
 
@@ -28,7 +28,7 @@ module.exports = {
     try {
       const selectFields = "username email status role confirmString createdAt profileId"
       const users = await UserObject.getUsersBy({ role: "admin" }, selectFields)
-      if (users & users.length > 0) {
+      if (users && users.length > 0) {
         return res.status(200).json(users)
       }
 
@@ -45,7 +45,7 @@ module.exports = {
       const selectFields = "username email status role confirmString createdAt profileId"
       const users = await UserObject.getUsersBy({ role: "user" }, selectFields)
 
-      if (users & users.length > 0) {
+      if (users && users.length > 0) {
         return res.status(200).json(users)
       }
 

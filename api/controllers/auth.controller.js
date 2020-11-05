@@ -8,13 +8,18 @@ const mailer = require("../helper/mailer")
 const registerTemplate = require("../../email_templates/register")
 const ResetPwdObject = require("../objects/ResetPwdObject")
 const ErrorHandler = require("../helper/errorHandler")
+const NotFoundError = require("../errors/not_found")
 
 module.exports = {
   // @desc    Authenticate
-  // @route   POST /auth
+  // @route   POST /auth?role=user
   auth: async (req, res) => {
     try {
-      const loggedUser = await new LoginObject({ ...req.body }).authenticate()
+      if (req.query.role == null) {
+        throw new Error("No role selected.")
+      }
+
+      const loggedUser = await new LoginObject({ ...req.body }).authenticate(req.query.role)
       const isInitialized = loggedUser.initializeTokens() // regenerate tokens
       if (isInitialized) {
         await loggedUser.save()
@@ -22,6 +27,21 @@ module.exports = {
       }
 
       throw new Error("Authentication failed.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc    GET User data by tokens
+  // @route   GET /get-user-data
+  getUserData: async (req, res) => {
+    try {
+      const userObject = await UserObject.getDataByToken("access", req.user.accessToken)
+      if (userObject) {
+        return res.status(200).json(userObject)
+      }
+
+      throw new NotFoundError("No user found.")
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }

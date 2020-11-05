@@ -38,7 +38,7 @@ class LoginObject {
           errors.push({
             field: "password",
             message: "Incorrect password.",
-            value: this.password,
+            value: this,
           })
           throw new ValidationError(errors)
         }
@@ -46,15 +46,15 @@ class LoginObject {
         if (userObject.status != null && userObject.status !== "activated") {
           errors.push({
             message: "The account is not activated",
-            value: null,
+            value: this,
           })
           throw new ValidationError(errors)
         }
         // Role is not allowed
         if (role != null && userObject.role !== role) {
           errors.push({
-            message: "The account does not have accessing permission.",
-            value: null,
+            message: "The account is not allowed to access.",
+            value: this,
           })
           throw new ValidationError(errors)
         }
@@ -69,7 +69,7 @@ class LoginObject {
         errors.push({
           field: "username",
           message: "Username is not existent",
-          value: this.username,
+          value: this,
         })
         throw new ValidationError(errors)
       }
