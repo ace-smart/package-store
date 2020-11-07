@@ -51,11 +51,11 @@ module.exports = authHelper = {
         return { error: error.response.data.error }
       }
 
-      throw new Error(error)
+      throw error.response.data
     }
   },
 
-  getUser: async ({ accessToken, refreshToken } = {}) => {
+  getUser: async ({ accessToken } = {}) => {
     try {
       const response = await axiosInstance.get(`/get-user-data`, {
         headers: { Authorization: "Bearer " + accessToken },
@@ -65,104 +65,21 @@ module.exports = authHelper = {
         return { user: response.data }
       }
     } catch (error) {
-      if (error.response.status >= 400) {
-        if (
-          error.response.status === 401 &&
-          error.response.data.error.name === "TokenExpiredError"
-        ) {
-          const newAccessTK = await authHelper.renewAccessToken(refreshToken)
-          return await authHelper.getUser({ accessToken: newAccessTK, refreshToken })
-        }
-        return { error: error.response.data.error }
-      }
-
-      throw new Error(error.message)
+      return error.response
     }
   },
 
-  getProfile: async ({ id, accessToken, refreshToken } = {}) => {
+  getProfile: async ({ accessToken } = {}) => {
     try {
       const response = await axiosInstance.get(`/profile`, {
         headers: { Authorization: "Bearer " + accessToken },
       })
 
       if (response.status === 200 && response.statusText === "OK") {
-        return { user: response.data }
+        return response.data
       }
     } catch (error) {
-      if (error.response.status >= 400) {
-        if (
-          error.response.status === 401 &&
-          error.response.data.error.name === "TokenExpiredError"
-        ) {
-          const newAccessTK = await authHelper.renewAccessToken(refreshToken)
-          return await authHelper.getProfile({ id, accessToken: newAccessTK, refreshToken })
-        }
-        return { error: error.response.data.error }
-      }
-
-      throw new Error(error.message)
-    }
-  },
-
-  getUserByRememberToken: async ({ accessToken, refreshToken, rememberToken } = {}) => {
-    try {
-      const response = await axiosInstance.get(`/remember-token?rememberToken=${rememberToken}`, {
-        headers: { Authorization: "Bearer " + accessToken },
-      })
-
-      if (response.status === 200 && response.statusText === "OK") {
-        return { user: response.data }
-      }
-    } catch (error) {
-      if (error.response.status >= 400) {
-        if (
-          error.response.status === 401 &&
-          error.response.data.error.name === "TokenExpiredError"
-        ) {
-          const newAccessTK = await authHelper.renewAccessToken(refreshToken)
-          return await authHelper.getRememberToken({
-            accessToken: newAccessTK,
-            refreshToken,
-            rememberToken,
-          })
-        }
-        return { error: error.response.data.error }
-      }
-
-      throw new Error(error.message)
-    }
-  },
-
-  updateRememberToken: async ({ accessToken, refreshToken } = {}) => {
-    try {
-      const newRememberMeTk = crypto.randomBytes(16).toString("hex")
-      const response = await axiosInstance.put(
-        `/remember-token`,
-        {
-          rememberToken: newRememberMeTk,
-        },
-        {
-          headers: { Authorization: "Bearer " + accessToken },
-        }
-      )
-      
-      if (response.status === 204) {
-        return newRememberMeTk
-      }
-    } catch (error) {
-      if (error.response.status >= 400) {
-        if (
-          error.response.status === 401 &&
-          error.response.data.error.name === "TokenExpiredError"
-        ) {
-          const newAccessTK = await authHelper.renewAccessToken(refreshToken)
-          return await authHelper.updateRememberToken({ accessToken: newAccessTK, refreshToken })
-        }
-        return { error: error.response.data.error }
-      }
-
-      throw new Error(error.message)
+      throw error
     }
   },
 
@@ -230,14 +147,57 @@ module.exports = authHelper = {
   },
 
   _loginWithCookie: async (req, res, next) => {
-    if (req.cookies['remember_me'] != null) {
-      const userData = await authHelper.getUser({...req.cookies['remember_me']})
-      
-      if (userData) {
-        req.logIn(userData.user, function(err) {
-          if (err) { throw new Error(err) }
+    if (req.isUnauthenticated() && req.cookies['tokens'] != null) {
+      const {refreshToken} = req.cookies['tokens']
+      let resData = await authHelper.getUser({ ...req.cookies["tokens"] })
 
+      if (resData.data && resData.data.error) {
+        if (resData.status === 401 && resData.data.error.name === 'TokenExpiredError') {
+          try {
+            const newAccessTK = await authHelper.renewAccessToken(refreshToken)
+            res.clearCookie('tokens', {path: '/admin'})
+            res.cookie('tokens',
+            {accessToken: newAccessTK, refreshToken: refreshToken, rememberMe: true},
+            {path: '/admin', httpOnly: true, secure: false, expires: new Date(Date.now() + 1000 * 3600 * 24 * 7)})
+            resData = await authHelper.getUser({accessToken: newAccessTK, refreshToken, rememberMe: true})
+          } catch (error) { throw error }
+        }
+      }
+      
+      if (resData.user) {
+        return req.logIn(resData.user, function (err) {
+          if (err) {
+            throw err
+          }
+
+          return next()
         })
+      }
+    }
+    
+    return next()
+  },
+
+  _autoRenewAccessToken: async(req, res, next) => {
+    if (req.isAuthenticated()) {
+      const {refreshToken, rememberMe} = req.cookies['tokens']
+
+      const resData = await authHelper.getUser({ ...req.cookies["tokens"] })
+      
+      if (resData.data && resData.data.error) {
+        if (resData.status === 401 && resData.data.error.name === 'TokenExpiredError') {
+          try {
+            const newAccessTK = await authHelper.renewAccessToken(refreshToken)
+            const expires = (rememberMe) ? new Date(Date.now() + 1000 * 3600 * 24 * 7) : 0
+            if (newAccessTK) {
+              res.clearCookie('tokens', {path: '/admin'})
+              res.cookie('tokens',
+              {accessToken: newAccessTK, refreshToken: refreshToken, rememberMe},
+              {path: '/admin', httpOnly: true, secure: false, expires})
+              return next()
+            }
+          } catch (error) { throw error }
+        }
       }
     }
     

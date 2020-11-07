@@ -22,8 +22,8 @@ connectDB()
 // template engine
 app.set("views", path.join(__dirname, "app/views"))
 app.engine(
-    ".hbs",
-    exphbs({ extname: ".hbs", defaultLayout: false, helpers: require("./app/helper/hbs.helper") })
+  ".hbs",
+  exphbs({ extname: ".hbs", defaultLayout: false, helpers: require("./app/helper/hbs.helper") })
 )
 app.set("view engine", ".hbs")
 // static folders
@@ -35,50 +35,42 @@ app.use("/admin/plugins", express.static(path.join(__dirname, "app/public/admin/
 app.use(morgan("dev"))
 // session
 app.use(
-    session({
-        name: "user_session",
-        secret: process.env.SESSION_SECRET,
-        resave: true,
-        saveUninitialized: false,
-        // store: new MongoStore({
-        //     mongooseConnection: mongoose.connection,
-        // }),
-    })
+  session({
+    name: "user_session",
+    secret: process.env.SESSION_SECRET,
+    resave: true,
+    saveUninitialized: false,
+    // store: new MongoStore({
+    //     mongooseConnection: mongoose.connection,
+    // }),
+  })
 )
 //  helmet, cors, csurf
 app.use(
-    helmet({
-        contentSecurityPolicy: false,
-    })
+  helmet({
+    contentSecurityPolicy: false,
+  })
 )
 // multer setup
 app.use(
-// require('./config/multer').fields([
-//     { name: 'avatar', maxCount: 1 },
-// ]), 
-(req, res, next) => {
-    const multer = require("multer")
-    const upload = require("./config/multer").fields([
-        { name: 'avatar', maxCount: 1 },
-    ])
+  (req, res, next) => {
+    const upload = require("./config/multer").fields(
+      [
+        { name: "avatar", maxCount: 1 }
+      ])
     upload(req, res, (err) => {
-        if (err instanceof multer.MulterError) {
-            return res.status(500).json({
-                success: false,
-                error: {
-                    message: err.message,
-                    field: err.field,
-                },
-            })
-        } else if (err) {
-            return res.status(500).json({ success: false, error: err })
+      if (err) {
+        res.locals.file = {
+          error: err
         }
-        
-        return next()
+      }
+
+      return next()
     })
-})
+  }
+)
 // bodyParser
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.urlencoded({ extended: false }))
 // cookieParser
 app.use(cookieParser())
 // csrfProtection
@@ -92,9 +84,8 @@ app.use(passport.session())
 // routes
 app.use("/admin", require("./app/routes/admin/admin.js"))
 
-
 // Port
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}...`)
+  console.log(`Server is running on port ${PORT}...`)
 })

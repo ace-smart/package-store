@@ -1,7 +1,8 @@
 const router = require("express").Router()
 const passport = require("passport")
-const { rememberMeLogin, showLoginForm } = require("../../controllers/admin/auth.controller")
+const { showLoginForm, _storeTokensBySession } = require("../../controllers/admin/auth.controller")
 const { _checkUnauthenticatedAdmin } = require('../../helper/auth.helper')
+
 // @desc    Show login form
 // @route   GET /login
 router.get("/login",
@@ -17,7 +18,7 @@ router.post(
         failureRedirect: "/admin/login",
         failureFlash: true,
     }),
-    rememberMeLogin,
+    _storeTokensBySession,
     (req,res, next) => {
         return res.redirect('/admin')
     }
@@ -26,9 +27,11 @@ router.post(
 // @desc    Logout
 // @route   GET /logout
 router.get("/logout", (req, res) => {
-    res.clearCookie('remember_me', {
-        path: '/admin'
-      })
+    if (req.cookies['tokens'] != null) {
+        res.clearCookie('tokens', {
+            path: '/admin'
+        })
+    }
     req.logout()
     return res.redirect('/admin/login')
 })

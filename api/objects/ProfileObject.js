@@ -1,13 +1,12 @@
 const validator = require("validator")
 const ProfileModel = require("../models/ProfileModel")
 const ValidationError = require("../errors/validation")
-const {toFormatDateStr} = require('../helper/format')
+const {toFormatDateStr, toCapitalize} = require('../helper/format')
 const UserObject = require("./UserObject")
 const ObjectError = require("../errors/object")
-const NotFoundError = require("../errors/not_found")
 const PROFILE_GENDER_VALUES = ["male", "female", "lgbt"]
 const STATUS_VALUES = ["deactivated", "activated"]
-const {toCapitalize} = require('../helper/format')
+const {isExistent} = require('../helper/validation')
 
 class ProfileObject {
   constructor({ _id, firstName, lastName, gender, dateOfBirth, phoneNumber, avatar } = {}) {
@@ -219,12 +218,13 @@ class ProfileObject {
     return profileObject
   }
 
-  static async create(userId = null, profileData = {}) {
+  static async create(userId = null, data = {}) {
     if (!userId) {
       throw new TypeError('userId can not be undefined or null')
     }
     
     try {
+      let profileData = new ProfileObject({...data})
       profileData = profileData.validate('create')
       profileData = profileData.clean()
       const profile = await ProfileModel.create({...profileData})
@@ -241,7 +241,7 @@ class ProfileObject {
     }
   }
 
-  async update(userId = null, profileData = {}) {
+  async update(userId = null, updateData = {}) {
     if (!userId) {
       throw new TypeError('userId can not be undefined or null')
     }
@@ -255,7 +255,8 @@ class ProfileObject {
     }
     
     try {
-      profileData = profileData.validate('create')
+      let profileData = new ProfileObject({...updateData})
+      profileData = profileData.validate('update')
       profileData = profileData.clean()
       const profile = await ProfileModel.findOneAndUpdate({_id: this.id}, {...profileData}, {new: true})
       const userObject = new UserObject({_id: userId})

@@ -20,8 +20,7 @@ class UserObject {
     status,
     role,
     confirmString,
-    rememberToken,
-    createdAt,
+    // createdAt,
     profileId,
   } = {}) {
     this.id = _id
@@ -31,9 +30,8 @@ class UserObject {
     this.addressId = addressId
     this.role = role
     this.confirmString = confirmString
-    this.rememberToken = rememberToken
     this.status = status
-    this.createdAt = createdAt
+    // this.createdAt = createdAt
     this.profileId = profileId
   }
 
@@ -372,7 +370,7 @@ class UserObject {
     }
 
     if (!(await isExistent(UserModel, {_id: this.id}))){
-      throw new ObjectEarror({
+      throw new ObjectError({
         objectName: 'UserObject',
         errorProperty: 'Id',
         message: "Id is not valid"
@@ -388,6 +386,35 @@ class UserObject {
         return updatedUser
       }
       throw new Error("Failed to update.")
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async resetTokens () {
+    if (this.id == null) {
+      throw new ObjectError({
+        objectName: 'UserObject',
+        errorProperty: 'Id',
+        message: "Id is not valid"
+      })
+    }
+
+    if (!(await isExistent(UserModel, {_id: this.id}))){
+      throw new ObjectError({
+        objectName: 'UserObject',
+        errorProperty: 'Id',
+        message: "Id is not valid"
+      })
+    }
+
+    try {
+      const isUpdated = await UserModel.findOneAndUpdate({_id: this.id}, {accessToken: null, refreshToken: null}, {new: true})
+      if (isUpdated) {
+        return isUpdated
+      }
+
+      throw new Error("Failed to reset tokens")
     } catch (error) {
       throw error
     }
@@ -481,7 +508,7 @@ class UserObject {
         if (this.id != null) {
           const updatedUser = new UserObject(
             await UserModel.findOneAndUpdate(
-              { _id: userToSave.id },
+              { _id: this.id },
               { ...userToSave },
               { new: true }
             ).lean()

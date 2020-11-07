@@ -3,8 +3,6 @@ const router = express.Router()
 const {
   auth,
   getUserData,
-  getUserByRememberToken,
-  updateRememberToken,
   renewAccessToken,
   register,
   confirmEmail,
@@ -23,14 +21,6 @@ router.post("/auth", auth)
 // @desc    GET User data by tokens
 // @route   GET /get-user-data
 router.get("/get-user-data", _ensureAccessToken, getUserData)
-
-// @desc    GET rememberToken
-// @route   GET /remember-token?rememberToken=example
-router.get("/remember-token", _ensureAccessToken, getUserByRememberToken)
-
-// @desc    Update rememberToken
-// @route   PUT /get-user-data
-router.put("/remember-token", _ensureAccessToken, updateRememberToken)
 
 // @desc    Renew access token
 // @route   GET /token

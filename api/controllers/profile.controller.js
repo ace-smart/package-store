@@ -32,7 +32,10 @@ module.exports = {
   updateProfile: async (req, res) => {
     /* === EXAMPLE ===
       req.body = {
-        avatar: <File>,
+        avatar: {
+          type: 'buffer',
+          data: [1,23,3,4]
+        },
         firstName: 'John',
         lastName: 'Smith',
         gender: 'male',
@@ -44,11 +47,13 @@ module.exports = {
       // get profileId by accessToken
       const profileId = await UserObject.getProfileIdById(req.user.id)
       const profileObject = new ProfileObject({...req.body})
-      if (req.file != null) {
-        profileObject.setAvatar = req.file.buffer.toString('base64')
+
+      if (req.body.avatar != null) {
+        profileObject.setAvatar = Buffer.from(req.body.avatar.data).toString('base64')
       }
+
       if (profileId == null) {
-        // create as the 1st time
+        // create for the 1st time
         const createdProfile = await ProfileObject.create(req.user.id, profileObject)
         if (createdProfile) {
           return res.sendStatus(204)

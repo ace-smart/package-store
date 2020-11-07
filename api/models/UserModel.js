@@ -44,11 +44,6 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: require('crypto').randomBytes(12).toString('hex')
   },
-  rememberToken: {
-    type: String,
-    required: true,
-    unique: true
-  },
   confirmString: {
     type: String,
     default: require('crypto').randomBytes(64).toString('hex')

@@ -1,44 +1,37 @@
-const authHelper = require('../../helper/auth.helper')
-
 module.exports = {
-    // @desc:   show login form
-    // @route:  GET /login
-    showLoginForm: (req, res) => {
-        return res.render("templates/admin/auth/login", {
-            layout: "admin/auth.layout.hbs",
-            csrfToken: req.csrfToken(),
-        })
-    },
+  // @desc:   Show login form
+  // @route:  GET /login
+  showLoginForm: (req, res) => {
+    return res.render("templates/admin/auth/login", {
+      layout: "admin/auth.layout.hbs",
+      csrfToken: req.csrfToken(),
+    })
+  },
 
-    // @desc:   remember user
-    // @route:  GET /login
-    rememberMeLogin: async (req, res, next) => {
-        if (!req.body.remember_me) {
-            return next()
-        }
+  // @desc:   Store tokens in cookie
+  _storeTokensBySession: (req, res, next) => {
+    const tokens = {
+      accessToken: req.user.accessToken,
+      refreshToken: req.user.refreshToken
+    }
+    let expires = 0
+    
+    if  (req.body.remember_me) {
+      expires = new Date(Date.now() + 1000 * 3600 * 24 * 7)  // 7 days
+      tokens.rememberMe = true
+    }
 
-        try {
-            const newRememberToken = await authHelper.updateRememberToken({...req.user})
-            
-            if (newRememberToken) {
-                // store in cookie
-                res.cookie("remember_me", 
-                {
-                    accessToken: req.user.accessToken,
-                    refreshToken: req.user.refreshToken,
-                    rememberToken: newRememberToken
-                }, 
-                {
-                    path: "/admin",
-                    httpOnly: true,
-                    secure: false, 
-                    maxAge: 1000*3600*24*7
-                })
-            }
-            
-            return next()
-        } catch (error) {
-            throw new Error(error)
-        }
-    },
+    res.cookie(
+      "tokens",
+      tokens,
+      {
+        path: "/admin",
+        httpOnly: true,
+        secure: false,
+        expires
+      }
+    )
+    
+    return next()
+  },
 }
