@@ -1,6 +1,3 @@
-const multer = require("../../config/multer")
-const csrf = require("csurf")
-
 module.exports = helper = {
   removeCSRF: function (formInput = {}) {
     // remove field ['_csrf'] from the form body
@@ -81,4 +78,15 @@ module.exports = helper = {
     }
   },
 
+  getUserInstance: async function (req) {
+    const authHelper = require('./auth.helper.js')
+    return {
+      username: req.user.username,
+      email: req.user.email,
+      role: req.user.role,
+      profile: await authHelper.getProfile({...req.user}),
+      status: req.user.status,
+      createdAt: req.user.createdAt,
+    }
+  }
 }

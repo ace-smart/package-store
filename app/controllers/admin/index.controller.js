@@ -1,18 +1,12 @@
+const helper = require('../../helper/helper')
 
 module.exports = {
     // @desc:   show index page
     // @route:  GET ['/','/index','/home']
-    showIndexPage: (req,res) => {
+    showIndexPage: async (req,res) => {
         return res.render('templates/admin/index', {
             layout: 'admin/index.layout.hbs',
-            // user: {
-            //     username: req.user.username,
-            //     email: req.user.email,
-            //     role: req.user.role,
-            //     profile: req.user.profileId,
-            //     status: req.user.status,
-            //     createdAt: req.user.createdAt,
-            // },
+            user: await helper.getUserInstance(req),
         })
     },
 }

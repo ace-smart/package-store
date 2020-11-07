@@ -7,7 +7,7 @@ module.exports = {
   // @route   GET /profile
   showProfilePage: async (req, res) => {
     try {
-      const user = (await authHelper.getUser({ ...req.user })).user
+      const user = await helper.getUserInstance(req)
       user.profile = await authHelper.getProfile({ ...req.user })
       const tabpane = req.query.tabpane != null ? req.query.tabpane : "account"
 
@@ -18,6 +18,7 @@ module.exports = {
         csrfToken: req.csrfToken(),
       })
     } catch (error) {
+      console.log(error)
       return res.render("templates/admin/error/404", {
         layout: "admin/error.layout.hbs",
       })
@@ -27,14 +28,7 @@ module.exports = {
   // @desc    Update profile
   // @route   POST /profile
   updateProfile: async (req, res) => {
-    const user = {
-      username: req.user.username,
-      email: req.user.email,
-      role: req.user.role,
-      profile: await authHelper.getProfile({ ...req.user }),
-      status: req.user.status,
-      createdAt: req.user.createdAt,
-    }
+    const user = await helper.getUserInstance(req)
 
     try {
       //  Avatar has error
@@ -101,23 +95,13 @@ module.exports = {
   // @desc    change password
   // @route   POST /changePwd
   changePwd: async (req, res) => {
-    // form inputs [currentPassword, newPassword] 
-    const user = {
-      username: req.user.username,
-      email: req.user.email,
-      role: req.user.role,
-      profile: await authHelper.getProfile({ ...req.user }),
-      status: req.user.status,
-      createdAt: req.user.createdAt,
-    }
+    // form inputs [password, new_password, confirm_new_password] 
     try {
       const formData = require("../../helper/helper").removeCSRF(req.body)
       const response = await axiosInstance.put(
         "/profile/change-password",
         { ...formData },
         {
-          responseType: "json",
-          responseEncoding: "utf-8",
           headers: {
             Authorization: "Bearer " + req.user.accessToken,
           },
@@ -129,11 +113,10 @@ module.exports = {
       }
     } catch (error) {
       if (error.response.status === 400 && error.response.data.error.name === "ValidationError") {
-        console.log(error.response.data.error.invalidation)
         req.flash("fail", "Failed to update.")
         return res.render("templates/admin/profile/profile", {
           layout: "admin/profile.layout.hbs",
-          user: user,
+          user: await helper.getUserInstance(req),
           csrfToken: req.csrfToken(),
           tabpane: "changePwd",
           error: error.response.data.error.invalidation,

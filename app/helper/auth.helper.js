@@ -1,6 +1,5 @@
 const axiosInstance = require("../helper/axios.helper")
 const helper = require("../helper/helper")
-const crypto = require("crypto")
 
 module.exports = authHelper = {
   validateUser: async (username, password, role) => {
