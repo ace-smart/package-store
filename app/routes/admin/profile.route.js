@@ -17,11 +17,11 @@ router.get("/profile", showProfilePage)
 router.post("/profile", updateProfile)
 
 // @desc    Show change password page
-// @route   GET /changePwd
-router.get("/changePwd", showChangePwdPage)
+// @route   GET /change-password
+router.get("/change-password", showChangePwdPage)
 
 // @desc    Change password
-// @route   POST /changePwd
-router.post("/changePwd", changePwd)
+// @route   POST /change-password
+router.post("/change-password", changePwd)
 
 module.exports = router

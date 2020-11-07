@@ -1,40 +1,58 @@
 <div class="row p-3 m-2">
     <div class="col-12">
-        <form class="form-horizontal p-3" action="/admin/changePwd" method="POST">
+        <form class="form-horizontal p-3" action="/admin/change-password" method="POST">
             {{> csrf}}
             <div class="form-group mt-2">
-                <label for="currentPassword" class="mb-2"><i class="mdi mdi-key mr-2"></i>Current Password</label>
+                <label for="password" class="mb-2"><i class="mdi mdi-key mr-2"></i>Current Password</label>
                 <div class="input-group">
-                    <input type="password" name="currentPassword" class="form-control" placeholder="Enter CURRENT password" id="currentPassword" required>
+                    <input type="password" name="password" class="form-control" placeholder="Enter CURRENT password" id="password" required>
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="mdi mdi-key"></i></span>
                     </div>
                 </div>
-                {{#ifeq error.field 'currentPassword'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
+                {{#each error}}
+                    <ul class="parsley-errors-list filled" id="parsley-id-27">
+                    {{#ifMatch this.field 'password'}}
+                        <li class="parsley-required">{{{this.message}}}</li>
+                    {{/ifMatch}}
+                    </ul>
+                {{/each}}
             </div>
 
             <div class="form-group mt-2">
-                <label for="newPassword" class="mb-2"><i class="mdi mdi-lock-plus mr-2"></i>New password</label>
+                <label for="new_password" class="mb-2"><i class="mdi mdi-lock-plus mr-2"></i>New password</label>
                 <div class="input-group">
-                    <input type="password" class="form-control" name="newPassword" id="newPassword"
+                    <input type="password" class="form-control" name="new_password" id="new_password"
                         placeholder="Enter NEW password" required>
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="mdi mdi-lock-plus"></i></span>
                     </div>
                 </div>
-                {{#ifeq error.field 'newPassword'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
+                {{#each error}}
+                    <ul class="parsley-errors-list filled" id="parsley-id-27">
+                    {{#ifMatch this.field 'new_password'}}
+                        <li class="parsley-required">{{{this.message}}}</li>
+                    {{/ifMatch}}
+                    </ul>
+                {{/each}}
             </div>
 
             <div class="form-group mt-2">
-                <label for="confirm_newPassword" class="mb-2"><i class="mdi mdi-lock-plus mr-2"></i>Confirm new password</label>
+                <label for="confirm_new_password" class="mb-2"><i class="mdi mdi-lock-plus mr-2"></i>Confirm new password</label>
                 <div class="input-group">
-                    <input type="password" class="form-control" name="confirm_newPassword" id="confirm_newPassword"
+                    <input type="password" class="form-control" name="confirm_new_password" id="confirm_new_password"
                         placeholder="Confirm NEW password" required>
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="mdi mdi-lock-plus"></i></span>
                     </div>
                 </div>
-                {{#ifeq error.field 'confirm_newPassword'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
+                {{#each error}}
+                    <ul class="parsley-errors-list filled" id="parsley-id-27">
+                    {{#ifMatch this.field 'confirm_new_password'}}
+                        <li class="parsley-required">{{{this.message}}}</li>
+                    {{/ifMatch}}
+                    </ul>
+                {{/each}}
             </div>
 
             <div class="form-group row m-t-30">
