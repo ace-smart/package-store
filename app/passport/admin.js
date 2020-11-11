@@ -79,7 +79,7 @@ module.exports = async function (passport) {
   })
 
   passport.deserializeUser(async function (adminData, done) {
-    const resData = await authHelper.getUser({ ...adminData })
+    const resData = await authHelper.getLoggedUser({ ...adminData })
     if (resData.user) {
       return done(null, resData.user)
     }
@@ -88,7 +88,7 @@ module.exports = async function (passport) {
       if (resData.status === 401 && resData.data.error.name === "TokenExpiredError") {
         try {
           const newAccessTK = await authHelper.renewAccessToken(adminData.refreshToken)
-          const userData = await authHelper.getUser({
+          const userData = await authHelper.getLoggedUser({
             accessToken: newAccessTK,
             refreshToken: adminData.refreshToken,
           })

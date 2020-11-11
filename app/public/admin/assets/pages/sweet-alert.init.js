@@ -153,6 +153,7 @@
                         } else {
                             Swal.fire("Failed", "An error has occurred.", "error")
                         }
+                        
                     }
 
                     xmlhttp.setRequestHeader("CSRF-Token", _csrf)
@@ -208,11 +209,11 @@
 
         // #sa-reset-pwd
         $(".sa-reset-pwd").click(function () {
-            const uid = e.target.dataset.uid
+            const email = this.dataset.email
             const _csrf = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
             Swal.fire({
                 title: "Reset password",
-                text: "Do you want to reset password of this account?",
+                text: "Do you want to reset this account password?",
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonText: "Yes, do it!",
@@ -225,24 +226,28 @@
                 // confirm => {value: true}
                 // cancel => {dismiss: "cancel"}
                 if (e.value === true) {
+                    let urlSegments = document.URL.split("/").filter((value) => {
+                        return value != "admins" && value != "customers" && value != "edit" && value != "#"
+                    })
+                    const toURL = urlSegments.join("/") + "/reset-password"
                     const xmlhttp = new XMLHttpRequest()
-                    xmlhttp.open("PUT", document.URL + "/reset_password/" + uid, true)
-
+                    // send request to api server
+                    xmlhttp.open("PUT", toURL, true)
                     xmlhttp.onreadystatechange = function () {
                         if (this.readyState == 4 && this.status == 200) {
-                            Swal.fire(
-                                "Successfully!",
-                                "The password was successfully reset.",
-                                "success"
-                            )
-                        } else {
-                            Swal.fire("Failed", "An error has occurred.", "error")
+                            Swal.fire("Successfully!", "Please check email to set a new password", "success")
+                            return setInterval(() => {
+                                location.reload()
+                            }, 500)
+                        } else if (this.readyState == 4 && this.status > 400){
+                            Swal.fire("Failed", this.responseText.replace(/\"/g, ""), "error")
                         }
                     }
 
                     xmlhttp.setRequestHeader("CSRF-Token", _csrf)
+                    xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
                     xmlhttp.withCredentials = true
-                    xmlhttp.send()
+                    xmlhttp.send(`email=${email}`)
                 }
             })
         })

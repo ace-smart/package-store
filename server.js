@@ -1,6 +1,5 @@
 // Load environment variable
 require("dotenv").config({ path: "./config/config.env" })
-const mongoose = require("mongoose")
 const express = require("express")
 const app = express()
 const connectDB = require("./config/db")
@@ -82,6 +81,7 @@ adminPassport(passport)
 app.use(passport.initialize())
 app.use(passport.session())
 // routes
+app.use(require("./app/routes/client/client.js"))
 app.use("/admin", require("./app/routes/admin/admin.js"))
 
 // Port

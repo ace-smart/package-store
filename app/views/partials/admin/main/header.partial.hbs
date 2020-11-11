@@ -13,8 +13,11 @@
                     <button onclick="backward()" type="button" class="btn btn-blue-grey waves-effect waves-light">
                         <i class="ion-arrow-left-c"></i>
                     </button>
-                    {{!-- <button onclick="window.history.go(-1); return false;" type="button" class="btn btn-blue-grey waves-effect waves-light">
-                        <i class="ion-arrow-left-c"></i> --}}
+                    {{/ifMatch}}
+
+                    {{#ifMatch content 'view'}}
+                    <button onclick="backward()" type="button" class="btn btn-blue-grey waves-effect waves-light">
+                        <i class="ion-arrow-left-c"></i>
                     </button>
                     {{/ifMatch}}
                 </div>

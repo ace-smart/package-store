@@ -79,7 +79,7 @@ module.exports = {
       validation.setRole = (req.body.role != null) ? req.body.role : undefined
       validation.setStatus = (req.body.status != null) ? req.body.status : undefined
       const user = await UserObject.create({...validation})
-      if (user instanceof UserObject) {
+      if (user) {
         return res.sendStatus(201)
       }
 

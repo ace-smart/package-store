@@ -20,7 +20,7 @@ class UserObject {
     status,
     role,
     confirmString,
-    // createdAt,
+    createdAt,
     profileId,
   } = {}) {
     this.id = _id
@@ -31,7 +31,7 @@ class UserObject {
     this.role = role
     this.confirmString = confirmString
     this.status = status
-    // this.createdAt = createdAt
+    this.createdAt = createdAt
     this.profileId = profileId
   }
 
@@ -338,7 +338,7 @@ class UserObject {
   static async create({ username, email, password, role, status } = {}) {
     let userObject = new UserObject({ username, email, password, role, status })
     try {
-      await userObject.validate()
+      userObject = await userObject.validate()
       if (password == null) {
         throw new ValidationError([
           {

@@ -9,3 +9,25 @@
 </script>
 
 {{> admin/js/init.partial }}
+
+<script>
+    function selectStatus(element) {
+        const statusElementId = element.getAttribute('for')
+        if (statusElementId === 'deactivated-status') {
+            const radioInp = document.getElementById(statusElementId)
+            const contrastedElement = document.querySelector('label[for="activated-status"]')
+            radioInp.setAttribute('checked', true)
+            element.classList.add('active')
+            document.getElementById('activated-status').removeAttribute('checked')
+            contrastedElement.classList.remove('active')
+            
+        } else if (statusElementId === 'activated-status'){
+            const radioInp = document.getElementById(statusElementId)
+            const contrastedElement = document.querySelector('label[for="deactivated-status"]')
+            radioInp.setAttribute('checked', true)
+            element.classList.add('active')
+            document.getElementById('deactivated-status').removeAttribute('checked')
+            contrastedElement.classList.remove('active')
+        }
+    }
+</script>

@@ -18,23 +18,30 @@
     <tbody>
         {{#each accounts}}
         <tr>
-            <td id="{{{_id}}}">{{{_id}}}</td>
-            <td>{{{username}}}</td>
-            <td>{{{email}}}</td>
+            <td id="{{{this.id}}}">{{{this.id}}}</td>
+            <td>{{{this.username}}}</td>
+            <td>{{{this.email}}}</td>
             <td class="capitalized text-center">
-                {{#ifMatch role 'admin'}}
+                {{#ifMatch this.role 'admin'}}
                 <i class="ion-ribbon-b mr-1 text-lime"></i>
                 {{/ifMatch}}
-                {{{role}}}
+                {{{this.role}}}
             </td>
-            {{#ifeq status 'activated'}}
+            {{#ifMatch this.status 'activated'}}
             <td class="bg-teal text-white capitalized text-center">
-                {{else}}
+            {{/ifMatch}}
+            {{#ifMatch this.status 'deactivated'}}
             <td class="bg-danger text-white capitalized text-center">
-                {{/ifeq}}
-                {{{status}}}
+            {{/ifMatch}}
+            {{#ifMatch this.status 'pending'}}
+            <td class="bg-orange text-white capitalized text-center">
+            {{/ifMatch}}
+            {{#ifMatch this.status 'reset password'}}
+            <td class="bg-lime text-white capitalized text-center">
+            {{/ifMatch}}
+                {{{this.status}}}
             </td>
-            <td class="text-center">{{#formatShortDate createdAt}} {{/formatShortDate}}</td>
+            <td class="text-center">{{#formatDate this.createdAt}} {{/formatDate}}</td>
             <td class="text-center">
                 <div class="btn-group">
                     <button class="btn btn-secondary" type="button" data-toggle="dropdown"
@@ -42,28 +49,26 @@
                         <i class="ion-more font-18"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-right">
-                        <a class="dropdown-item" href="/admin/accounts/edit/{{{_id}}}" >
+                        <a class="dropdown-item" href="/admin/accounts/view/{{{this.id}}}">
+                            <i class="ion-ios7-eye mr-2"></i> View
+                        </a>
+                        <a class="dropdown-item" href="/admin/accounts/edit/{{{this.id}}}" >
                             <i class="ion-edit mr-2"></i> Edit
                         </a>
                         {{#ifeq status 'activated'}}
-                        <a class="dropdown-item sa-deactivate" href="javascript:void(0);" data-uid="{{{_id}}}">
+                        <a class="dropdown-item sa-deactivate" href="javascript:void(0);" data-uid="{{{this.id}}}">
                             <i class="ion-minus-round mr-2"></i> Deactivate
                         {{else}}
-                        <a class="dropdown-item sa-activate" href="javascript:void(0);" data-uid="{{{_id}}}">
+                        <a class="dropdown-item sa-activate" href="javascript:void(0);" data-uid="{{{this.id}}}">
                             <i class="ion-checkmark-round mr-2"></i> Activate
                         {{/ifeq}} 
                         </a>
-                        <a class="dropdown-item" href="#">
-                            <i class="ion-ios7-eye mr-2"></i> View
-                        </a>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item sa-reset-pwd" href="javascript:void(0);" data-email="{{{this.email}}}">
                             <i class="ion-ios7-reload mr-2"></i> Reset password
                         </a>
-                        <a class="dropdown-item sa-delete" href="javascript:void(0);" data-uid="{{{_id}}}">
+                        <a class="dropdown-item sa-delete" href="javascript:void(0);" data-uid="{{{this.id}}}">
                             <i class="ion-trash-a mr-2"></i> Delete
                         </a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item mr-2" href="#">Separated link</a>
                     </div>
                 </div>
             </td>

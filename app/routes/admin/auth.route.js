@@ -1,6 +1,6 @@
 const router = require("express").Router()
 const passport = require("passport")
-const { showLoginForm, _storeTokensBySession } = require("../../controllers/admin/auth.controller")
+const { showLoginForm, _storeTokensBySession, resetPassword } = require("../../controllers/admin/auth.controller")
 const { _checkUnauthenticatedAdmin } = require('../../helper/auth.helper')
 
 // @desc    Show login form

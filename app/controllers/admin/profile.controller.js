@@ -18,7 +18,6 @@ module.exports = {
         csrfToken: req.csrfToken(),
       })
     } catch (error) {
-      console.log(error)
       return res.render("templates/admin/error/404", {
         layout: "admin/error.layout.hbs",
       })
@@ -71,18 +70,8 @@ module.exports = {
           error: error.response.data.error,
         })
       }
-
-      if (error.response.status === 403) {
-        return helper.renderForbiddenPage(res, "admin")
-      }
-
-      if (error.response.status === 404) {
-        return helper.renderNotFoundPage(res, "admin")
-      }
-
-      if (error.response.status === 500) {
-        return helper.renderServerErrorPage(res, "admin")
-      }
+      
+      return helper.handleErrors(res, error, 'admin')
     }
   },
 
@@ -123,17 +112,7 @@ module.exports = {
         })
       }
 
-      if (error.response.status === 403) {
-        return helper.renderForbiddenPage(res, "admin")
-      }
-
-      if (error.response.status === 404) {
-        return helper.renderNotFoundPage(res, "admin")
-      }
-
-      if (error.response.status === 500) {
-        return helper.renderServerErrorPage(res, "admin")
-      }
+      return helper.handleErrors(res, error, 'admin')
     }
   },
 }

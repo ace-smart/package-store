@@ -1,13 +1,9 @@
 <!doctype html>
 <html lang="en">
-    {{#ifMatch content 'list'}}
-    {{> admin/list/head.partial }}
-    {{/ifMatch}}
-    
-    {{#ifMatch content 'form'}}
-    {{> admin/form/head.partial }}
-    {{/ifMatch}}
 
+<head>
+    {{> admin/main/head.partial }}
+</head>
 
 <body class="fixed-left">
 
@@ -44,15 +40,6 @@
 
     </div>
     <!-- END wrapper -->
-
-    {{#ifMatch content 'list'}}
-    {{> admin/list/js.partial }}
-    {{/ifMatch}}
-
-    {{#ifMatch content 'form'}}
-    {{> admin/form/js.partial }}
-    {{/ifMatch}}
-
     {{> admin/main/js.partial }}
 </body>
 

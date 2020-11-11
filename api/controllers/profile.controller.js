@@ -27,6 +27,21 @@ module.exports = {
     }
   },
 
+  // @desc:   get profile by accessTK
+  // @route:  GET /profile
+  getProfileById: async (req, res) => {
+    try {
+      const profile = await ProfileObject.getProfile(req.params.id)
+      if (profile) {
+        return res.status(200).json(profile)
+      }
+      
+      throw new NotFoundError("No profile found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
   // @desc:   update profile by accessTK
   // @route:  PUT /profile
   updateProfile: async (req, res) => {

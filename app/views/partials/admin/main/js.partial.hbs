@@ -1,8 +1,22 @@
+{{#ifMatch content 'view'}}
+<script src="/admin/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+<script src="/admin/static/assets/pages/form-advanced.js"></script>
+{{> admin/form/js.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'list'}}
+{{> admin/list/js.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'form'}}
+{{> admin/form/js.partial }}
+{{/ifMatch}}
+
 <script>
     function toAddPage() {
         let forwardURL = document.URL.split('/');
         forwardURL = forwardURL.filter((value) => {
-            return value != 'admins' && value != 'customers' && value != 'edit' && value != "#"
+            return value != 'admins' && value != 'customers' && value != 'view' && value != 'edit' && value != "#"
         })
         forwardURL = forwardURL.join('/') + '/add';
         return window.location.href = forwardURL;
@@ -10,7 +24,7 @@
     function backward() {
         let backwardURL = document.URL.split('/');
         backwardURL = backwardURL.filter((value) => {
-            return value != 'admins' && value != 'customers' && value != 'edit' && value != "#"
+            return value != 'admins' && value != 'customers' && value != 'view' && value != 'edit' && value != "#"
         })
         backwardURL.pop();
         return window.location.href = backwardURL.join('/');

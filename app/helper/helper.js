@@ -88,5 +88,20 @@ module.exports = helper = {
       status: req.user.status,
       createdAt: req.user.createdAt,
     }
+  },
+
+  handleErrors: async function(res, error, forRole = 'user') {
+    // Opt out 'ValidationError' (code: 400)
+    if (error.response.status === 403) {
+      return helper.renderForbiddenPage(res, forRole)
+    }
+
+    if (error.response.status === 404) {
+      return helper.renderNotFoundPage(res, forRole)
+    }
+
+    if (error.response.status === 500) {
+      return helper.renderServerErrorPage(res, forRole)
+    }
   }
 }

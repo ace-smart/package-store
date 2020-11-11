@@ -5,7 +5,7 @@ const {
     showCustomerList,
     showCreateUserForm,
     createUser,
-    getUserById,
+    viewUserById,
     showEditUserForm,
     editUserById,
     activateUserById,
@@ -28,8 +28,8 @@ router.get("/admins", _checkAuthenticatedAdmin, showAdminList)
 router.get("/customers", _checkAuthenticatedAdmin, showCustomerList)
 
 // @desc    Get an admin by id
-// @route   GET /accounts/:id
-// router.get("/:id", getAccountById)
+// @route   GET /accounts/view/:id
+router.get("/view/:id", viewUserById)
 
 // @desc    Show create form
 // @route   get /accounts/add
@@ -38,6 +38,10 @@ router.get("/add", _checkAuthenticatedAdmin, showCreateUserForm)
 // @desc    Add a new user
 // @route   POST /accounts/add
 router.post("/add", _checkAuthenticatedAdmin, createUser)
+
+// @desc    View user information
+// @route   get /accounts/edit/:id
+router.get("/view/:id", showEditUserForm)
 
 // @desc    Show edit form
 // @route   get /accounts/edit/:id
@@ -48,19 +52,19 @@ router.get("/edit/:id", showEditUserForm)
 router.post("/edit/:id", editUserById)
 
 // @desc    Update an admin by id
-// @route   PUT /administrators/:id
+// @route   PUT /accounts/:id
 router.put("/activate/:id", activateUserById)
 
 // @desc    Update an admin by id
-// @route   PUT /users/:id
+// @route   PUT /accounts/:id
 router.put("/deactivate/:id", deactivateUserById)
 
 // @desc    Update an admin by id
-// @route   PUT /administrators/:id
-router.put("/reset_password/:id", resetPassword)
+// @route   PUT /accounts/reset-password
+router.put("/reset-password", resetPassword)
 
 // @desc    Delete an admin by id
-// @route   DELETE /user/:id
+// @route   DELETE /accounts/:id
 router.delete("/:id", removeUserById)
 
 module.exports = router

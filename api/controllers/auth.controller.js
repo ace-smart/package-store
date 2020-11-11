@@ -219,21 +219,18 @@ module.exports = {
         user.setConfirmString = require("crypto").randomBytes(64).toString("hex")
         const isUpdated = await user.save()
         if (isUpdated) {
-          const confirmEmailURL =
-            req.protocol +
-            "://" +
-            req.get("host") +
-            `/api/reset-password?email=${isUpdated.email}&confirmString=${isUpdated.confirmString}`
+          const confirmEmailRoute =
+            `reset-password?email=${isUpdated.email}&confirmString=${isUpdated.confirmString}`
 
           const body = registerTemplate.setRegisterTemplate(
-            { btnLink: confirmEmailURL, btnText: 'Reset password' })
+            {btnText: 'Reset password' }, confirmEmailRoute)
           const mailResponse = await mailer.sendEmail([req.body.email], {
             subject: "EcommerceStore - Reset password",
             htmlBody: body,
           })
 
           if (mailResponse.accepted.length > 0) {
-            return res.sendStatus(201)
+            return res.sendStatus(200)
           } else {
             return res.status(400).json({
               error: { message: "Failed to send reset password email. Please request a new one." },

@@ -77,7 +77,7 @@ class RegisterObject {
 
     // Validate the fields of UserObject
     try {
-      const isValidated = (new UserObject({...this})).validate() 
+      const isValidated = await (new UserObject({...this})).validate() 
       if (isValidated) {
         return this
       }

@@ -5,8 +5,8 @@ module.exports = {
       "To complete the register process. Please confirm your email address by clicking the link below.",
   },
   _btnText: "Confirm email address",
-  _btnLink: "http://localhost:4000/api/confirm-email",
-  setRegisterTemplate: function({body = this._body, btnText = this._btnText, btnLink = this._btnLink} = {}) {
+  _btnLink: `${process.env.EMAIL_HTTP_PROTOCOL}${process.env.EMAIL_HTTP_DOMAIN_NAME}:${process.env.EMAIL_HTTP_PORT}`,
+  setRegisterTemplate: function({body = this._body, btnText = this._btnText, btnLink = this._btnLink} = {}, route = '') {
     return `<table class="body-wrap" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; color: #333333; margin: 0;">
     <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
         <td style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;" valign="top"></td>
@@ -29,7 +29,7 @@ module.exports = {
                                 </tr>
                                 <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
                                     <td class="content-block" itemprop="handler" itemscope itemtype="http://schema.org/HttpActionHandler" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">\
-                                        <a href="${btnLink}" class="btn-primary" itemprop="url" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background-color: #f06292 !important; margin: 0; border-color: #f06292 !important; border-style: solid !important; border-width: 8px 16px !important;">${btnText}</a>
+                                        <a href="${btnLink}/${route}" class="btn-primary" itemprop="url" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background-color: #f06292 !important; margin: 0; border-color: #f06292 !important; border-style: solid !important; border-width: 8px 16px !important;">${btnText}</a>
                                     </td>
                                 </tr>
                                 <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">

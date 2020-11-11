@@ -1,116 +1,133 @@
 <h4 class="mt-0 header-title">Update Form</h4>
 <p class="text-muted m-b-30 font-14">Edit the fields and submit <strong>Save changes</strong> button to save them.</p>
 
-<form action="/admin/accounts/edit/{{{user._id}}}" method="POST">
+<form action="/admin/accounts/edit/{{{account.id}}}" method="POST">
     {{> csrf}}
+    
+    {{!-- Username --}}
     <div class="row">
         <div class="col-sm-12">
             <div class="form-group">
-                <label for="username">Username</label>
-                <input id="username" name="username" type="text" 
-                {{#ifeq error.field 'username'}} 
-                    value="{{{error.value}}}" 
+                <label for="username">
+                    <i class="mdi mdi-account-location mr-2"></i>Username
+                </label>
+                {{#if errors}}
+                {{!-- Has error --}}
+                {{#each errors}}
+                {{#ifeq this.field 'username'}}
+                <input id="username" name="username" type="text" required class="form-control parsley-error"
+                    value="{{{this.value}}}">
+                <p class="form-validation-error">{{{this.message}}}</p>
                 {{else}}
-                    {{#if error.formInput.username}}
-                        value="{{{error.formInput.username}}}"
-                    {{else}}
-                        value="{{{user.username}}}"
-                    {{/if}}
                 {{/ifeq}}
-                    class="form-control {{#ifeq error.field 'username'}}parsley-error{{else}} {{/ifeq}}" required>
-
-                {{#ifeq error.field 'username'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="form-group">
-                <label for="email">Email</label>
-                    <input id="email" name="email" type="email" 
-                {{#ifeq error.field 'email'}} 
-                    value="{{{error.value}}}"
-                {{else}}
-                    {{#if error.formInput.email}}
-                        value="{{{error.formInput.email}}}" 
-                    {{else}}
-                        value="{{{user.email}}}"
-                    {{/if}}
-                {{/ifeq}}
-                    class="form-control {{#ifeq error.field 'email'}}parsley-error{{else}} {{/ifeq}}" required>
+                {{/each}}
                 
-                {{#ifeq error.field 'email'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
+                {{!-- Valid --}}
+                {{#if validData.username}}
+                <input id="username" name="username" type="text" required class="form-control" value="{{{validData.username}}}">
+                {{/if}} 
+                {{else}}
+                {{!-- First load --}}
+                <input id="username" name="username" type="text" required class="form-control"
+                    value="{{{account.username}}}">
+                {{/if}}
             </div>
         </div>
     </div>
 
+    {{!-- Email --}}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="email">
+                    <i class="ion-ios7-email mr-2"></i>Email
+                </label>
+                {{#if errors}}
+                {{!-- Has error --}}
+                {{#each errors}}
+                {{#ifeq this.field 'email'}}
+                <input id="email" name="email" type="email" required class="form-control parsley-error"
+                    value="{{{this.value}}}">
+                <p class="form-validation-error">{{{this.message}}}</p>
+                {{else}}
+                {{/ifeq}}
+                {{/each}}
+
+                {{!-- Valid --}}
+                {{#if validData.email}}
+                <input id="email" name="email" type="email" required class="form-control" value="{{{validData.email}}}">
+                {{/if}} 
+                {{else}}
+                {{!-- First load --}}
+                <input id="email" name="email" type="email" required class="form-control"
+                    value="{{{account.email}}}">
+                {{/if}}
+            </div>
+        </div>
+    </div>
+
+    {{!-- Role --}}
     <div class="row">
         <div class="col-sm-6">
             <div class="form-group">
-                <label class="control-label">Role</label>
+                <label class="control-label">
+                    <i class="ion-ribbon-b mr-2"></i>Role
+                </label>
                 <select class="form-control select2" name="role" id="role" required>
-                    <option value="" selected disabled>Select a role</option>
-                    <option value="admin" 
-                    {{#ifeq error.field 'role'}} 
-                        {{#ifMatch error.value 'admin'}} selected {{/ifMatch}} 
-                    {{else}}
-                        {{#if error.formInput.role}}
-                            {{#ifMatch error.formInput.role 'admin'}} selected {{/ifMatch}}
-                        {{else}}
-                            {{#ifMatch user.role 'admin'}} selected {{/ifMatch}}
-                        {{/if}}
-                    {{/ifeq}}> Admin
+                    <option value="">Select a role</option>
+                    <option value="admin" {{#ifMatch account.role 'admin'}} selected {{/ifMatch}}> Admin
                     </option>
-                    <option value="user" 
-                    {{#ifeq error.field 'role'}} 
-                        {{#ifMatch error.value 'user'}} selected {{/ifMatch}} 
-                    {{else}} 
-                        {{#if error.formInput.role}}
-                            {{#ifMatch error.formInput.role 'user'}} selected {{/ifMatch}}
-                        {{else}}
-                            {{#ifMatch user.role 'user'}} selected {{/ifMatch}}
-                        {{/if}}
-                    {{/ifeq}}> Customer
+                    <option value="user" {{#ifMatch account.role 'user'}} selected {{/ifMatch}}> Customer
                     </option>
                 </select>
+
+                {{#if errors}}
+                {{#each errors}}
+                {{#ifeq this.field 'role'}}
+                <p class="form-validation-error">{{{this.message}}}</p>
+                {{/ifeq}}
+                {{/each}}
+                {{else}}
+                {{/if}}
+
             </div>
-            {{#ifeq error.field 'role'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
         </div>
     </div>
 
+    {{!-- Status --}}
     <div class="row mt-1 pt-2">
         <div class="col-sm-2">
-            <div class="form-group">
-                <span class="control-label">Activated</span>
-            </div>
+            <label class="control-label">
+                <i class="ion-ios7-circle-filled mr-2"></i>Status
+            </label>
+
+            {{#if errors}}
+            {{#each errors}}
+            {{#ifeq this.field 'status'}}
+            <p class="form-validation-error">{{{this.message}}}</p>
+            {{/ifeq}}
+            {{/each}}
+            {{else}}
+            {{/if}}
         </div>
         <div class="col-sm-2">
             <div class="form-group">
-                <input type="checkbox" id="switch5" name="status" switch="success"
-                {{#ifeq error.field 'status'}} 
-                    {{!-- {{#ifMatch error.value 'activated'}} checked {{/ifMatch}}  --}}
-                {{else}}
-                    {{#ifeq error.formInput.status 'activated'}} checked 
-                    {{else}}
-                        {{#ifMatch user.status 'activated'}} checked {{/ifMatch}}
-                    {{/ifeq}}
-                {{/ifeq}}
-                />
-                <label id="status-lbl" for="switch5" data-on-label="Yes" data-off-label="No"></label>
+                <label class="btn btn-danger {{#ifMatch account.status 'deactivated'}} active {{/ifMatch}}"
+                    onclick="selectStatus(this)" for="deactivated-status">Deactivated</label>
+                <input type="radio" name="status" value="deactivated" id="deactivated-status" {{#ifMatch account.status 'deactivated'}} checked
+                    {{/ifMatch}}>
+                <label class="btn btn-success {{#ifMatch account.status 'activated'}} active {{/ifMatch}}"
+                    onclick="selectStatus(this)" for="activated-status">Activated</label>
+                <input type="radio" name="status" value="activated" id="activated-status" {{#ifMatch account.status 'activated'}} checked
+                    {{/ifMatch}}>
             </div>
         </div>
-        {{#ifeq error.field 'status'}}
-        <div class="col-sm-12">
-            {{> admin/form/error.partial }}
-        </div>
-        {{else}} {{/ifeq}}
     </div>
 
     <div class="row">
         <div class="col-sm-12 mr-0 text-right">
-            <button type="submit" class="btn btn-success waves-effect waves-light">Save Changes</button>
-            <button type="submit" class="btn btn-secondary waves-effect">Cancel</button>
+            <button type="submit" class="btn btn-success waves-effect waves-light">Save changes</button>
+            <button type="button" onclick="backward()" class="btn btn-secondary waves-effect">Cancel</button>
         </div>
     </div>
 </form>

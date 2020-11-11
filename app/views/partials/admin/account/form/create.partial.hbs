@@ -1,120 +1,210 @@
 <h4 class="mt-0 header-title">Create Form</h4>
 <p class="text-muted m-b-30 font-14">Fill in these fields below and submit <strong>Create</strong>
-    button to finish.</p>
+  button to finish.</p>
 
 <form action="/admin/accounts/add" method="POST">
-    {{> csrf}}
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input id="username" name="username" type="text" 
-                {{#ifeq error.field 'username'}} 
-                    value="{{{error.value}}}" 
-                {{else}} 
-                    value="{{{error.formInput.username}}}" 
-                {{/ifeq}}
-                    class="form-control {{#ifeq error.field 'username'}}parsley-error{{else}} {{/ifeq}}" required>
-                {{#ifeq error.field 'username'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
-            </div>
-        </div>
-    </div>
+  {{> csrf}}
+  {{!-- Username --}}
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label for="username">
+          <i class="mdi mdi-account-location mr-2"></i>Username
+        </label>
+        {{#if errors}} 
+        {{!-- Has error --}}
+          {{#each errors}}
+            {{#ifeq this.field 'username'}} 
+              <input id="username" name="username" type="text" required
+              class="form-control parsley-error" value="{{{this.value}}}">
+              <p class="form-validation-error">{{{this.message}}}</p>
+            {{else}} 
+            {{/ifeq}}
+          {{/each}}
 
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="form-group">
-                <label for="email">Email</label>
-                    <input id="email" name="email" type="email" 
-                {{#ifeq error.field 'email'}} 
-                    value="{{{error.value}}}"
-                {{else}} 
-                        value="{{{error.formInput.email}}}"
-                {{/ifeq}}
-                    class="form-control {{#ifeq error.field 'email'}}parsley-error{{else}} {{/ifeq}}" required>
-                
-                {{#ifeq error.field 'email'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
-            </div>
-        </div>
+          {{!-- Valid --}}
+          {{#if validData.username}}
+          <input id="username" name="username" type="text" required class="form-control" value="{{{validData.username}}}">
+          {{/if}} 
+        {{else}}
+        {{!-- First load --}}
+          <input id="username" name="username" type="text" required class="form-control"
+          {{#if validData.username}} value="{{{validData.username}}}"
+          {{/if}} >
+        {{/if}}
+      </div>
     </div>
+  </div>
 
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="form-group">
-                <label for="password">Password</label>
-                    <input id="password" name="password" type="password" {{#ifeq error.field 'password'}}
-                    value="{{{error.value}}}" {{else}} value="{{{error.formInput.password}}}" {{/ifeq}}
-                    class="form-control {{#ifeq error.field 'password'}}parsley-error{{else}} {{/ifeq}}" required>
-                
-                {{#ifeq error.field 'password'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
-            </div>
-            <div class="form-group">
-                <label for="confirm_password">Confirm Password</label>
-                    <input id="confirm_password" name="confirm_password" type="password"
-                    {{#ifeq error.field 'confirm_password'}} value="{{{error.value}}}" {{else}}
-                    value="{{{error.formInput.confirm_password}}}" {{/ifeq}}
-                    class="form-control {{#ifeq error.field 'confirm_password'}}parsley-error{{else}} {{/ifeq}}"
-                    required>
-                
-                {{#ifeq error.field 'confirm_password'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
-            </div>
-        </div>
-    </div>
+  {{!-- Email --}}
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label for="email">
+          <i class="ion-ios7-email mr-2"></i>Email
+        </label>
+        {{#if errors}} 
+        {{!-- Has error --}}
+          {{#each errors}}
+            {{#ifeq this.field 'email'}} 
+              <input id="email" name="email" type="email" required
+              class="form-control parsley-error" value="{{{this.value}}}">
+              <p class="form-validation-error">{{{this.message}}}</p>
+            {{else}} 
+            {{/ifeq}}
+          {{/each}}
 
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="form-group">
-                <label class="control-label">Role</label>
-                <select class="form-control select2" name="role" id="role" required>
-                    <option value="" selected disabled>Select a role</option>
-                    <option value="admin" 
-                    {{#ifeq error.field 'role'}} 
-                        {{#ifMatch error.value 'admin'}} selected {{/ifMatch}} 
-                    {{else}}
-                        {{#ifMatch error.formInput.role 'admin'}} selected {{/ifMatch}}
-                    {{/ifeq}}> Admin
-                    </option>
-                    <option value="user" 
-                    {{#ifeq error.field 'role'}} 
-                        {{#ifMatch error.value 'user'}} selected {{/ifMatch}} 
-                    {{else}} 
-                        {{#ifMatch error.formInput.role 'user'}} selected {{/ifMatch}}
-                    {{/ifeq}}> Customer
-                    </option>
-                </select>
-            </div>
-            {{#ifeq error.field 'role'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
-        </div>
-    </div>
+          {{!-- Valid --}}
+          {{#if validData.email}}
+          <input id="email" name="email" type="email" class="form-control" value="{{{validData.email}}}"
+            required>
+          {{/if}} 
+        {{else}}
+        {{!-- First load --}}
+          <input id="email" name="email" type="email" required class="form-control"
+          {{#if validData.email}} value="{{{validData.email}}}"
+          {{/if}} >
+        {{/if}}
 
-    <div class="row mt-1 pt-2">
-        <div class="col-sm-2">
-            <div class="form-group">
-                <span class="control-label">Activated</span>
-            </div>
-        </div>
-        <div class="col-sm-2">
-            <div class="form-group">
-                <input type="checkbox" id="switch4" name="status" switch="success"
-                {{#ifeq error.field 'status'}} 
-                    {{#ifMatch error.value 'activated'}} checked {{/ifMatch}} 
-                {{else}} 
-                    {{#ifMatch error.formInput.status 'activated'}} checked {{/ifMatch}}
-                {{/ifeq}}
-                />
-                <label id="status-lbl" for="switch4" data-on-label="Yes" data-off-label="No"></label>
-            </div>
-        </div>
-        {{#ifeq error.field 'status'}}
-        <div class="col-sm-12">
-            {{> admin/form/error.partial }}
-        </div>
-        {{else}} {{/ifeq}}
+      </div>
     </div>
+  </div>
 
-    <div class="row">
-        <div class="col-sm-12 mr-0 text-right">
-            <button type="submit" class="btn btn-success waves-effect waves-light">Create</button>
-            <button type="submit" class="btn btn-secondary waves-effect">Cancel</button>
-        </div>
+  {{!-- Password --}}
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="form-group">
+        <label for="password">
+          <i class="ion ion-unlocked mr-2"></i>Password
+        </label>
+
+        {{#if errors}} 
+        {{!-- Has error --}}
+          {{#each errors}}
+            {{#ifeq this.field 'password'}} 
+              <input id="password" name="password" type="password" required
+              class="form-control parsley-error" value="{{{this.value.password}}}">
+              <p class="form-validation-error">{{{this.message}}}</p>
+            {{else}} 
+            {{/ifeq}}
+          {{/each}}
+          
+          {{!-- Valid --}}
+          {{#if validData.password}}
+          <input id="password" name="password" type="password" class="form-control" value="{{{validData.password}}}" required>
+          {{/if}} 
+        {{else}}
+        {{!-- First load --}}
+          <input id="password" name="password" type="password" required class="form-control"
+          {{#if validData.password}} value="{{{validData.password}}}"
+          {{/if}} >
+        {{/if}}
+      </div>
+
+      {{!-- Confirm Password --}}
+      <div class="form-group">
+        <label for="confirm_password">
+          <i class="ion ion-unlocked mr-2"></i>Confirm Password
+        </label>
+        
+        {{#if errors}} 
+        {{!-- Has error --}}
+          {{#each errors}}
+            {{#ifeq this.field 'confirm_password'}} 
+              <input id="confirm_password" name="confirm_password" type="password" required
+              class="form-control parsley-error" value="{{{this.value.confirm_password}}}">
+              <p class="form-validation-error">{{{this.message}}}</p>
+            {{else}} 
+            {{/ifeq}}
+          {{/each}}
+
+          {{!-- Valid --}}
+          {{#if validData.confirm_password}}
+          <input id="confirm_password" name="confirm_password" type="password" class="form-control" value="{{{validData.confirm_password}}}"
+            required>
+          {{/if}} 
+        {{else}}
+        {{!-- First load --}}
+          <input id="confirm_password" name="confirm_password" type="password" required class="form-control"
+          {{#if validData.confirm_password}} value="{{{validData.confirm_password}}}"
+          {{/if}} >
+        {{/if}}
+      </div>
     </div>
+  </div>
+
+  {{!-- Role --}}
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label class="control-label">
+          <i class="ion-ribbon-b mr-2"></i>Role
+        </label>
+        <select class="form-control select2" name="role" id="role" required>
+          <option value="" selected disabled>Select a role</option>
+          <option value="admin" {{#ifMatch validData.role 'admin'}} selected {{/ifMatch}}> Admin
+          </option>
+          <option value="user" {{#ifMatch validData.role 'user'}} selected {{/ifMatch}}> Customer
+          </option>
+        </select>
+
+        {{#if errors}}
+          {{#each errors}}
+            {{#ifeq this.field 'role'}}
+            <p class="form-validation-error">{{{this.message}}}</p>
+            {{/ifeq}}
+          {{/each}}
+        {{else}}
+        {{/if}}
+
+      </div>
+    </div>
+  </div>
+
+  {{!-- Status --}}
+  <div class="row mt-1 pt-2">
+    <div class="col-sm-2">
+      <label class="control-label">
+        <i class="ion-ios7-circle-filled mr-2"></i>Status
+      </label>
+
+      {{#if errors}}
+        {{#each errors}}
+          {{#ifeq this.field 'status'}}
+          <p class="form-validation-error">{{{this.message}}}</p>
+          {{/ifeq}}
+        {{/each}}
+      {{else}}
+      {{/if}}
+    </div>
+    <div class="col-sm-2">
+      <div class="form-group">
+        {{#if validData.status}}
+        <label class="btn btn-danger {{#ifMatch validData.status 'deactivated'}} active {{/ifMatch}}" 
+        onclick="selectStatus(this)" for="deactivated-status">Deactivated</label>
+        <input type="radio" name="status" id="deactivated-status" value="deactivated"
+        {{#ifMatch validData.status 'deactivated'}} checked {{/ifMatch}}>
+        <label class="btn btn-success {{#ifMatch validData.status 'activated'}} active {{/ifMatch}}"
+        onclick="selectStatus(this)" for="activated-status">Activated</label>
+        <input type="radio" name="status" id="activated-status" value="activated"
+        {{#ifMatch validData.status 'activated'}} checked {{/ifMatch}}>
+        
+        {{else}}
+        {{!-- First load --}}
+        <label class="btn btn-danger active" onclick="selectStatus(this)" for="deactivated-status">Deactivated</label>
+        <input type="radio" name="status" id="deactivated-status" value="deactivated" checked>
+        <label class="btn btn-success" onclick="selectStatus(this)" for="activated-status">Activated</label>
+        <input type="radio" name="status" id="activated-status" value="activated">
+        {{/if}}
+
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12 mr-0 text-right">
+      <button type="submit" class="btn btn-success waves-effect waves-light">Create</button>
+      <button type="button" onclick="backward()" class="btn btn-secondary waves-effect">Cancel</button>
+    </div>
+  </div>
 </form>
