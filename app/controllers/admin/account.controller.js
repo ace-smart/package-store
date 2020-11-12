@@ -3,8 +3,8 @@ const helper = require('../../helper/helper')
 const authHelper = require('../../helper/auth.helper')
 
 module.exports = {
-    // @desc:   Show all users
-    // @route   GET /users
+    // @desc:   Show all accounts
+    // @route   GET /accounts
     showAccountList: async (req, res) => {
         try {
             const response = await axiosInstance.get("/admin/users", {
@@ -18,6 +18,7 @@ module.exports = {
                     layout: "admin/main.layout.hbs",
                     content: "list",
                     header: "List of accounts",
+                    route: 'accounts',
                     accounts: response.data,
                     user: await helper.getUserInstance(req),
                     csrfToken: req.csrfToken(),
@@ -44,6 +45,7 @@ module.exports = {
                     layout: "admin/main.layout.hbs",
                     content: "list",
                     header: "List of administrators",
+                    route: 'accounts',
                     accounts: response.data,
                     user: await helper.getUserInstance(req),
                     csrfToken: req.csrfToken(),
@@ -70,6 +72,7 @@ module.exports = {
                     layout: "admin/main.layout.hbs",
                     content: "list",
                     header: "List of Customers",
+                    route: 'accounts',
                     accounts: response.data,
                     user: await helper.getUserInstance(req),
                     csrfToken: req.csrfToken(),
@@ -118,6 +121,7 @@ module.exports = {
                     layout: "admin/main.layout.hbs",
                     content: "view",
                     header: "User information",
+                    route: 'accounts',
                     account: account,
                     user: await helper.getUserInstance(req),
                     csrfToken: req.csrfToken(),
@@ -137,6 +141,7 @@ module.exports = {
             content: "form",
             formType: "create",
             header: "Add a new administrator",
+            route: 'accounts',
             user: await helper.getUserInstance(req),
             csrfToken: req.csrfToken(),
         })
@@ -160,6 +165,7 @@ module.exports = {
                     content: "form",
                     formType: "create",
                     header: "Add a new administrator",
+                    route: 'accounts',
                     user: await helper.getUserInstance(req),
                     csrfToken: req.csrfToken(),
                 })
@@ -183,6 +189,7 @@ module.exports = {
                     content: "form",
                     formType: "create",
                     header: "Add a new administrator",
+                    route: 'accounts',
                     csrfToken: req.csrfToken(),
                     user: await helper.getUserInstance(req),
                     errors: errors,
@@ -212,6 +219,7 @@ module.exports = {
                     content: "form",
                     formType: "update",
                     header: "Update the administrator",
+                    route: 'accounts',
                     user: await helper.getUserInstance(req),
                     account: response.data,
                     csrfToken: req.csrfToken(),
@@ -235,12 +243,12 @@ module.exports = {
                 })
 
             if (response.status === 200) {
-                const account = response.data
+                let account = response.data
                 let accountData = require("../../helper/helper").removeCSRF(req.body)
                 accountData = require("../../helper/helper").getFilledFields(accountData, account)
                 
                 try {
-                    const response = await axiosInstance.put(
+                    const updateResponse = await axiosInstance.put(
                         `/admin/users/${req.params.id}`, 
                         accountData, 
                         {
@@ -249,15 +257,19 @@ module.exports = {
                             },
                         })
 
-                    if (response.status === 204) {
+                    if (updateResponse.status === 204) {
+                        account = JSON.parse(JSON.stringify(req.body))
+                        account.id = response.data.id
+
                         req.flash("success", "Your changes have been saved.")
                         return res.render("templates/admin/account/account.hbs", {
                             layout: "admin/main.layout.hbs",
                             content: "form",
                             formType: "update",
                             header: "Update the administrator",
+                            route: 'accounts',
                             user: await helper.getUserInstance(req),
-                            account: JSON.parse(JSON.stringify(req.body)),
+                            account: account,
                             csrfToken: req.csrfToken(),
                         })
                     }
@@ -278,6 +290,7 @@ module.exports = {
                             content: "form",
                             formType: "update",
                             header: "Update the administrator",
+                            route: 'accounts',
                             user: await helper.getUserInstance(req),
                             account: account,
                             csrfToken: req.csrfToken(),

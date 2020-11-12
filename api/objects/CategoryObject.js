@@ -17,7 +17,10 @@ class CategoryObject {
   set addOneSubcategory (subcategoryId) {
     if (subcategoryId == null) {
       throw new TypeError("Can not add subcategory with null or undefined value.")
-    }else {
+    }else if (this.subcategories){
+      this.subcategories.push(subcategoryId)
+    } else {
+      this.subcategories = new Array()
       this.subcategories.push(subcategoryId)
     }
   }
@@ -114,18 +117,21 @@ class CategoryObject {
         errors.push({
           field: "name",
           message: "Must contain only numbers and characters.",
+          value: this.name
         })
       }
       if (!validator.isLength(this.name, { min: 4, max: 40 })) {
         errors.push({
           field: "name",
           message: "Must be from 4 to 40 characters.",
+          value: this.name
         })
       }
       if (await isExistent(CategoryModel, { name: this.name }, exceptionId)) {
         errors.push({
           field: "name",
           message: "Already existent.",
+          value: this.name
         })
       }
     }
@@ -135,6 +141,7 @@ class CategoryObject {
         errors.push({
           field: "status",
           message: "Not valid.",
+          value: this.status.toLowerCase()
         })
       }
     }
@@ -188,7 +195,6 @@ class CategoryObject {
 
       throw new Error("Failed to create category.")
     } catch (error) {
-      console.log(error)
       throw error
     }
   }

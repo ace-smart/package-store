@@ -1,4 +1,5 @@
 {{> admin/meta.partial }}
+
 <meta name="csrf-token" content="{{csrfToken}}">
 
 <!-- Select 2 -->
@@ -6,7 +7,18 @@
 
 {{> admin/css.partial }}
 
+<!-- DataTables -->
+<link href="/admin/plugins/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+<link href="/admin/plugins/datatables/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+<!-- Responsive datatable examples -->
+<link href="/admin/plugins/datatables/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+
+<!-- Sweet Alert -->
+<link href="/admin/plugins/sweet-alert2/sweetalert2.min.css" rel="stylesheet" type="text/css">
+
 {{> admin/main/css.partial }}
+
+{{> admin/list/head.partial }}
 
 <style>
     p.form-validation-error {

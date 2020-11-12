@@ -96,7 +96,7 @@
 
     {{!-- Status --}}
     <div class="row mt-1 pt-2">
-        <div class="col-sm-2">
+        <div class="col-sm-12">
             <label class="control-label">
                 <i class="ion-ios7-circle-filled mr-2"></i>Status
             </label>
@@ -110,7 +110,7 @@
             {{else}}
             {{/if}}
         </div>
-        <div class="col-sm-2">
+        <div class="col-sm-12">
             <div class="form-group">
                 <label class="btn btn-danger {{#ifMatch account.status 'deactivated'}} active {{/ifMatch}}"
                     onclick="selectStatus(this)" for="deactivated-status">Deactivated</label>

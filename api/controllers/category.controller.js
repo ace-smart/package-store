@@ -10,7 +10,7 @@ module.exports = {
     try {
       const selectFields = "name subcategories status createdAt"
       const categories = await CategoryObject.getCategoriesBy({}, selectFields)
-      return res.status(200).json({ categories: categories })
+      return res.status(200).json(categories)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -22,7 +22,7 @@ module.exports = {
     try {
       const category = await CategoryObject.getOneCategoryBy({ _id: req.params.id })
       if (category) {
-        return res.status(200).json({ category: category })
+        return res.status(200).json(category)
       }
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
@@ -89,10 +89,12 @@ module.exports = {
       const category = await CategoryObject.getOneCategoryBy({_id: req.params.id})
       if (category) {
         let subcategoryList = new Array()
-        for(let i =0; i < category.getSubcategories.length; i++) {
-          const subcategory = await SubcategoryObject.getOneSubcategoryBy({_id: category.getSubcategories[i]})
-          if (subcategory) {
-            subcategoryList.push(subcategory)
+        if (category.getSubcategories) {
+          for(let i =0; i < category.subcategories.length; i++) {
+            const subcategory = await SubcategoryObject.getOneSubcategoryBy({_id: category.getSubcategories[i]})
+            if (subcategory) {
+              subcategoryList.push(subcategory)
+            }
           }
         }
 
@@ -135,7 +137,7 @@ module.exports = {
       if (category){
         const createdSubcategory = await SubcategoryObject.create(category.id, {...req.body})
         if (createdSubcategory) {
-          return res.sendStatus(204)
+          return res.sendStatus(201)
         }
         throw new Error("Failed to create subcategory")
       }

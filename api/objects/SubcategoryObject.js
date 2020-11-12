@@ -49,18 +49,22 @@ class SubcategoryObject {
         errors.push({
           field: "name",
           message: "Must contain only numbers and characters.",
+          value: this.name
         })
       }
       if (!validator.isLength(this.name, { min: 4, max: 40 })) {
         errors.push({
           field: "name",
           message: "Must be from 4 to 40 characters.",
+          value: this.name
         })
       }
+
       if (await isExistent(SubcategoryModel, { name: this.name }, exceptionId)) {
         errors.push({
           field: "name",
-          message: "Already existent.",
+          message: "Already existent in this category or other categories.",
+          value: this.name
         })
       }
     }
@@ -70,6 +74,7 @@ class SubcategoryObject {
         errors.push({
           field: "status",
           message: "Not valid.",
+          value: this.status.toLowerCase()
         })
       }
     }

@@ -163,7 +163,7 @@
 
   {{!-- Status --}}
   <div class="row mt-1 pt-2">
-    <div class="col-sm-2">
+    <div class="col-sm-12">
       <label class="control-label">
         <i class="ion-ios7-circle-filled mr-2"></i>Status
       </label>
@@ -177,7 +177,7 @@
       {{else}}
       {{/if}}
     </div>
-    <div class="col-sm-2">
+    <div class="col-sm-12">
       <div class="form-group">
         {{#if validData.status}}
         <label class="btn btn-danger {{#ifMatch validData.status 'deactivated'}} active {{/ifMatch}}" 
