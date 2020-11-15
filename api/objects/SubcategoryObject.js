@@ -1,23 +1,46 @@
 const SubcategoryModel = require("../models/SubcategoryModel")
 const CategoryModel = require("../models/CategoryModel")
-const NotFoundError = require("../errors/not_found")
 const ValidationError = require("../errors/validation")
 const ObjectError = require("../errors/object")
-const CategoryObject = require("./CategoryObject")
 const validator = require('validator')
 const { STATUS_VALUES, isExistent } = require("../helper/validation")
+const mongoose = require('mongoose')
+const castToObjectId = mongoose.Types.ObjectId
 
 class SubcategoryObject {
-  constructor({ _id, name, status, createdAt }) {
+  constructor({ _id, name, categoryId, status, createdAt }) {
     this.id = _id
     this.name = name
+    this.categoryId = categoryId
     this.status = status
     this.createdAt = createdAt
   }
 
+  static async getSubcategoriesBy(criteria = {}, selectFields = null) {
+    if (criteria._id) {
+      criteria._id = castToObjectId(criteria._id)
+    }
+
+    try {
+      const subcategories = await SubcategoryModel.find(criteria, selectFields).populate({path: 'categoryId'}).lean()
+      
+      if (subcategories) {
+        return subcategories
+      }
+
+      return null
+    } catch (error) {
+      throw error
+    }
+  }
+
   static async getOneSubcategoryBy(criteria = {}, selectFields = null) {
+    if (criteria._id) {
+      criteria._id = castToObjectId(criteria._id)
+    }
     try {
       const subcategory = await SubcategoryModel.findOne(criteria, selectFields).lean()
+      
       if (subcategory) {
         return new SubcategoryObject({ ...subcategory })
       }
@@ -35,6 +58,12 @@ class SubcategoryObject {
       if (typeof this.name === "undefined" || validator.isEmpty(this.name)) {
         errors.push({
           field: "name",
+          message: "Must be required.",
+        })
+      }
+      if (typeof this.categoryId === "undefined" || validator.isEmpty(this.categoryId.toString())) {
+        errors.push({
+          field: "categoryId",
           message: "Must be required.",
         })
       }
@@ -65,6 +94,24 @@ class SubcategoryObject {
           field: "name",
           message: "Already existent in this category or other categories.",
           value: this.name
+        })
+      }
+    }
+
+    // category
+    if (typeof this.categoryId !== "undefined" && !validator.isEmpty(this.categoryId.toString())) {
+      if (!validator.isMongoId(this.categoryId)) {
+        errors.push({
+          field: "categoryId",
+          message: "Invalid format.",
+          value: this.categoryId,
+        })
+      }
+      if (!(await isExistent(CategoryModel, { _id: this.categoryId }))) {
+        errors.push({
+          field: "categoryId",
+          message: "Not existent.",
+          value: this.categoryId,
         })
       }
     }
@@ -114,19 +161,7 @@ class SubcategoryObject {
     return subcategoryObject
   }
 
-  static async create(categoryId = null, { ...subcategoryData }) {
-    if (categoryId == null) {
-      throw new TypeError("Can not create with null or undefined categoryId")
-    }
-
-    if (!(await isExistent(CategoryModel, { _id: categoryId }))) {
-      throw new ObjectError({
-        objectName: "CategoryObject",
-        errorProperty: "Id",
-        message: "Id is not valid.",
-      })
-    }
-
+  static async create({ ...subcategoryData }) {
     try {
       let subcategoryObject = new SubcategoryObject({ ...subcategoryData })
       subcategoryObject = subcategoryObject.clean()
@@ -135,14 +170,9 @@ class SubcategoryObject {
         const createdSubcategory = new SubcategoryObject(
           await SubcategoryModel.create({ ...isValid })
         )
-        // add to Category
-        const category = await CategoryObject.getOneCategoryBy({ _id: categoryId })
-        if (category) {
-          category.addOneSubcategory = createdSubcategory.id
-          const isSaved = await category.save()
-          if (isSaved) {
-            return createdSubcategory
-          }
+
+        if (createdSubcategory) {
+          return createdSubcategory
         }
       }
 
@@ -209,7 +239,7 @@ class SubcategoryObject {
     }
   }
 
-  async remove(categoryId) {
+  async remove() {
     if (this.id == null){
       throw new ObjectError({
         objectName: 'SubcategoryObject',
@@ -218,29 +248,14 @@ class SubcategoryObject {
       })
     }
 
-    if (categoryId == null || !(await isExistent(CategoryModel,{_id: categoryId}))){
-      throw new ObjectError({
-        objectName: 'CategoryObject',
-        errorProperty: 'Id',
-        message: 'Id is not valid.'
-      })
-    }
-
     try {
-      const category = await CategoryObject.getOneCategoryBy({_id: categoryId})
-      if (category) {
-        const removedSubcategory = await SubcategoryModel.findOneAndDelete({_id: this.id}).lean()
-        if (removedSubcategory) {
-          category.setSubcategories = category.getSubcategories.filter((value) => value != removedSubcategory._id.toString())
-          const isSaved = await category.save()
-          if (isSaved) {
-            return new SubcategoryObject({...removedSubcategory})
-          }
-        }
-        throw new Error("Failed to remove subcategory.")
+      const removedSubcategory = new SubcategoryObject(
+        await SubcategoryModel.findOneAndDelete({_id: this.id}).lean()
+      )
+      if (removedSubcategory) {
+        return removedSubcategory
       }
-
-      throw new NotFoundError("No category found.")
+      throw new Error("Failed to remove subcategory.")
     } catch (error) {
       throw error
     }

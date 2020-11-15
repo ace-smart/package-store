@@ -9,6 +9,10 @@ const SubcategorySchema = new mongoose.Schema({
     min: 3,
     max: 255
   },
+  categoryId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category'
+  },
   status: {
     type: String,
     default: 'deactivated',

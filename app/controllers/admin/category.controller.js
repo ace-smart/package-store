@@ -1,13 +1,41 @@
-const e = require("express")
 const axiosInstance = require("../../helper/axios.helper")
+const { handleErrors } = require("../../helper/helper")
 const helper = require("../../helper/helper")
-// @desc    Get subcategories
-const getSubcategories = async (req, categoryId) => {
+const getCategoryById = async (accessToken, categoryId) => {
   if (categoryId) {
     try {
-      const response = await axiosInstance.get(`/admin/categories/${categoryId}/subcategories`, {
+      const response = await axiosInstance.get(`/admin/categories/${categoryId}`, {
         headers: {
-          Authorization: "Bearer " + req.user.accessToken,
+          Authorization: "Bearer " + accessToken,
+        },
+      })
+
+      if (response.status === 200) {
+        return response.data
+      }
+    } catch (error) {
+      throw error
+    }
+  }
+
+  return null
+}
+const getSubcategoryByCategory = (category, subcategoryId) => {
+  if (category.subcategories instanceof Array && category.subcategories.length > 0) {
+    const subcategory = category.subcategories.find(element => element.id == subcategoryId)
+    if (subcategory) {
+      return subcategory
+    }
+  }
+
+  return null
+}
+const getSubcategoryById = async (accessToken, subcategoryId) => {
+  if (subcategoryId) {
+    try {
+      const response = await axiosInstance.get(`/admin/subcategories/${subcategoryId}`, {
+        headers: {
+          Authorization: "Bearer " + accessToken,
         },
       })
 
@@ -61,47 +89,12 @@ module.exports = {
       })
 
       if (response.status === 200) {
-        category = response.data
-        if (category.subcategories && category.subcategories.length > 0) {
-          try {
-            const subCateRes = await axiosInstance.get(
-              `/admin/categories/${req.params.id}/subcategories`,
-              {
-                headers: {
-                  Authorization: "Bearer " + req.user.accessToken,
-                },
-              }
-            )
-
-            if (subCateRes.status === 200) {
-              category.subcategories = subCateRes.data
-            }
-          } catch (error) {
-            if (
-              (error.response.status = 404 && error.response.data.error.name === "NotFoundError")
-            ) {
-              category.subcategories = []
-              return res.render("templates/admin/category/category.hbs", {
-                layout: "admin/main.layout.hbs",
-                content: "view",
-                header: "Category information",
-                route: "categories",
-                category: category,
-                user: await helper.getUserInstance(req),
-                csrfToken: req.csrfToken(),
-              })
-            }
-
-            throw error
-          }
-        }
-
         return res.render("templates/admin/category/category.hbs", {
           layout: "admin/main.layout.hbs",
           content: "view",
           header: "Category information",
           route: "categories",
-          category: category,
+          category: response.data,
           user: await helper.getUserInstance(req),
           csrfToken: req.csrfToken(),
         })
@@ -349,39 +342,30 @@ module.exports = {
   // @desc    Add subcategory
   // @route   POST /categories/:id/subcategories/add
   addSubcategory: async function (req, res) {
-    let subcategoryData = helper.removeCSRF(req.body)
     let category = null
+    let subcategoryData = helper.removeCSRF(req.body)
+    subcategoryData.categoryId = req.params.id
+    
     try {
-      const response = await axiosInstance.get(`/admin/categories/${req.params.id}`, {
-        headers: {
-          Authorization: "Bearer " + req.user.accessToken,
-        },
-      })
-
-      if (response.status === 200) {
-        category = response.data
-        try {
-          const subCategoryRes = await axiosInstance.post(
-            `/admin/categories/${category.id}/subcategories`,
-            subcategoryData,
-            {
-              headers: {
-                Authorization: "Bearer " + req.user.accessToken,
-              },
-            }
-          )
-
-          if (subCategoryRes.status === 201) {
-            req.flash("success", "You have created a new subcategory.")
-            return res.redirect(`/admin/categories/view/${req.params.id}`)
-          }
-        } catch (error) {
-          throw error
+      const createSubcategoryRes = await axiosInstance.post(
+        `/admin/subcategories`,
+        subcategoryData,
+        {
+          headers: {
+            Authorization: "Bearer " + req.user.accessToken,
+          },
         }
+      )
+
+      if (createSubcategoryRes.status === 201) {
+        req.flash("success", "You have created a new subcategory.")
+        return res.redirect(`/admin/categories/view/${req.params.id}`)
       }
+
     } catch (error) {
+      category = await getCategoryById(req.user.accessToken, req.params.id)
+      //ValidationError
       if (error.response.status === 400) {
-        //ValidationError
         const errors = error.response.data.error.invalidation
         const inputFields = Object.keys(subcategoryData)
         for (let i = 0; i < inputFields.length; i++) {
@@ -389,17 +373,6 @@ module.exports = {
           if (isFound) {
             delete subcategoryData[inputFields[i]]
           }
-        }
-
-        try {
-          const subcategories = await getSubcategories(req, req.params.id)
-          if (subcategories) {
-            category.subcategories = subcategories
-          } else {
-            category.subcategories = []
-          }
-        } catch (error) {
-          throw error
         }
 
         req.flash("fail", "Your input is not valid. Please check and then fill in again.")
@@ -415,7 +388,7 @@ module.exports = {
           errors: errors,
           validData: JSON.parse(JSON.stringify(subcategoryData)),
         })
-      }
+        }
 
       return helper.handleErrors(res, error, "admin")
     }
@@ -424,52 +397,25 @@ module.exports = {
   // @desc:   Get category by Id
   // @route   GET /categories/view/:id/subcategories/edit/:subId
   showUpdateSubcateForm: async (req, res) => {
-    let category = null
     try {
-      const response = await axiosInstance.get(`/admin/categories/${req.params.id}`, {
-        headers: {
-          Authorization: "Bearer " + req.user.accessToken,
-        },
-      })
-
-      if (response.status === 200) {
-        category = response.data
-        if (category.subcategories && category.subcategories.length > 0) {
-          const isFound = category.subcategories.find((ele) => ele == req.params.subId)
-
-          if (isFound) {
-            try {
-              const subCateRes = await axiosInstance.get(
-                `/admin/categories/${req.params.id}/subcategories/${req.params.subId}`,
-                {
-                  headers: {
-                    Authorization: "Bearer " + req.user.accessToken,
-                  },
-                }
-              )
-
-              if (subCateRes.status === 200) {
-                category.subcategories = await getSubcategories(req, category.id)
-                return res.render("templates/admin/category/category.hbs", {
-                  layout: "admin/main.layout.hbs",
-                  content: "view",
-                  formType: "update",
-                  header: "Category information",
-                  route: "categories",
-                  category: category,
-                  subcategory: subCateRes.data,
-                  user: await helper.getUserInstance(req),
-                  csrfToken: req.csrfToken(),
-                })
-              }
-            } catch (error) {
-              throw error
-            }
-          }
-          
-          throw {response: {status: 404}}
-        }
+      const category = await getCategoryById(req.user.accessToken, req.params.id)
+      const subcategory = getSubcategoryByCategory(category, req.params.subId)
+      if (subcategory) {
+        return res.render("templates/admin/category/category.hbs", {
+          layout: "admin/main.layout.hbs",
+          content: "view",
+          formType: "update",
+          header: "Category information",
+          route: "categories",
+          category: category,
+          subcategory: subcategory,
+          user: await helper.getUserInstance(req),
+          csrfToken: req.csrfToken(),
+        })
+      } else {
+        return helper.renderNotFoundPage(res, 'admin')
       }
+      
     } catch (error) {
       return helper.handleErrors(res, error, "admin")
     }
@@ -479,97 +425,70 @@ module.exports = {
   // @route   POST /categories/view/:id/subcategories/edit/:subId
   updateSubcategoryById: async (req, res) => {
     let category = null
+    let subcategoryData = helper.removeCSRF(req.body)
     try {
-      const response = await axiosInstance.get(`/admin/categories/${req.params.id}`, {
-        headers: {
-          Authorization: "Bearer " + req.user.accessToken,
-        },
-      })
+      category = await getCategoryById(req.user.accessToken, req.params.id)
+      let subcategory = getSubcategoryByCategory(category, req.params.subId)
+      if (subcategory) {
+        subcategoryData = helper.getFilledFields(subcategoryData, subcategory)
 
-      if (response.status === 200) {
-        category = response.data
-        const isFound = category.subcategories.find((ele) => ele == req.params.subId)
-        if (isFound) {
-          let subcategoryData = helper.removeCSRF(req.body)
-
-          try {
-            // Get subcategory data
-            const subcateResponse = await axiosInstance.get(
-              `/admin/categories/${req.params.id}/subcategories/${req.params.subId}`,
-              {
-                headers: {
-                  Authorization: "Bearer " + req.user.accessToken,
-                },
-              }
-            )
-
-            if (subcateResponse.status === 200) {
-              subcategoryData = helper.getFilledFields(subcategoryData, category)
-            }
-
-            // Update
-            const updateResponse = await axiosInstance.put(
-              `/admin/categories/${req.params.id}/subcategories/${req.params.subId}`,
-              subcategoryData,
-              {
-                headers: {
-                  Authorization: "Bearer " + req.user.accessToken,
-                },
-              }
-            )
-
-            if (updateResponse.status === 204) {
-              subcategory = JSON.parse(JSON.stringify(req.body))
-              subcategory.id = req.params.subId
-              category.subcategories = await getSubcategories(req, category.id)
-              req.flash("success", "Your changes have been saved.")
-              return res.render("templates/admin/category/category.hbs", {
-                layout: "admin/main.layout.hbs",
-                content: "view",
-                formType: "update",
-                header: "Update the category",
-                route: "categories",
-                category: category,
-                subcategory: subcategory,
-                user: await helper.getUserInstance(req),
-                csrfToken: req.csrfToken(),
-              })
-            }
-          } catch (error) {
-            //ValidationError
-            const errors = error.response.data.error.invalidation
-            const inputFields = Object.keys(subcategoryData)
-            for (let i = 0; i < inputFields.length; i++) {
-              const isFound = errors.find((ele) => ele.field === inputFields[i])
-              if (isFound) {
-                delete subcategoryData[inputFields[i]]
-              }
-            }
-            if (error.response && error.response.status === 400) {
-              subcategory = JSON.parse(JSON.stringify(req.body))
-              subcategory.id = req.params.subId
-              category.subcategories = await getSubcategories(req, category.id)
-              req.flash("fail", "Your changes was not valid. Please check your input.")
-              return res.render("templates/admin/category/category.hbs", {
-                layout: "admin/main.layout.hbs",
-                content: "view",
-                formType: "update",
-                header: "Update the subcategory",
-                route: "categories",
-                user: await helper.getUserInstance(req),
-                category: category,
-                subcategory: subcategory,
-                csrfToken: req.csrfToken(),
-                errors: errors,
-                validData: subcategoryData,
-              })
-            } else {
-              throw error
-            }
+        const updateResponse = await axiosInstance.put(
+          `/admin/subcategories/${req.params.subId}`,
+          subcategoryData,
+          {
+            headers: {
+              Authorization: "Bearer " + req.user.accessToken,
+            },
           }
+        )
+
+        if (updateResponse.status === 204) {
+          // Set updated subcategory
+          subcategory = await getSubcategoryById(req.user.accessToken, req.params.subId)
+          req.flash("success", "Your changes have been saved.")
+          return res.render("templates/admin/category/category.hbs", {
+            layout: "admin/main.layout.hbs",
+            content: "view",
+            formType: "update",
+            header: "Update the category",
+            route: "categories",
+            category: category,
+            subcategory: subcategory,
+            user: await helper.getUserInstance(req),
+            csrfToken: req.csrfToken(),
+          })
         }
       }
+
     } catch (error) {
+      //ValidationError
+      const errors = error.response.data.error.invalidation
+      const inputFields = Object.keys(subcategoryData)
+      for (let i = 0; i < inputFields.length; i++) {
+        const isFound = errors.find((ele) => ele.field === inputFields[i])
+        if (isFound) {
+          delete subcategoryData[inputFields[i]]
+        }
+      }
+
+      if (error.response && error.response.status === 400) {
+        category = await getCategoryById(req.user.accessToken, req.params.id)
+        req.flash("fail", "Your changes was not valid. Please check your input.")
+        return res.render("templates/admin/category/category.hbs", {
+          layout: "admin/main.layout.hbs",
+          content: "view",
+          formType: "update",
+          header: "Update the subcategory",
+          route: "categories",
+          user: await helper.getUserInstance(req),
+          category: category,
+          subcategory: getSubcategoryByCategory(category, req.params.subId),
+          csrfToken: req.csrfToken(),
+          errors: errors,
+          validData: subcategoryData,
+        })
+      }
+
       return helper.handleErrors(res, error, "admin")
     }
   },
@@ -577,44 +496,29 @@ module.exports = {
   // @desc    Deactivate a category by Id
   // @route   PUT /categories/view/:id/subcategories/deactivate/:subId
   deactivateSubcateById: async (req, res) => {
-    let category = null
     try {
-      const response = await axiosInstance.get(`/admin/categories/${req.params.id}`, {
-        headers: {
-          Authorization: "Bearer " + req.user.accessToken,
-        },
-      })
-
-      if (response.status === 200) {
-        category = response.data
-        // Check category has the subcategory
-        if (category.subcategories && category.subcategories.length > 0) {
-          const isFound = category.subcategories.find((ele) => ele == req.params.subId)
-          if (isFound) {
-            try {
-              const deactivateRes = await axiosInstance.put(
-                `/admin/categories/${req.params.id}/subcategories/${req.params.subId}`,
-                {
-                  status: "deactivated",
-                },
-                {
-                  headers: {
-                    Authorization: "Bearer " + req.user.accessToken,
-                  },
-                }
-              )
-
-              if (deactivateRes.status === 204) {
-                return res.sendStatus(200)
-              }
-            } catch (error) {
-              throw error
-            }
+      const subcategory = await getSubcategoryById(req.user.accessToken, req.params.subId)
+      if (subcategory) {
+        const deactivateRes = await axiosInstance.put(
+          `/admin/subcategories/${req.params.subId}`,
+          {
+            status: "deactivated",
+          },
+          {
+            headers: {
+              Authorization: "Bearer " + req.user.accessToken,
+            },
           }
+        )
+
+        if (deactivateRes.status === 204) {
+          return res.sendStatus(200)
         }
 
-        throw { response: { status: 404 } }
+      } else {
+        return helper.renderNotFoundPage(res, 'admin')
       }
+
     } catch (error) {
       return helper.handleErrors(res, error, "admin")
     }
@@ -623,44 +527,29 @@ module.exports = {
   // @desc    Deactivate a category by Id
   // @route   PUT /categories/view/:id/subcategories/activate/:subId
   activateSubcateById: async (req, res) => {
-    let category = null
     try {
-      const response = await axiosInstance.get(`/admin/categories/${req.params.id}`, {
-        headers: {
-          Authorization: "Bearer " + req.user.accessToken,
-        },
-      })
-
-      if (response.status === 200) {
-        category = response.data
-        // Check category has the subcategory
-        if (category.subcategories && category.subcategories.length > 0) {
-          const isFound = category.subcategories.find((ele) => ele == req.params.subId)
-          if (isFound) {
-            try {
-              const deactivateRes = await axiosInstance.put(
-                `/admin/categories/${req.params.id}/subcategories/${req.params.subId}`,
-                {
-                  status: "activated",
-                },
-                {
-                  headers: {
-                    Authorization: "Bearer " + req.user.accessToken,
-                  },
-                }
-              )
-
-              if (deactivateRes.status === 204) {
-                return res.sendStatus(200)
-              }
-            } catch (error) {
-              throw error
-            }
+      const subcategory = await getSubcategoryById(req.user.accessToken, req.params.subId)
+      if (subcategory) {
+        const deactivateRes = await axiosInstance.put(
+          `/admin/subcategories/${req.params.subId}`,
+          {
+            status: "activated",
+          },
+          {
+            headers: {
+              Authorization: "Bearer " + req.user.accessToken,
+            },
           }
+        )
+
+        if (deactivateRes.status === 204) {
+          return res.sendStatus(200)
         }
 
-        throw { response: { status: 404 } }
+      } else {
+        return helper.renderNotFoundPage(res, 'admin')
       }
+
     } catch (error) {
       return helper.handleErrors(res, error, "admin")
     }
@@ -669,41 +558,26 @@ module.exports = {
   // @desc    Delete subcategory by Id
   // @route   PUT /categories/view/:id/subcategories/:subId
   removeSubcateById: async (req, res) => {
-    let category = null
     try {
-      const response = await axiosInstance.get(`/admin/categories/${req.params.id}`, {
-        headers: {
-          Authorization: "Bearer " + req.user.accessToken,
-        },
-      })
-
-      if (response.status === 200) {
-        category = response.data
-        // Check category has the subcategory
-        if (category.subcategories && category.subcategories.length > 0) {
-          const isFound = category.subcategories.find((ele) => ele == req.params.subId)
-          if (isFound) {
-            try {
-              const deactivateRes = await axiosInstance.delete(
-                `/admin/categories/${req.params.id}/subcategories/${req.params.subId}`,
-                {
-                  headers: {
-                    Authorization: "Bearer " + req.user.accessToken,
-                  },
-                }
-              )
-
-              if (deactivateRes.status === 204) {
-                return res.sendStatus(200)
-              }
-            } catch (error) {
-              throw error
-            }
+      const subcategory = await getSubcategoryById(req.user.accessToken, req.params.subId)
+      if (subcategory) {
+        const deactivateRes = await axiosInstance.delete(
+          `/admin/subcategories/${req.params.subId}`,
+          {
+            headers: {
+              Authorization: "Bearer " + req.user.accessToken,
+            },
           }
+        )
+
+        if (deactivateRes.status === 204) {
+          return res.sendStatus(200)
         }
 
-        throw { response: { status: 404 } }
+      } else {
+        return helper.renderNotFoundPage(res, 'admin')
       }
+
     } catch (error) {
       return helper.handleErrors(res, error, "admin")
     }

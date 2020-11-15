@@ -1,8 +1,9 @@
-{{!-- {{> admin/main/css.partial }} --}}
 {{#ifMatch route 'accounts'}}
   {{> admin/account/head.partial}}
 {{/ifMatch}}
-
 {{#ifMatch route 'categories'}}
   {{> admin/category/head.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'products'}}
+  {{> admin/product/head.partial}}
 {{/ifMatch}}

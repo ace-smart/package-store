@@ -1,5 +1,6 @@
 <div class="row p-3 m-2">
   <div class="p-0 col-3 d-flex flex-column justify-content-start align-items-center">
+    {{!-- Avatar --}}
     <div class="my-3 ">
       {{#if account.profile.avatar}}
       <img class="img-thumbnail" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
@@ -9,6 +10,8 @@
         data-holder-rendered="true" class="img-thumbnail">
       {{/if}}
     </div>
+
+    {{!-- Info --}}
     <div class="my-2  view-lower-left-col">
       <ul>
         <li class="d-flex bg-purple justify-content-between">

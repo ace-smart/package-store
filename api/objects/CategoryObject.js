@@ -3,69 +3,54 @@ const ValidationError = require("../errors/validation")
 const CategoryModel = require("../models/CategoryModel")
 const { isExistent, STATUS_VALUES } = require("../helper/validation")
 const ObjectError = require("../errors/object")
-const SubcategoryModel = require("../models/SubcategoryModel")
+const SubcategoryObject = require("./SubcategoryObject")
+const mongoose = require('mongoose')
+const castToObjectId = mongoose.Types.ObjectId
 
 class CategoryObject {
   constructor({ _id, name, subcategories, status, createdAt }) {
     this.id = _id
     this.name = name
-    this.subcategories = subcategories
     this.status = status
     this.createdAt = createdAt
-  }
-
-  set addOneSubcategory (subcategoryId) {
-    if (subcategoryId == null) {
-      throw new TypeError("Can not add subcategory with null or undefined value.")
-    }else if (this.subcategories){
-      this.subcategories.push(subcategoryId)
-    } else {
-      this.subcategories = new Array()
-      this.subcategories.push(subcategoryId)
+    if (subcategories){
+      this.subcategories = this.parseSubcategories(subcategories)
     }
   }
 
-  set setSubcategories (subcategories) {
+
+  parseSubcategories (subcategories) {
     if (subcategories instanceof Array) {
-      this.subcategories = subcategories
+      if (subcategories.length > 0) {
+        const listOfSubcates = subcategories.map(element => new SubcategoryObject({...element})) 
+        
+        return listOfSubcates
+      }
+
+      return []
     } else {
       throw new TypeError("subcategories must be an array.")
     }
   }
 
-  get getSubcategories () {
-    return this.subcategories
-  }
-
-  async removeSubcategory(subcategoryId = null) {
-    if (subcategoryId = null){
-      throw new TypeError("Can not remove with null or undefined subcategoryId.")
-    }
-    if (!(await isExistent(SubcategoryModel, {_id: subcategoryId}))){
-      throw new ObjectError({
-        objectName: 'SubcategoryObject',
-        errorProperty: 'Id',
-        message: 'Id is not valid.'
-      })
+  static async getCategoriesBy(criteria = {}) {
+    if (criteria._id) {
+      criteria._id = castToObjectId(criteria._id)
     }
 
     try {
-      const subcategoryList = this.subcategories.filter((value) => value != subcategoryId)
-      this.subcategories = subcategoryList
-      let isSaved = await this.save()
-      if (isSaved) {
-        return isSaved
-      }
+      const categoryList = await CategoryModel.aggregate([
+        {$match: criteria},
+        {$lookup: 
+          {
+            from: 'subcategories',
+            localField: '_id',
+            foreignField: 'categoryId',
+            as: 'subcategories'
+          } 
+        }
+      ])
 
-      throw new Error("Failed to remove subcategory.")
-    } catch (error) {
-      throw error
-    }
-  }
-
-  static async getCategoriesBy(criteria = {}, selectFields = null) {
-    try {
-      const categoryList = await CategoryModel.find(criteria, selectFields).lean()
       if (categoryList.length > 0) {
         let categoryObjects = new Array()
         categoryList.forEach((element) => {
@@ -82,12 +67,27 @@ class CategoryObject {
     }
   }
 
-  static async getOneCategoryBy(criteria = {}, selectFields = null) {
+  static async getOneCategoryBy(criteria = {}) {
+    if (criteria._id) {
+      criteria._id = castToObjectId(criteria._id)
+    }
+
     try {
-      let category = await CategoryModel.findOne(criteria, selectFields).lean()
+      let category = (await CategoryModel.aggregate([
+          {$match: criteria},
+          {$lookup: 
+            {
+              from: 'subcategories',
+              localField: '_id',
+              foreignField: 'categoryId',
+              as: 'subcategories'
+            } 
+          }
+        ]).limit(1))[0]
+      
+        
       if (category) {
-        category = new CategoryObject({ ...category })
-        return category
+        return new CategoryObject({...category})
       }
 
       return null

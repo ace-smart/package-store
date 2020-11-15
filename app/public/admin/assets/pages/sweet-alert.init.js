@@ -115,9 +115,7 @@
             if (this.readyState == 4 && this.status == 200) {
               Swal.fire("Deleted!", "Your file has been deleted.", "success").then((e) => {
                 if (e.value) {
-                  return setInterval(() => {
-                    location.reload()
-                  }, 500)
+                  return location.reload()
                 }
               })
             } else {
@@ -176,9 +174,7 @@
               Swal.fire("Activated!", "It was successfully activated.", "success").then((e) => {
                 if (e.value) {
                   // press OK button
-                  return setInterval(() => {
-                    location.reload()
-                  }, 500)
+                  return location.reload()
                 }
               })
             } else {
@@ -237,9 +233,7 @@
               Swal.fire("Deactivated!", "It was successfully deactivated.", "success").then((e) => {
                 if (e.value) {
                   // press OK button
-                  return setInterval(() => {
-                    location.reload()
-                  }, 500)
+                  return location.reload()
                 }
               })
             } else {
@@ -282,10 +276,11 @@
           xmlhttp.open("PUT", toURL, true)
           xmlhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
-              Swal.fire("Successfully!", "Please check email to set a new password", "success")
-              return setInterval(() => {
-                location.reload()
-              }, 500)
+              Swal.fire("Successfully!", "Please check email to set a new password", "success").then((e) => {
+                if (e.value){
+                  return location.reload()
+                }
+              })
             } else if (this.readyState == 4 && this.status > 400) {
               Swal.fire("Failed", this.responseText.replace(/\"/g, ""), "error")
             }
