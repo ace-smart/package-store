@@ -29,6 +29,9 @@
                 {{#ifMatch route 'products'}}
                     {{> admin/product/breadcrumb.partial }}
                 {{/ifMatch}}
+                {{#ifMatch route 'vouchers'}}
+                    {{> admin/voucher/breadcrumb.partial }}
+                {{/ifMatch}}
 
             </div>
         </div>

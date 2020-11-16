@@ -90,6 +90,23 @@ module.exports = helper = {
     }
   },
 
+  handleInvalidationErrors: function(invalidation = []) {
+    let errorObject = {}
+    // Get fields that have errors
+    invalidation.forEach((element) => {
+      if (errorObject[element.field]) {
+        errorObject[element.field].messages.push(element.message)
+      } else {
+        errorObject[element.field] = {
+          value : (element.value) ? element.value : '',
+          messages: [element.message]
+        }
+      }
+    })
+
+    return errorObject
+  },
+
   handleErrors: async function(res, error, forRole = 'user') {
     // Opt out 'ValidationError' (code: 400)
     if (error.response.status === 403) {

@@ -1,8 +1,8 @@
 const VoucherModel = require("../models/VoucherModel")
 const validator = require("validator")
 const { isExistent, hasSpecialChars, STATUS_VALUES } = require("../helper/validation")
-const VOUCHER_LIMIT_TYPE = ["daily", "weekly", "seasonal", "unlimited", "personal", "manually"]
 const ValidationError = require('../errors/validation')
+const helper = require('../helper/format')
 
 class VoucherObject {
   constructor({
@@ -12,9 +12,7 @@ class VoucherObject {
     rate,
     minValue,
     maxValue,
-    usageLimit,
     validUntil,
-    description,
     status,
     createdAt,
   }) {
@@ -24,9 +22,7 @@ class VoucherObject {
     this.rate = rate
     this.minValue = minValue
     this.maxValue = maxValue
-    this.usageLimit = usageLimit
     this.validUntil = validUntil
-    this.description = description
     this.status = status
     this.createdAt = createdAt
   }
@@ -106,46 +102,44 @@ class VoucherObject {
     }
 
     // name
-    if (typeof this.name !== "undefined" && !validator.isEmpty(this.name)) {
-      if (hasSpecialChars(this.name)) {
+    if (typeof this.name !== "undefined" && !validator.isEmpty(this.name.toString())) {
+      if (hasSpecialChars(this.name.toString())) {
         errors.push({
           field: "name",
           message: "Must contain only numbers,characters and spaces.",
+          value: this.name
         })
       }
       if (!validator.isLength(this.name, { max: 200 })) {
         errors.push({
           field: "name",
           message: "Must be under 200 characters.",
+          value: this.name
         })
       }
-      if (
-        await isExistent(
-          VoucherModel,
-          {
-            name: this.name,
-          },
-          exceptionId
-        )
-      ) {
+      if (await isExistent(VoucherModel,{name: this.name}, exceptionId)) {
         errors.push({
           field: "name",
           message: "Already existent.",
+          value: this.name
         })
       }
     }
+
     // code
     if (typeof this.code !== "undefined" && !validator.isEmpty(this.code)) {
       if (!validator.isAlphanumeric(validator.trim(this.code))) {
         errors.push({
           field: "code",
           message: "Must contain only numbers and letters. (no spaces)",
+          value: this.code
         })
       }
       if (!validator.isLength(validator.trim(this.code), { max: 30 })) {
         errors.push({
           field: "code",
           message: "Must be under 30 characters.",
+          value: this.code
         })
       }
       if (
@@ -169,7 +163,15 @@ class VoucherObject {
       if (!validator.isNumeric(this.rate.toString())) {
         errors.push({
           field: "rate",
-          message: "Must contain only numbers."
+          message: "Must contain only numbers.",
+          value: this.rate
+        })
+      }
+      if (parseInt(this.rate.toString()) < 0) {
+        errors.push({
+          field: "rate",
+          message: "Must be positive number (> 0).",
+          value: this.rate
         })
       }
     }
@@ -178,7 +180,15 @@ class VoucherObject {
       if (!validator.isNumeric(this.minValue.toString())) {
         errors.push({
           field: "minValue",
-          message: "Must contain only numbers."
+          message: "Must contain only numbers.",
+          value: this.minValue
+        })
+      }
+      if (parseInt(this.minValue.toString()) < 0) {
+        errors.push({
+          field: "minValue",
+          message: "Must be greater than 0",
+          value: this.minValue
         })
       }
     }
@@ -187,43 +197,15 @@ class VoucherObject {
       if (!validator.isNumeric(this.maxValue.toString())) {
         errors.push({
           field: "maxValue",
-          message: "Must contain only numbers."
+          message: "Must contain only numbers.",
+          value: this.maxValue
         })
       }
-    }
-
-    // usageLimit
-    if (typeof this.usageLimit !== "undefined") {
-      if (
-        JSON.stringify(this.usageLimit) === "{}" ||
-        typeof this.usageLimit === "string" ||
-        this.usageLimit.limitType == null ||
-        this.usageLimit.maxOfUse == null
-      ) {
+      if (parseInt(this.maxValue.toString()) < 0) {
         errors.push({
-          field: "usageLimit",
-          message: "Must contain two properties {limitType, maxOfUse}."
-        })
-      }
-      if (!validator.isAlpha(this.usageLimit.limitType.toString())) {
-        errors.push({
-          field: "usageLimit.limitType",
-          message: "Must contain only alphabetic characters."
-        })
-      }
-      const validTypes = VOUCHER_LIMIT_TYPE.find((ele) => {
-        return ele === this.usageLimit.limitType.toString()
-      })
-      if (validTypes == null) {
-        errors.push({
-          field: "usageLimit.limitType",
-          message: "Invalid value."
-        })
-      }
-      if (!validator.isNumeric(this.usageLimit.maxOfUse.toString())) {
-        errors.push({
-          field: "usageLimit.maxOfUse",
-          message: "Must be numbers."
+          field: "maxValue",
+          message: "Must be greater than 0",
+          value: this.maxValue
         })
       }
     }
@@ -232,31 +214,29 @@ class VoucherObject {
       if (!validator.isDate(this.validUntil)) {
         errors.push({
           field: "validUntil",
-          message: "Invalid format. [YYYY/MM/DD]"
+          message: "Invalid format. [YYYY/MM/DD]",
+          value: this.validUntil
         })
       }
-    }
-    // description
-    if (typeof this.description !== "undefined" && !validator.isEmpty(this.description)) {
-      if (hasSpecialChars(validator.trim(this.description))) {
+      if (!validator.isAfter(
+          this.validUntil,
+          helper.toFormatDateStr()
+        )
+      ) {
         errors.push({
-          field: "description",
-          message: "Must contain only numbers.",
-        })
-      }
-      if (!validator.isLength(validator.trim(this.description), { max: 350 })) {
-        errors.push({
-          field: "description",
-          message: "Must be under 350 characters.",
+          field: "validUntil",
+          message: "Invalid date. Must be after the present day",
+          value: this.validUntil,
         })
       }
     }
     // status
     if (typeof this.status !== "undefined" && !validator.isEmpty(this.status)) {
-      if (!validator.isIn(this.status.toLowerCase(), STORAGE_STATUS_VALUES)) {
+      if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
         errors.push({
           field: "status",
           message: "Not valid.",
+          value: this.status
         })
       }
     }
@@ -270,7 +250,7 @@ class VoucherObject {
 
   clean() {
     let voucherObject = this
-    const fieldsToClean = ["name", "code", "rate", "minValue", "maxValue", "usageLimit", "description", "status"]
+    const fieldsToClean = ["name", "code", "rate", "minValue", "maxValue","description", "status"]
     for (const [key, value] of Object.entries(voucherObject)) {
       if (value != null) {
         const isFound = fieldsToClean.find((field) => key === field)
@@ -286,14 +266,6 @@ class VoucherObject {
           }
           if (key === "rate" || key === "minValue" || key === "maxValue") {
             voucherObject[key] = parseFloat(validator.trim(value.toString()))
-          }
-          if (key === "usageLimit") {
-            if (value.limitType != null) {
-              voucherObject[key].limitType = validator.trim(value.limitType.toString().toLowerCase())
-            }
-            if (value.maxOfUse != null) {
-              voucherObject[key].maxOfUse = parseInt(validator.trim(value.maxOfUse.toString()))
-            }
           }
         }
 

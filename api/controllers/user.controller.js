@@ -10,8 +10,7 @@ module.exports = {
   // @return:   UserObject[]
   showUserList: async (req, res) => {
     try {
-      const selectFields = "username email status role confirmString createdAt profileId"
-      const users = await UserObject.getUsersBy({}, selectFields)
+      const users = await UserObject.getUsersBy()
       if (users && users.length > 0) {
         return res.status(200).json(users)
       }

@@ -34,8 +34,6 @@ module.exports = validation = {
             if (!validator.matches(validator.trim(string), RegExp("(\\w+|\\w+ \\w+)+", "g"))) {
                 return true
             }
-
-            return false
         }
 
         return false
