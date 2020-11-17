@@ -3,6 +3,7 @@ const TokenObject = require("../objects/TokenObject")
 const LoginObject = require("../objects/LoginObject")
 const RegisterObject = require("../objects/RegisterObject")
 const ConfirmEmailObject = require("../objects/ConfirmEmailObject")
+const ContactObject = require("../objects/ContactObject")
 const TokenError = require("../errors/token")
 const mailer = require("../helper/mailer")
 const registerTemplate = require("../../email_templates/register")
@@ -363,4 +364,21 @@ module.exports = {
       return ErrorHandler.sendErrors(res, error)
     }
   },
+
+  // @desc:   Leave a message to admin
+  // @route:  POST /leave-message
+  leaveMessage: async (req, res) => {
+    try {
+      const createdContact = await ContactObject.create({...req.body})
+
+      if (createdContact) {
+        return res.status(201).json(createdContact)
+      }
+      
+      throw new Error("Failed to create contact.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
 }

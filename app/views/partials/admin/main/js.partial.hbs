@@ -10,6 +10,9 @@
 {{#ifMatch route 'vouchers'}}
 {{> admin/voucher/js.partial}}
 {{/ifMatch}}
+{{#ifMatch route 'contacts'}}
+{{> admin/contact/js.partial}}
+{{/ifMatch}}
 
 <script>
     function toAddPage() {

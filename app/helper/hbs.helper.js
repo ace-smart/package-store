@@ -15,5 +15,27 @@ module.exports = {
         if(a === b){
             return options.fn(this)
         }
-    }
+    },
+    showNumOfItems: function (numOfItems, itemPerPage, currentPage){
+        let currentNumOfItems = itemPerPage * currentPage
+
+        if (currentNumOfItems > numOfItems) {
+            currentNumOfItems = numOfItems
+        }
+
+        return currentNumOfItems
+    },
+    equal: function(a, b, options) {
+        a = parseInt(a.toString())
+        b = parseInt(b.toString())
+
+        if (a === b) {
+            return options.fn(this)
+        } else {
+            return options.inverse(this)
+        }
+    },
+    // formatPrice: function(price){
+    //     return `$ ${parseFloat(price)}`
+    // },
 }

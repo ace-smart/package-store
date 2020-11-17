@@ -1,5 +1,6 @@
 const ContactModel = require('../models/ContactModel')
-const { isExistent, hasSpecialChars, STATUS_VALUES } = require('../helper/validation')
+const { isExistent, hasSpecialChars } = require('../helper/validation')
+const CONTACT_STATUS = ['seen', 'unread', 'removed', 'starred']
 const validator = require('validator')
 const ValidationError = require('../errors/validation')
 
@@ -81,13 +82,15 @@ class ContactObject {
       if (hasSpecialChars(this.subject)) {
         errors.push({
           field: 'subject',
-          message: "Must contain only numbers,characters and spaces."
+          message: "Must contain only numbers,characters and spaces.",
+          value: this.name
         })
       }
       if (!validator.isLength(this.subject, { min: 4, max: 250 })) {
         errors.push({
           field: 'subject',
-          message: "Must be from 4 to 250 characters."
+          message: "Must be from 4 to 250 characters.",
+          value: this.name
         })
       }
     }
@@ -114,19 +117,21 @@ class ContactObject {
       if (hasSpecialChars(this.message)) {
         errors.push({
           field: 'message',
-          message: "Must contain only numbers,characters and spaces."
+          message: "Must contain only numbers,characters and spaces.",
+          value: this.message
         })
       }
       if (!validator.isLength(this.message, { min: 4, max: 400 })) {
         errors.push({
           field: 'message',
-          message: "Must be from 4 to 400 characters."
+          message: "Must be from 4 to 400 characters.",
+          value: this.message
         })
       }
     }
     // status
     if (typeof this.status !== "undefined" && !validator.isEmpty(this.status)) {
-        if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
+        if (!validator.isIn(this.status.toLowerCase(), CONTACT_STATUS)) {
           errors.push({
             field: 'status',
             message: "Not valid."

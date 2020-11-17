@@ -11,6 +11,7 @@ const {
   resetPassword,
   updateNewPassword,
   resetToken,
+  leaveMessage
 } = require("../controllers/auth.controller")
 const { _ensureAccessToken } = require("../helper/auth")
 
@@ -53,6 +54,10 @@ router.get("/reset-password", resetPassword)
 // @desc    Update new password
 // @route   PUT /reset-password
 router.put("/reset-password", updateNewPassword)
+
+// @desc    Leave a message to admin
+// @route   POST /leave-message
+router.post("/leave-message", leaveMessage)
 
 
 module.exports = router

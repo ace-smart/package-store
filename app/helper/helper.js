@@ -120,5 +120,19 @@ module.exports = helper = {
     if (error.response.status === 500) {
       return helper.renderServerErrorPage(res, forRole)
     }
-  }
+  },
+
+  makePagination: (items, itemPerPage = 1, currentPage = 1) => {
+    if(!items || itemPerPage < 1 || currentPage < 1) {
+      return null
+    }
+    
+    const numOfPages = Math.ceil(items.length / itemPerPage)
+    if(currentPage > numOfPages) {
+      throw {response: {status: 404}}
+    }
+    const fromIndex = itemPerPage * (currentPage - 1)
+
+    return items.splice(fromIndex, itemPerPage)
+  },
 }

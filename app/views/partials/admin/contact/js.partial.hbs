@@ -1,0 +1,216 @@
+{{> admin/js/assets.partial }}
+
+<!-- Sweet-Alert  -->
+<script src="/admin/plugins/sweet-alert2/sweetalert2.all.min.js"></script>
+<script src="/admin/static/assets/pages/sweet-alert.init.js"></script>
+
+{{> admin/js/init.partial }}
+
+<script>
+  const queryStr = new URLSearchParams(window.location.search)
+  const status = queryStr.get('status')
+  if (status == 'starred') {
+    document.getElementById('contact-starred-msg').classList.add('active')
+    document.getElementById('contact-removed-msg').classList.remove('active')
+    document.getElementById('contact-all-msg').classList.remove('active')
+  } else if (status == 'removed') {
+    document.getElementById('contact-removed-msg').classList.add('active')
+    document.getElementById('contact-all-msg').classList.remove('active')
+    document.getElementById('contact-starred-msg').classList.remove('active')
+  } else {
+    document.getElementById('contact-all-msg').classList.add('active')
+    document.getElementById('contact-removed-msg').classList.remove('active')
+    document.getElementById('contact-starred-msg').classList.remove('active')
+  }
+
+  const nextPage = function () {
+    const currentPage = (queryStr.get('page'))
+    if (currentPage) {
+      const nextPage = parseInt(currentPage.toString()) + 1
+      queryStr.set('page', nextPage)
+
+      return window.location.search = queryStr.toString();
+    } else {
+      queryStr.set('page', 2)
+
+      return window.location.search = queryStr.toString();
+    }
+  }
+
+  const prevPage = function () {
+    const currentPage = (queryStr.get('page'))
+    if (currentPage) {
+      const prevPage = parseInt(currentPage.toString()) - 1
+      queryStr.set('page', prevPage)
+
+      return window.location.search = queryStr.toString();
+    }
+  }
+
+  // Toggle select box
+  const selectBoxes = document.getElementsByClassName('select-box')
+  for (let i = 0; i < selectBoxes.length; i++) {
+    selectBoxes[i].addEventListener('click', (event) => {
+      if (event.target.hasAttribute('checked')) {
+        event.target.removeAttribute('checked')
+      } else {
+        event.target.setAttribute('checked', true)
+      }
+    })
+  }
+
+  const changeMsgStatus = function (messageStatus) {
+    let actionRoute = ''
+    if (messageStatus === 'read') {
+      actionRoute = '/read-message?idArr='
+    } else if (messageStatus === 'star') {
+      actionRoute = '/star-message?idArr='
+    } else if (messageStatus === 'remove') {
+      actionRoute = '/remove-message?idArr='
+    } else if (messageStatus === 'delete') {
+      actionRoute = '/'
+    }
+
+    let selectedBoxes = []
+    for (let i = 0; i < selectBoxes.length; i++) {
+      if (selectBoxes[i].hasAttribute('checked')) {
+        selectedBoxes.push(selectBoxes[i].id)
+      }
+    }
+
+    // Call ajax
+    let urlSegments = document.URL.split("/")
+    urlSegments = urlSegments.map((value) => {
+      if (value.includes('?')) {
+        return value.split('?')[0]
+      }
+      if (value != "#") {
+        return value
+      }
+    })
+
+    const _csrf = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+    const toURL = urlSegments.join('/') + actionRoute + selectedBoxes.join(',')
+    const xmlhttp = new XMLHttpRequest()
+    if (messageStatus === 'delete') {
+      xmlhttp.open("DELETE", toURL, true)
+    } else {
+      xmlhttp.open("PUT", toURL, true)
+    }
+    
+    xmlhttp.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        if (messageStatus === 'delete') {
+          Swal.fire({
+            title: "Completely delete?",
+            text: "Do you want to erase all of them?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, do it!",
+            cancelButtonText: "No, cancel!",
+            confirmButtonClass: "btn btn-success",
+            cancelButtonClass: "btn btn-danger m-l-10",
+            buttonsStyling: false,
+            allowOutsideClick: false,
+          }).then(function (e) {
+            if (e.value) {
+              Swal.fire("Successfully!", "Status of the message was changed", "success").then((e) => {
+                if (e.value) {
+                  return location.reload()
+                }
+              })
+            }
+          })
+        } else {
+          Swal.fire("Successfully!", "Status of the message was changed", "success").then((e) => {
+            if (e.value) {
+              return location.reload()
+            }
+          })
+        }
+      } else {
+        Swal.fire("Failed", "An error has occurred.", "error")
+      }
+    }
+
+    xmlhttp.setRequestHeader("CSRF-Token", _csrf)
+    xmlhttp.withCredentials = true
+    xmlhttp.send()
+  }
+
+  // Read message
+  // document.getElementById('read-message').addEventListener('click', changeMsgStatus)
+
+  // Star message
+  /* document.getElementById('star-message').addEventListener('click', (event) => {
+    let selectedBoxes = []
+    for(let i =0; i < selectBoxes.length; i++) {
+      if (selectBoxes[i].hasAttribute('checked')) {
+        console.log(selectBoxes[i].id)
+        selectedBoxes.push(selectBoxes[i].id)
+      }
+    }
+
+    // Call ajax
+    let urlSegments = document.URL.split("/").filter((value) => {
+      return value != "#"
+    })
+
+    const _csrf = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+    const starURL = urlSegments.join('/') + '/star-message?idArr=' + selectedBoxes.join(',')
+    const xmlhttp = new XMLHttpRequest()
+    xmlhttp.open("PUT", starURL, true)
+    xmlhttp.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        Swal.fire("Successfully!", "Please check email to set a new password", "success").then((e) => {
+          if (e.value){
+            return location.reload()
+          }
+        })
+      } else {
+          Swal.fire("Failed", "An error has occurred.", "error")
+      }
+    }
+
+    xmlhttp.setRequestHeader("CSRF-Token", _csrf)
+    xmlhttp.withCredentials = true
+    xmlhttp.send()
+  }) */
+
+  // Remove message
+  /* document.getElementById('remove-message').addEventListener('click', (event) => {
+    let selectedBoxes = []
+    for(let i =0; i < selectBoxes.length; i++) {
+      if (selectBoxes[i].hasAttribute('checked')) {
+        console.log(selectBoxes[i].id)
+        selectedBoxes.push(selectBoxes[i].id)
+      }
+    }
+
+    // Call ajax
+    let urlSegments = document.URL.split("/").filter((value) => {
+      return value != "#"
+    })
+
+    const _csrf = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+    const removeURL = urlSegments.join('/') + '/remove-message?idArr=' + selectedBoxes.join(',')
+    const xmlhttp = new XMLHttpRequest()
+    xmlhttp.open("PUT", removeURL, true)
+    xmlhttp.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        Swal.fire("Successfully!", "Please check email to set a new password", "success").then((e) => {
+          if (e.value){
+            return location.reload()
+          }
+        })
+      } else {
+          Swal.fire("Failed", "An error has occurred.", "error")
+      }
+    }
+
+    xmlhttp.setRequestHeader("CSRF-Token", _csrf)
+    xmlhttp.withCredentials = true
+    xmlhttp.send()
+  })*/
+
+</script>
