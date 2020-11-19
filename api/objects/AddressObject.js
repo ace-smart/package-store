@@ -1,6 +1,6 @@
 const UserModel = require("../models/UserModel")
 const AddressModel = require("../models/AddressModel")
-const { isExistent } = require("../helper/validation")
+const { isExistent, hasSpecialChars } = require("../helper/validation")
 const validator = require("validator")
 const ValidationError = require("../errors/validation")
 const ObjectError = require("../errors/object")
@@ -80,31 +80,31 @@ class AddressObject {
     let errors = new Array()
 
     if (type === "create") {
-      if (typeof this.street === "undefined" || validator.isEmpty(this.street)) {
+      if (this.street == null) {
         errors.push({
           field: "street",
           message: "Must be required.",
         })
       }
-      if (typeof this.district === "undefined" || validator.isEmpty(this.district)) {
+      if (this.district == null) {
         errors.push({
           field: "district",
           message: "Must be required.",
         })
       }
-      if (typeof this.city === "undefined" || validator.isEmpty(this.city)) {
+      if (this.city == null) {
         errors.push({
           field: "city",
           message: "Must be required.",
         })
       }
-      if (typeof this.country === "undefined" || validator.isEmpty(this.country)) {
+      if (this.country == null) {
         errors.push({
           field: "country",
           message: "Must be required.",
         })
       }
-      if (typeof this.postalCode === "undefined" || validator.isEmpty(this.postalCode)) {
+      if (this.postalCode == null) {
         errors.push({
           field: "postalCode",
           message: "Must be required.",
@@ -116,92 +116,101 @@ class AddressObject {
       }
     }
     // update
-    if (this.street != null && !validator.isEmpty(this.street)) {
-      if (
-        validator.matches(
-          this.street,
+    if (this.street != null && !validator.isEmpty(this.street.toString())) {
+      if (validator.matches(
+          this.street.toString(),
           new RegExp("[\\`~\\!@#\\$%\\^&\\*()_\\+\\=\\[\\]\\{\\};'\"<>\\?]+", "g")
-        )
-      ) {
+        )) {
         errors.push({
           field: "street",
           message: "Only allowed to have these special characters [\\/-,.:]",
+          value: this.street
         })
       }
-      if (!validator.matches(this.street, RegExp("[\\w/-/\\.\\,:]+", "g"))) {
+      if (!validator.matches(this.street.toString(), RegExp("[\\w/-/\\.\\,:]+", "g"))) {
         errors.push({
           field: "street",
           message: "Must contain only numbers, characters and [\\/-,.:].",
+          value: this.street
         })
       }
-      if (!validator.isLength(this.street, { max: 350 })) {
+      if (!validator.isLength(this.street.toString(), { max: 350 })) {
         errors.push({
           field: "street",
           message: "Must be under 350 characters.",
+          value: this.street
         })
       }
     }
-    if (this.district != null && !validator.isEmpty(this.district)) {
-      if (!validator.isAlphanumeric(this.district)) {
+    if (this.district != null && !validator.isEmpty(this.district.toString())) {
+      if (hasSpecialChars(this.district)) {
         errors.push({
           field: "district",
-          message: "Must contain only numbers and characters.",
+          message: "Can not have special characters.",
+          value: this.district
         })
       }
-      if (!validator.isLength(this.district, { max: 255 })) {
+      if (!validator.isLength(this.district.toString(), { max: 255 })) {
         errors.push({
           field: "district",
           message: "Must be under 255 characters.",
+          value: this.district
         })
       }
     }
-    if (this.city != null && !validator.isEmpty(this.city)) {
-      if (!validator.isAlphanumeric(this.city)) {
+    if (this.city != null && !validator.isEmpty(this.city.toString())) {
+      if (hasSpecialChars(this.city)) {
         errors.push({
           field: "city",
-          message: "Must contain only numbers and characters.",
+          message: "Can not have special characters.",
+          value: this.city
         })
       }
-      if (!validator.isLength(this.city, { max: 300 })) {
+      if (!validator.isLength(this.city.toString(), { max: 300 })) {
         errors.push({
           field: "city",
           message: "Must be under 255 characters.",
+          value: this.country
         })
       }
     }
-    if (this.country != null && !validator.isEmpty(this.country)) {
-      if (!validator.isAlpha(this.country)) {
+    if (this.country != null && !validator.isEmpty(this.country.toString())) {
+      if (hasSpecialChars(this.country)) {
         errors.push({
           field: "country",
-          message: "Must contain only alphabetic characters.",
+          message: "Can not have special characters.",
+          value: this.country
         })
       }
-      if (!validator.isLength(this.country, { max: 255 })) {
+      if (!validator.isLength(this.country.toString(), { max: 255 })) {
         errors.push({
           field: "country",
           message: "Must be under 255 characters.",
+          value: this.country
         })
       }
     }
-    if (this.postalCode != null && !validator.isEmpty(this.postalCode)) {
-      if (!validator.isNumeric(this.postalCode, { no_symbols: true })) {
+    if (this.postalCode != null && !validator.isEmpty(this.postalCode.toString())) {
+      if (!validator.isNumeric(this.postalCode.toString(), { no_symbols: true })) {
         errors.push({
           field: "postalCode",
           message: "Must be only numbers.",
+          value: this.postalCode
         })
       }
-      if (!validator.isLength(this.postalCode, { max: 10 })) {
+      if (!validator.isLength(this.postalCode.toString(), { max: 10 })) {
         errors.push({
           field: "postalCode",
           message: "Must be under 10 characters.",
+          value: this.postalCode
         })
       }
     }
-    if (this.status != null && !validator.isEmpty(this.status)) {
+    if (this.status != null && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
         errors.push({
           field: "status",
-          message: "Not valid.",
+          message: "Status is not valid.",
         })
       }
     }
@@ -245,25 +254,14 @@ class AddressObject {
     return addressObject
   }
 
-  static async create(userId = null, { ...addressData } = {}) {
-    if (userId == null) {
-      throw new TypeError("userId can not be null or undefined.")
-    }
-
-    try {
+  static async create({ ...addressData } = {}) {
+    try { 
       let address = new AddressObject({ ...addressData })
-      const isValid = address.validate("create")
-      if (isValid) {
+      const validation = address.validate("create")
+      if (validation) {
         address = address.clean()
         const createdAddress = new AddressObject(await AddressModel.create({ ...address }))
-        const user = await UserObject.getOneUserBy({ _id: userId })
-        if (user) {
-          user.setAddress = createdAddress.id
-          const isSaved = await user.save()
-          if (isSaved) {
-            return createdAddress
-          }
-        }
+        return createdAddress.id
       }
 
       throw new Error("Failed to create address")
@@ -272,12 +270,9 @@ class AddressObject {
     }
   }
 
-  async update(userId = null, info = {}) {
+  async update(info = {}) {
     if (this.id == null) {
       throw new TypeError("Can not update with null or undefined Id.")
-    }
-    if (userId == null) {
-      throw new TypeError("userId can not be null or undefined.")
     }
 
     if (!(await isExistent(AddressModel, { _id: this.id }))) {
@@ -287,19 +282,12 @@ class AddressObject {
         message: "Id is not valid.",
       })
     }
-    if (!(await isExistent(UserModel, { _id: userId }))) {
-      throw new ObjectError({
-        objectName: "UserObject",
-        errorProperty: "Id",
-        message: "Id is not valid.",
-      })
-    }
 
     try {
       let addressObject = new AddressObject({ ...info })
-      addressObject = addressObject.clean()
       const isValid = addressObject.validate("update")
       if (isValid) {
+        addressObject = addressObject.clean()
         const updatedAddress = new AddressObject(
           await AddressModel.findOneAndUpdate({ _id: this.id }, { ...addressObject }, { new: true })
         )
@@ -337,35 +325,23 @@ class AddressObject {
     }
   }
 
-  async remove(userId = null) {
-    if (userId == null) {
-      throw new TypeError("userId can not be null or undefined.")
-    }
-
-    try {
-      if (this.id != null) {
-        const isRemoved = await AddressModel.findOneAndDelete(
-          { _id: this.id }
-        )
-        
-        if (isRemoved) {
-          const user = await UserObject.getOneUserBy({_id: userId})
-          if (user) {
-            user.addressId = user.getAddress.filter((value) => value != this.id)
-            await user.save()
-          } else {
-            throw new NotFoundError("No user found.")
-          }
-        }
-
-        return true
-      }
-
+  async remove() {
+    if (this.id == null) {
       throw new ObjectError({
         objectName: "AddressObject",
         errorProperty: "Id",
-        message: "Can not delete object with undefined or null id.",
+        message: "Id is not valid.",
       })
+    }
+
+    try {
+      const isRemoved = await AddressModel.findOneAndDelete( { _id: this.id } ).lean()
+      
+      if (isRemoved) {
+        return new AddressObject({...isRemoved})
+      }
+
+      throw new Error("Failed to remove address.")
     } catch (error) {
       throw error
     }

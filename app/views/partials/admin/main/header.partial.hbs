@@ -28,7 +28,10 @@
                 {{/ifMatch}}
                 {{#ifMatch route 'products'}}
                     {{> admin/product/breadcrumb.partial }}
-                {{/ifMatch}}
+                {{/ifMatch}} 
+                {{#ifMatch route 'providers'}}
+                    {{> admin/provider/breadcrumb.partial }}
+                {{/ifMatch}} 
                 {{#ifMatch route 'vouchers'}}
                     {{> admin/voucher/breadcrumb.partial }}
                 {{/ifMatch}}

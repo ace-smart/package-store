@@ -8,19 +8,54 @@ module.exports = helper = {
     return formInput
   },
 
+  isSameDate: function(dateObject1, dateObject2) {
+    dateObject1 = new Date(dateObject1)
+    dateObject2 = new Date(dateObject2)
+    const date1 = dateObject1.getDate()
+    const month1 = dateObject1.getMonth()
+    const year1 = dateObject1.getFullYear()
+
+    const date2 = dateObject2.getDate()
+    const month2 = dateObject2.getMonth()
+    const year2 = dateObject2.getFullYear()
+    if (date1 === date2 && month1 === month2 && year1 === year2) {
+      return true
+    }
+
+    return false
+  },
+
   getFilledFields: function (body, data) {
-    // return only fields that are different from database
+    // return only fields that are filled 
     const bodyKeys = Object.keys(body)
     const filledFields = {}
-    for (const [key, value] of Object.entries(data)) {
+    for (let [key, value] of Object.entries(data)) {
       for (let i = 0; i < bodyKeys.length; i++) {
-        if (key === bodyKeys[i] && value !== body[key]) {
+        if (key === 'validUntil' || key === 'dateOfBirth') {
+          if (!helper.isSameDate(value, body[key])){
+            filledFields[key] = body[key]
+          }
+        } else if (key === bodyKeys[i] && value != body[key]) {
           filledFields[key] = body[key]
         }
       }
     }
-
+    
     return filledFields
+  },
+
+  getValidFields: function (errors, data) {
+    let dataObject = JSON.parse(JSON.stringify(data))
+    let inputFields =  Object.keys(data)
+
+    for (let i = 0; i < inputFields.length; i++) {
+      const isFound = errors.find((ele) => ele.field === inputFields[i])
+      if (isFound) {
+        delete dataObject[inputFields[i]]
+      }
+    }
+
+    return dataObject
   },
 
   toDateFormat: function (dateString) {
@@ -79,18 +114,18 @@ module.exports = helper = {
   },
 
   getUserInstance: async function (req) {
-    const authHelper = require('./auth.helper.js')
+    const authHelper = require("./auth.helper.js")
     return {
       username: req.user.username,
       email: req.user.email,
       role: req.user.role,
-      profile: await authHelper.getProfile({...req.user}),
+      profile: await authHelper.getProfile({ ...req.user }),
       status: req.user.status,
       createdAt: req.user.createdAt,
     }
   },
 
-  handleInvalidationErrors: function(invalidation = []) {
+  handleInvalidationErrors: function (invalidation = []) {
     let errorObject = {}
     // Get fields that have errors
     invalidation.forEach((element) => {
@@ -98,8 +133,8 @@ module.exports = helper = {
         errorObject[element.field].messages.push(element.message)
       } else {
         errorObject[element.field] = {
-          value : (element.value) ? element.value : '',
-          messages: [element.message]
+          value: element.value ? element.value : "",
+          messages: [element.message],
         }
       }
     })
@@ -107,7 +142,7 @@ module.exports = helper = {
     return errorObject
   },
 
-  handleErrors: async function(res, error, forRole = 'user') {
+  handleErrors: async function (res, error, forRole = "user") {
     // Opt out 'ValidationError' (code: 400)
     if (error.response.status === 403) {
       return helper.renderForbiddenPage(res, forRole)
@@ -123,13 +158,13 @@ module.exports = helper = {
   },
 
   makePagination: (items, itemPerPage = 1, currentPage = 1) => {
-    if(!items || itemPerPage < 1 || currentPage < 1) {
+    if (!items || itemPerPage < 1 || currentPage < 1) {
       return null
     }
-    
+
     const numOfPages = Math.ceil(items.length / itemPerPage)
-    if(currentPage > numOfPages) {
-      throw {response: {status: 404}}
+    if (currentPage > numOfPages) {
+      throw { response: { status: 404 } }
     }
     const fromIndex = itemPerPage * (currentPage - 1)
 

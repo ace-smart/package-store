@@ -1,0 +1,12 @@
+{{#ifMatch content 'view'}}
+{{!-- {{> admin/provider/view/js.partial }} --}}
+{{> admin/form/js.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'form'}}
+{{> admin/form/js.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'list'}}
+{{> admin/list/js.partial }}
+{{/ifMatch}}

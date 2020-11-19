@@ -65,25 +65,25 @@ class VoucherObject {
     let errors = new Array()
 
     if (type === "create") {
-      if (this.name == null || validator.isEmpty(this.name.toString())) {
+      if (this.name == null) {
         errors.push({
           field: "name",
           message: "Must be required.",
         })
       }
-      if (this.code == null || validator.isEmpty(this.code.toString())) {
+      if (this.code == null) {
         errors.push({
           field: "code",
           message: "Must be required.",
         })
       }
-      if (this.minValue == null || validator.isEmpty(this.minValue.toString())) {
+      if (this.minValue == null) {
         errors.push({
           field: "minValue",
           message: "Must be required.",
         })
       }
-      if (this.maxValue == null || validator.isEmpty(this.maxValue.toString())) {
+      if (this.maxValue == null) {
         errors.push({
           field: "maxValue",
           message: "Must be required.",
@@ -102,15 +102,15 @@ class VoucherObject {
     }
 
     // name
-    if (typeof this.name !== "undefined" && !validator.isEmpty(this.name.toString())) {
+    if (this.name != null && !validator.isEmpty(this.name.toString())) {
       if (hasSpecialChars(this.name.toString())) {
         errors.push({
           field: "name",
-          message: "Must contain only numbers,characters and spaces.",
+          message: "Can not have special characters.",
           value: this.name
         })
       }
-      if (!validator.isLength(this.name, { max: 200 })) {
+      if (!validator.isLength(this.name.toString(), { max: 200 })) {
         errors.push({
           field: "name",
           message: "Must be under 200 characters.",
@@ -127,15 +127,15 @@ class VoucherObject {
     }
 
     // code
-    if (typeof this.code !== "undefined" && !validator.isEmpty(this.code)) {
-      if (!validator.isAlphanumeric(validator.trim(this.code))) {
+    if (this.code != null && !validator.isEmpty(this.code.toString())) {
+      if (!validator.isAlphanumeric(validator.trim(this.code.toString()))) {
         errors.push({
           field: "code",
           message: "Must contain only numbers and letters. (no spaces)",
           value: this.code
         })
       }
-      if (!validator.isLength(validator.trim(this.code), { max: 30 })) {
+      if (!validator.isLength(validator.trim(this.code.toString()), { max: 30 })) {
         errors.push({
           field: "code",
           message: "Must be under 30 characters.",
@@ -143,8 +143,7 @@ class VoucherObject {
         })
       }
       if (
-        await isExistent(
-          VoucherModel,
+        await isExistent(VoucherModel,
           {
             code: validator.trim(this.code.toUpperCase()),
           },
@@ -154,12 +153,13 @@ class VoucherObject {
         errors.push({
           field: "code",
           message: "Already existent.",
+          value: this.code
         })
       }
     }
 
     // rate
-    if (typeof this.rate !== "undefined" && !validator.isEmpty(this.rate.toString())) {
+    if (this.rate != null && !validator.isEmpty(this.rate.toString())) {
       if (!validator.isNumeric(this.rate.toString())) {
         errors.push({
           field: "rate",
@@ -176,7 +176,7 @@ class VoucherObject {
       }
     }
     // minValue
-    if (typeof this.minValue !== "undefined" && !validator.isEmpty(this.minValue.toString())) {
+    if (this.minValue != null && !validator.isEmpty(this.minValue.toString())) {
       if (!validator.isNumeric(this.minValue.toString())) {
         errors.push({
           field: "minValue",
@@ -193,7 +193,7 @@ class VoucherObject {
       }
     }
     // maxValue
-    if (typeof this.maxValue !== "undefined" && !validator.isEmpty(this.maxValue.toString())) {
+    if (this.maxValue != null && !validator.isEmpty(this.maxValue.toString())) {
       if (!validator.isNumeric(this.maxValue.toString())) {
         errors.push({
           field: "maxValue",
@@ -210,8 +210,8 @@ class VoucherObject {
       }
     }
     // validUntil
-    if (typeof this.validUntil !== "undefined" && !validator.isEmpty(this.validUntil)) {
-      if (!validator.isDate(this.validUntil)) {
+    if (this.validUntil != null && !validator.isEmpty(this.validUntil.toString())) {
+      if (!validator.isDate(this.validUntil.toString())) {
         errors.push({
           field: "validUntil",
           message: "Invalid format. [YYYY/MM/DD]",
@@ -219,7 +219,7 @@ class VoucherObject {
         })
       }
       if (!validator.isAfter(
-          this.validUntil,
+          this.validUntil.toString(),
           helper.toFormatDateStr()
         )
       ) {
@@ -231,11 +231,11 @@ class VoucherObject {
       }
     }
     // status
-    if (typeof this.status !== "undefined" && !validator.isEmpty(this.status)) {
+    if (this.status != null && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
         errors.push({
           field: "status",
-          message: "Not valid.",
+          message: "Value is not valid.",
           value: this.status
         })
       }
@@ -255,7 +255,7 @@ class VoucherObject {
       if (value != null) {
         const isFound = fieldsToClean.find((field) => key === field)
         if (isFound) {
-          if (key === "name" || key === "description" ) {
+          if (key === "name") {
             voucherObject[key] = validator.trim(value.toString())
           }
           if (key === "status") {
@@ -285,9 +285,9 @@ class VoucherObject {
   static async create({ ...voucherData }) {
     try {
       let voucherObject = new VoucherObject({ ...voucherData })
-      voucherObject = voucherObject.clean()
       const validation = await voucherObject.validate("create")
       if (validation) {
+        voucherObject = voucherObject.clean()
         const createdVoucher = await VoucherModel.create({ ...validation })
         if (createdVoucher) {
           const voucher = new VoucherObject({ ...createdVoucher })
@@ -320,9 +320,9 @@ class VoucherObject {
 
     try {
       let updateObject = new VoucherObject({ ...updateData })
-      updateObject = updateObject.clean()
       const validation = await updateObject.validate("update", this.id)
       if (validation) {
+        updateObject = updateObject.clean()
         const updated = new VoucherObject(
           await VoucherModel.findOneAndUpdate({ _id: this.id }, { ...validation }, { new: true })
         )

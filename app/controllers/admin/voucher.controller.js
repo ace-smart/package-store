@@ -1,6 +1,6 @@
 const axiosInstance = require("../../helper/axios.helper")
 const helper = require("../../helper/helper")
-const getVoucher = async function(accessToken, voucherId) {
+const getVoucherById = async function(accessToken, voucherId) {
   try {
     const response = await axiosInstance.get(`/admin/vouchers/${voucherId}`,
     {
@@ -16,6 +16,19 @@ const getVoucher = async function(accessToken, voucherId) {
     throw error 
   }
 }
+const getVoucherData = function(reqBody) {
+  reqBody = JSON.parse(JSON.stringify(reqBody))
+  return {
+    name: reqBody.name,
+    code: reqBody.code,
+    rate: reqBody.rate,
+    minValue: reqBody.minValue,
+    maxValue: reqBody.maxValue,
+    validUntil: helper.toDateFormat(reqBody.validUntil),
+    status: reqBody.status
+  }
+}
+
 module.exports = {
   // @desc:   Show vouchers
   // @route   GET /vouchers
@@ -45,7 +58,7 @@ module.exports = {
 
   // @desc:   Get vouchers by Id
   // @route   GET /vouchers/:id
-  getVoucherById: async (req, res) => {
+  viewVoucherById: async (req, res) => {
     // res.render('templates/admin/voucher',{
     //     layout: 'admin/table.layout.hbs'
     // })
@@ -58,7 +71,7 @@ module.exports = {
       layout: "admin/main.layout.hbs",
       content: "form",
       formType: "create",
-      header: "List of vouchers",
+      header: "Create a new voucher",
       route: "vouchers",
       user: await helper.getUserInstance(req),
       csrfToken: req.csrfToken(),
@@ -68,8 +81,8 @@ module.exports = {
   // @desc    show create form
   // @route   POST /vouchers/add
   createVoucher: async (req, res) => {
-    let voucherData = helper.removeCSRF(req.body)
-    voucherData.validUntil = helper.toDateFormat(req.body.validUntil)
+    let voucherData = getVoucherData(req.body)
+    
     try {
       const response = await axiosInstance.post("/admin/vouchers", 
       voucherData, 
@@ -95,13 +108,7 @@ module.exports = {
       if (error.response.status === 400) {
         //ValidationError
         const errors = error.response.data.error.invalidation
-        const inputFields = Object.keys(voucherData)
-        for (let i = 0; i < inputFields.length; i++) {
-          const isFound = errors.find((ele) => ele.field === inputFields[i])
-          if (isFound) {
-            delete voucherData[inputFields[i]]
-          }
-        }
+        const validData = helper.getValidFields(errors, req.body)
 
         req.flash("fail", "Your input is not valid. Please check and then fill in again.")
         return res.render("templates/admin/voucher/voucher.hbs", {
@@ -112,8 +119,8 @@ module.exports = {
           route: "vouchers",
           csrfToken: req.csrfToken(),
           user: await helper.getUserInstance(req),
-          errors: helper.handleInvalidationErrors(error.response.data.error.invalidation),
-          validData: JSON.parse(JSON.stringify(voucherData)),
+          errors: helper.handleInvalidationErrors(errors),
+          validData: validData,
         })
       }
 
@@ -125,21 +132,16 @@ module.exports = {
   // @route   GET /vouchers/edit/:id
   showUpdateVoucherForm: async (req, res) => {
     try {
-      const response = await axiosInstance.get(`/admin/vouchers/${req.params.id}`, 
-      {
-        headers: {
-          Authorization: "Bearer " + req.user.accessToken,
-        },
-      })
+      const voucher = await getVoucherById(req.user.accessToken,req.params.id)
 
-      if (response.status === 200) {
+      if (voucher) {
         return res.render("templates/admin/voucher/voucher.hbs", {
           layout: "admin/main.layout.hbs",
           content: "form",
           formType: "update",
           header: "Update voucher",
           route: "vouchers",
-          voucher: response.data,
+          voucher: voucher,
           user: await helper.getUserInstance(req),
           csrfToken: req.csrfToken(),
         })
@@ -152,10 +154,14 @@ module.exports = {
   // @desc    Update voucher
   // @route   PUT /vouchers/edit/:id
   updateVoucherById: async (req, res) => {
-    let voucherData = helper.removeCSRF(req.body)
-    voucherData.validUntil = helper.toDateFormat(req.body.validUntil)
-    
+    let voucherData = {}
+
     try {
+      const voucher = await getVoucherById(req.user.accessToken, req.params.id)
+      if (voucher) {
+        voucherData = helper.getFilledFields(getVoucherData(req.body), voucher)
+      }
+
       const response = await axiosInstance.put(`/admin/vouchers/${req.params.id}`, 
       voucherData, 
       {
@@ -171,7 +177,7 @@ module.exports = {
           content: "form",
           formType: "update",
           header: "Update voucher",
-          voucher: await getVoucher(req.user.accessToken, req.params.id),
+          voucher: await getVoucherById(req.user.accessToken, req.params.id),
           route: "vouchers",
           user: await helper.getUserInstance(req),
           csrfToken: req.csrfToken(),
@@ -181,13 +187,7 @@ module.exports = {
       if (error.response.status === 400) {
         //ValidationError
         const errors = error.response.data.error.invalidation
-        const inputFields = Object.keys(voucherData)
-        for (let i = 0; i < inputFields.length; i++) {
-          const isFound = errors.find((ele) => ele.field === inputFields[i])
-          if (isFound) {
-            delete voucherData[inputFields[i]]
-          }
-        }
+        const validData = helper.getValidFields(errors, voucherData)
 
         req.flash("fail", "Your input is not valid. Please check and then fill in again.")
         return res.render("templates/admin/voucher/voucher.hbs", {
@@ -198,9 +198,9 @@ module.exports = {
           route: "vouchers",
           csrfToken: req.csrfToken(),
           user: await helper.getUserInstance(req),
-          voucher: await getVoucher(req.user.accessToken, req.params.id),
-          errors: helper.handleInvalidationErrors(error.response.data.error.invalidation),
-          validData: JSON.parse(JSON.stringify(voucherData)),
+          voucher: await getVoucherById(req.user.accessToken, req.params.id),
+          errors: helper.handleInvalidationErrors(errors),
+          validData: validData,
         })
       }
 

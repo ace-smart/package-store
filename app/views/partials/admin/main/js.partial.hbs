@@ -7,6 +7,9 @@
 {{#ifMatch route 'products'}}
 {{> admin/product/js.partial}}
 {{/ifMatch}}
+{{#ifMatch route 'providers'}}
+{{> admin/provider/js.partial}}
+{{/ifMatch}}
 {{#ifMatch route 'vouchers'}}
 {{> admin/voucher/js.partial}}
 {{/ifMatch}}

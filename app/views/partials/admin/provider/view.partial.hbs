@@ -1,0 +1,121 @@
+<div class="row">
+  {{!-- Information --}}
+  <div class="col-sm-6 p-4">
+    <p class="text-lime p-2 my-3 border-bottom"><i class="ion-information-circled mr-1"></i> Information</p>
+      {{!-- Name --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="name">
+              <i class="mdi mdi-tag-text-outline mr-2"></i>Name
+            </label>
+            <input id="name" name="name" type="text" disabled class="form-control" value="{{{provider.name}}}">
+          </div>
+        </div>
+      </div>
+
+      {{!-- Email --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="email">
+              <i class="fa fa-envelope-open mr-2"></i>Email
+            </label>
+            <input id="email" name="email" type="email" disabled class="form-control" value="{{{provider.email}}}">
+          </div>
+        </div>
+      </div>
+
+      {{!-- Created at --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-calendar mr-2"></i>Created at
+            </label>
+            <input id="createdAt" name="createdAt" type="text" disabled class="form-control"
+              value="{{{formatDate provider.createdAt}}}">
+          </div>
+        </div>
+      </div>
+
+      {{!-- Status --}}
+      <div class="row mt-1 pt-2">
+        <div class="col-sm-12">
+          <label class="control-label">
+            <i class="ion-ios7-circle-filled mr-2"></i>Status
+          </label>
+        </div>
+        <div class="col-sm-12">
+          <div class="form-group">
+            {{#ifMatch provider.status 'deactivated'}}
+            <label class="btn btn-danger" for="deactivated-status">Deactivated</label>
+            {{/ifMatch}}
+
+            {{#ifMatch provider.status 'activated'}}
+            <label class="btn btn-success">Activated</label>
+            {{/ifMatch}}
+
+          </div>
+        </div>
+      </div>
+
+    
+  </div>
+
+  {{!-- Address --}}
+  <div class="col-sm-6 p-4">
+    <p class="text-lime p-2 my-3 border-bottom"><i class="ion-location mr-1"></i> Address</p>
+      {{!-- Street --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-road mr-2"></i>Street
+            </label>
+            <input id="name" name="name" type="text" disabled class="form-control" value="{{{provider.address.street}}}">
+          </div>
+        </div>
+      </div>
+
+      {{!-- District - City --}}
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-dot-circle-o mr-2"></i>District
+            </label>
+            <input id="name" name="name" type="text" disabled class="form-control" value="{{{provider.address.street}}}">
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-bank mr-2"></i>City
+            </label>
+            <input id="name" name="name" type="text" disabled class="form-control" value="{{{provider.address.street}}}">
+          </div>
+        </div>
+      </div>
+
+      {{!-- Country - Postal code --}}
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-flag mr-2"></i>Country
+            </label>
+            <input id="name" name="name" type="text" disabled class="form-control" value="{{{provider.address.street}}}">
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-barcode mr-2"></i>Postal code
+            </label>
+            <input id="name" name="name" type="text" disabled class="form-control" value="{{{provider.address.street}}}">
+          </div>
+        </div>
+      </div>
+  </div>
+</div>

@@ -22,6 +22,7 @@ router.use(profileRouter)
 router.use('/accounts', accountRouter)
 router.use('/categories', categoryRouter)
 router.use('/products', productRouter)
+router.use('/providers', providerRouter)
 router.use('/vouchers', voucherRouter)
 router.use('/contacts', contactRouter)
 

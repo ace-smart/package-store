@@ -1,8 +1,4 @@
 const validator = require("validator")
-const blacklistChars = new RegExp(
-    "[\r\n\\t\\f\\v`~\\!@#\\$%\\^&\\*()_\\+\\=\\[\\]\\{\\};'\"<>\\?\\-\\/\\.\\,:]+",
-    "g"
-)
 
 module.exports = validation = {
     STATUS_VALUES: ["activated", "deactivated"],
@@ -27,6 +23,10 @@ module.exports = validation = {
     },
 
     hasSpecialChars: (string = null) => {
+        const blacklistChars = new RegExp(
+            "[\r\n\\t\\f\\v`~\\!@#\\$%\\^&\\*()_\\+\\=\\[\\]\\{\\};'\"<>\\?\\-\\/\\.\\,:]+",
+            "g"
+        )
         if (string) {
             if (validator.matches(validator.trim(string), blacklistChars)) {
                 return true

@@ -3,21 +3,25 @@ const AddressModel = require('../models/AddressModel')
 const validator = require("validator")
 const { isExistent, hasSpecialChars, STATUS_VALUES } = require("../helper/validation")
 const ValidationError = require('../errors/validation')
+const AddressObject = require('./AddressObject')
+const { compare } = require("bcrypt")
 
 class ProviderObject {
-  constructor({ _id, name, addressId, email, description, status, createdAt }) {
+  constructor({ _id, name, addressId, email, status, createdAt }) {
     this.id = _id
     this.name = name
-    this.addressId = addressId
+    this.address = (addressId) ? new AddressObject({...addressId}) : null    
     this.email = email
-    this.description = description
     this.status = status
     this.createdAt = createdAt
   }
 
   static async getOneProviderBy(criteria = {}, selectFields = null) {
     try {
-      let provider = await ProviderModel.findOne(criteria, selectFields).lean()
+      let provider = await ProviderModel.findOne(criteria, selectFields)
+      .populate({path: 'addressId'})
+      .lean()
+      
       if (provider) {
         provider = new ProviderObject({ ...provider })
         return provider
@@ -31,7 +35,10 @@ class ProviderObject {
 
   static async getProvidersBy(criteria = {}, selectFields = null) {
     try {
-      const providers = await ProviderModel.find(criteria, selectFields).lean()
+      const providers = await ProviderModel.find(criteria, selectFields)
+      .populate({path: 'addressId'})
+      .lean()
+
       if (providers.length > 0) {
         let providerList = new Array()
 
@@ -53,19 +60,13 @@ class ProviderObject {
     let errors = new Array()
 
     if (type === "create") {
-      if (this.name == null || validator.isEmpty(this.name)) {
+      if (this.name == null) {
         errors.push({
           field: "name",
           message: "Must be required.",
         })
       }
-      if (this.addressId == null || validator.isEmpty(this.addressId)) {
-        errors.push({
-          field: "addressId",
-          message: "Must be required.",
-        })
-      }
-      if (this.email == null || validator.isEmpty(this.email)) {
+      if (this.email == null) {
         errors.push({
           field: "email",
           message: "Must be required.",
@@ -78,44 +79,49 @@ class ProviderObject {
     }
 
     // name
-    if (typeof this.name !== "undefined" && !validator.isEmpty(this.name)) {
+    if (typeof this.name !== "undefined" && !validator.isEmpty(this.name.toString())) {
       if (hasSpecialChars(this.name)) {
         errors.push({
           field: "name",
-          message: "Must contain only numbers,characters and spaces.",
+          message: "Must contain only numbers, characters and spaces.",
+          value: this.name
         })
       }
       if (!validator.isLength(this.name, { min: 4, max: 255 })) {
         errors.push({
           field: "name",
           message: "Must be from 4 to 255 characters.",
+          value: this.name
         })
       }
     }
     // addressId
-    if (typeof this.addressId !== "undefined" && !validator.isEmpty(this.addressId)) {
+    if (typeof this.addressId !== "undefined" && !validator.isEmpty(this.addressId.toString())) {
         if (!validator.isMongoId(this.addressId)) {
           errors.push({
             field: 'addressId',
-            message: "Invalid format."
+            message: "Invalid format.",
+            value: this.addressId
           })
         }
         try {
           if (!(await isExistent(AddressModel, { _id: this.addressId }))) {
             errors.push({
               field: 'addressId',
-              message: "Not existent."
+              message: "Not existent.",
+              value: this.addressId
             })
           }
         } catch (error) {
           errors.push({
             field: 'addressId',
-            message: "Not existent."
+            message: "Not existent.",
+            value: this.addressId
           })
         }
     } 
     // email
-    if (typeof this.email !== "undefined" && !validator.isEmpty(this.email)) {
+    if (typeof this.email !== "undefined" && !validator.isEmpty(this.email.toString())) {
       const _email = this.email.toLowerCase()
       if (!validator.isEmail(_email)) {
         errors.push({
@@ -139,27 +145,13 @@ class ProviderObject {
         })
       }
     }
-    // description
-    if (typeof this.description !== "undefined" && !validator.isEmpty(this.description)) {
-        if (hasSpecialChars(validator.trim(this.description))) {
-          errors.push({
-            field: 'description',
-            message: "Must not be filled in with special characters."
-          })
-        }
-        if (!validator.isLength(validator.trim(this.description), { max: 300 })) {
-          errors.push({
-            field: 'description',
-            message: "Must be under 300 characters."
-          })
-        }
-    }
     // status
-    if (typeof this.status !== "undefined" && !validator.isEmpty(this.status)) {
+    if (typeof this.status !== "undefined" && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
         errors.push({
           field: "status",
           message: "Not valid.",
+          value: this.status
         })
       }
     }
@@ -199,12 +191,36 @@ class ProviderObject {
     return providerObject
   }
 
+  //@desc:    Empty => return true
+  static hasEmptyAddress(addressData) {
+    let emptyProps = []
+    for (const [key, value] of Object.entries(addressData)) {
+      if (value == null) {
+        emptyProps.push(key)
+      } else if (!validator.isEmpty(value.toString())) {
+        emptyProps.push(key)
+      }
+    }
+
+    if (emptyProps.length > 0) {
+      return false
+    }
+
+    return true
+  } 
+
   static async create({ ...providerData }) {
     try {
+      let addressId = null
+      if (!ProviderObject.hasEmptyAddress(providerData.address)) {
+        const createdAddress = await AddressObject.create({...providerData.address})
+        addressId = createdAddress.id
+      }
+      providerData.addressId = addressId
       let providerObject = new ProviderObject({ ...providerData })
-      providerObject = providerObject.clean()
       const validation = await providerObject.validate("create")
       if (validation) {
+        providerObject = providerObject.clean()
         const createdProvider = await ProviderModel.create({ ...validation })
         if (createdProvider) {
           const provider = new ProviderObject({ ...createdProvider })
@@ -236,10 +252,15 @@ class ProviderObject {
     }
 
     try {
+      // Update address
+      if (!ProviderObject.hasEmptyAddress(updateData.address)) {
+        await this.address.update({...updateData.address})
+      }
+      // Update provider
       let updateObject = new ProviderObject({ ...updateData })
-      updateObject = updateObject.clean()
-      const validation = await updateObject.validate("update")
+      const validation = await updateObject.validate("update", this.id)
       if (validation) {
+        updateObject = updateObject.clean()
         const updated = new ProviderObject(
           await ProviderModel.findOneAndUpdate({ _id: this.id }, { ...validation }, { new: true })
         )
@@ -284,6 +305,10 @@ class ProviderObject {
     }
 
     try {
+      // Remove address
+      const addressObject = new AddressObject({...this.address})
+      await addressObject.remove()
+
       const isRemoved = await ProviderModel.findOneAndDelete({ _id: this.id }).lean()
       if (isRemoved) {
         return new ProviderObject({ ...isRemoved })
