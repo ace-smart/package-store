@@ -66,15 +66,6 @@
           <label class="control-label">
             <i class="ion-ios7-circle-filled mr-2"></i>Status
           </label>
-
-          {{#if errors}}
-          {{#each errors}}
-          {{#ifeq this.field 'status'}}
-          <p class="form-validation-error">{{{this.message}}}</p>
-          {{/ifeq}}
-          {{/each}}
-          {{else}}
-          {{/if}}
         </div>
         <div class="col-sm-12">
           <div class="form-group">

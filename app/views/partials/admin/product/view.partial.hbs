@@ -1,0 +1,207 @@
+<div class="row">
+  {{!-- Left Column --}}
+  <div class="col-sm-4">
+    {{!-- Image Gallery --}}
+    <p class="text-lime p-2 border-bottom">
+      <i class="fa fa-image  mr-2"></i>Gallery (20)
+    </p>
+    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+      <ol class="carousel-indicators">
+        <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+        <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+        <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+      </ol>
+      <div class="carousel-inner popup-gallery" role="listbox">
+
+        <div class="carousel-item active">
+          <a class="pull-left" href="/admin/static/assets/images/small/img-1.jpg" title="Project 1">
+            <div class="img-responsive">
+              <img class="d-block img-fluid" src="/admin/static/assets/images/small/img-3.jpg" alt="First slide">
+            </div>
+          </a>
+        </div>
+
+        <div class="carousel-item">
+          <a class="pull-left" href="/admin/static/assets/images/small/img-2.jpg" title="Project 2">
+            <div class="img-responsive">
+              <img class="d-block img-fluid" src="/admin/static/assets/images/small/img-2.jpg" alt="Second slide">
+            </div>
+          </a>
+        </div>
+
+        <div class="carousel-item">
+          <a class="pull-left" href="/admin/static/assets/images/small/img-3.jpg" title="Project 3">
+            <div class="img-responsive">
+              <img class="d-block img-fluid" src="/admin/static/assets/images/small/img-3.jpg" alt="Third slide">
+            </div>
+          </a>
+        </div>
+      </div>
+      {{!-- Swipe button --}}
+      <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+      </a>
+      <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+      </a>
+    </div>
+
+
+    {{!-- Info --}}
+    <div class="my-2 mx-auto view-lower-left-col">
+      <ul>
+        <li class="d-flex bg-purple justify-content-between">
+          <span><i class="ion ion-android-user-menu mr-2"></i>ID </span>
+          <span>{{{product.id}}}</span>
+        </li>
+        <li class="d-flex bg-purple justify-content-between">
+          <span><i class="ion ion-android-note mr-2"></i>Status </span>
+          {{#ifeq product.status 'activated'}}
+          <span class="text-light bg-success px-2"><i
+              class="ion ion-checkmark-round mr-2"></i>{{{product.status}}}</span>
+          {{/ifeq}}
+          {{#ifeq product.status 'deactivated'}}
+          <span class="text-light bg-danger px-2"><i
+              class="ion ion-checkmark-round mr-2"></i>{{{product.status}}}</span>
+          {{/ifeq}}
+        <li class="d-flex bg-purple justify-content-between">
+          <span><i class="mdi mdi-account-card-details mr-2"></i>Stock </span>
+          {{#ifeq product.role 'admin'}}
+          <span><i class="ion-ribbon-b mr-2 text-lime"></i>{{{product.role}}}</span>
+          {{else}}
+          <span>{{{product.role}}}</span>
+          {{/ifeq}}
+        </li>
+        <li class="d-flex bg-purple justify-content-between">
+          <span><i class="ion ion-calendar mr-2"></i>Added at </span>
+          <span>{{{formatDate product.createdAt}}}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  {{!-- Product information --}}
+  <div class="col-sm-8 px-4">
+    <p class="text-lime p-2 border-bottom"><i class="fa fa-info-circle mr-2"></i>Information</p>
+    {{!-- Product Form --}}
+    <div class="category-info px-3">
+      {{!-- Product Name --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="name">
+              <i class="mdi mdi-tag-text-outline mr-2"></i>Product Name
+            </label>
+            <input id="name" name="name" type="text" disabled class="form-control" value="{{{product.name}}}">
+          </div>
+        </div>
+      </div>
+
+      {{!-- Subcategory --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="name">
+              <i class="ion-ios7-keypad mr-2"></i>Subcategory
+            </label>
+            <input id="name" name="name" type="text" disabled class="form-control"
+              value="{{{product.subcategory.name}}}">
+          </div>
+        </div>
+      </div>
+
+      {{!-- Price --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="price" class="my-auto mb-0">
+              <i class="ion-cash mr-2"></i>Price
+            </label>
+            <div class="col-sm-2 mt-1 p-0 input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="ion ion-social-usd"></i></span>
+              </div>
+              <input id="price" name="price" type="text" disabled class="form-control text-right" disabled
+                value="{{{product.price}}}">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    
+    {{!-- Details --}}
+    <p class="text-lime p-2 my-3 border-bottom"><i class="fa fa-wpforms mr-2"></i>Details</p>
+
+    {{!-- Color --}}
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label for="colorName">
+            <i class="fa fa-tag mr-2"></i>Color Name
+          </label>
+          <input id="colorName" name="colorName" type="text" class="form-control" disabled
+          value="{{{product.details.color.colorName}}}" >
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label for="hexCode">
+            <i class="fa fa-hashtag mr-2"></i>Color Hexcode
+          </label>
+          <input id="hexCode" name="hexCode" type="text" class="form-control" disabled
+          value="{{{product.details.color.hexCode}}}" >
+        </div>
+      </div>
+    </div>
+
+    {{!-- Material - Size --}}
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label for="size">
+            <i class="fa fa-child mr-2"></i>Size
+          </label>
+
+          <input id="size" name="size" type="text" class="form-control" disabled
+          value="{{{product.details.size}}}" >
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label for="material">
+            <i class="fa fa-chain-broken mr-2"></i>Material
+          </label>
+          <input id="material" name="material" type="text" class="form-control" disabled
+          value="{{{product.details.material}}}" >
+        </div>
+      </div>
+    </div>
+
+    {{!-- Gender --}}
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="form- roup">
+          <label for="gender">
+            <i class="fa fa-transgender-alt mr-2"></i>Gender
+          </label>
+          <input id="gender" name="gender" type="text" class="form-control" disabled
+          value="{{{product.details.gender}}}" >
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label for="season">
+            <i class="fa fa-cloud mr-2"></i>Season
+          </label>
+
+          <input id="season" name="season" type="text" class="form-control" disabled
+          value="{{{product.details.season}}}" >
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

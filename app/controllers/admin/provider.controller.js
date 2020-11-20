@@ -99,7 +99,6 @@ module.exports = {
   // @route   POST /providers/add
   createProvider: async (req, res) => {
     let providerData = getProviderData(req.body)
-    console.log(providerData)
     try {
       const response = await axiosInstance.post(`/admin/providers`, providerData, {
         headers: {
@@ -190,7 +189,7 @@ module.exports = {
           formType: "update",
           header: "Update provider",
           route: "providers",
-          provider: providerData,
+          provider: await getProviderById(req.user.accessToken, req.params.id),
           user: await helper.getUserInstance(req),
           csrfToken: req.csrfToken()
         })

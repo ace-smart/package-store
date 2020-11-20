@@ -4,13 +4,13 @@ const validator = require("validator")
 const { isExistent, hasSpecialChars, STATUS_VALUES } = require("../helper/validation")
 const ValidationError = require('../errors/validation')
 const AddressObject = require('./AddressObject')
-const { compare } = require("bcrypt")
 
 class ProviderObject {
   constructor({ _id, name, addressId, email, status, createdAt }) {
     this.id = _id
     this.name = name
-    this.address = (addressId) ? new AddressObject({...addressId}) : null    
+    this.address = (addressId) ? new AddressObject({...addressId}) : null 
+    this.addressId = (this.address) ? this.address.id : null 
     this.email = email
     this.status = status
     this.createdAt = createdAt
@@ -191,28 +191,10 @@ class ProviderObject {
     return providerObject
   }
 
-  //@desc:    Empty => return true
-  static hasEmptyAddress(addressData) {
-    let emptyProps = []
-    for (const [key, value] of Object.entries(addressData)) {
-      if (value == null) {
-        emptyProps.push(key)
-      } else if (!validator.isEmpty(value.toString())) {
-        emptyProps.push(key)
-      }
-    }
-
-    if (emptyProps.length > 0) {
-      return false
-    }
-
-    return true
-  } 
-
   static async create({ ...providerData }) {
     try {
       let addressId = null
-      if (!ProviderObject.hasEmptyAddress(providerData.address)) {
+      if (!AddressObject.hasEmptyAddress(providerData.address)) {
         const createdAddress = await AddressObject.create({...providerData.address})
         addressId = createdAddress.id
       }

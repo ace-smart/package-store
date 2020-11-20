@@ -39,7 +39,4 @@ module.exports = {
             return options.inverse(this)
         }
     },
-    // formatPrice: function(price){
-    //     return `$ ${parseFloat(price)}`
-    // },
 }

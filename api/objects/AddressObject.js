@@ -254,6 +254,24 @@ class AddressObject {
     return addressObject
   }
 
+  //@desc:    Empty => return true
+  static hasEmptyAddress(addressData) {
+    let emptyProps = []
+    for (const [key, value] of Object.entries(addressData)) {
+      if (value == null) {
+        emptyProps.push(key)
+      } else if (!validator.isEmpty(value.toString())) {
+        emptyProps.push(key)
+      }
+    }
+
+    if (emptyProps.length > 0) {
+      return false
+    }
+
+    return true
+  } 
+  
   static async create({ ...addressData } = {}) {
     try { 
       let address = new AddressObject({ ...addressData })

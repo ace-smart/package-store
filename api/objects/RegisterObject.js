@@ -26,15 +26,14 @@ class RegisterObject {
     let errors = new Array()
     
     // [password] -- [required]
-    if (typeof this.password === "undefined" || validator.isEmpty(this.password)) {
+    if (this.password == null) {
       errors.push({
         field: "password",
         message: "Must be required.",
       })
     } 
     // confirm_password -- [required]
-    if (typeof this.confirm_password === "undefined" ||
-      validator.isEmpty(this.confirm_password)) {
+    if (this.confirm_password == null) {
       errors.push({
         field: "confirm_password",
         message: "Must be required.",
@@ -45,7 +44,7 @@ class RegisterObject {
       throw new ValidationError(errors)
     }
 
-    if (this.password != null && !validator.isEmpty(this.password)) {
+    if (this.password != null && !validator.isEmpty(this.password.toString())) {
       if (!validator.isLength(this.password, { min: 4, max: 255 })) {
         errors.push({
           field: "password",
@@ -58,7 +57,7 @@ class RegisterObject {
       }
     }
 
-    if (this.confirm_password != null && !validator.isEmpty(this.confirm_password)) {
+    if (this.confirm_password != null && !validator.isEmpty(this.confirm_password.toString())) {
       if (!validator.equals(this.confirm_password, this.password)) {
         errors.push({
           field: "confirm_password",
