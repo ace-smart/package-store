@@ -14,15 +14,15 @@ class ResetPwdObject {
     let errors = new Array()
 
     // email [required]
-    if (this.email == null) {
+    if (this.email == null || validator.isEmpty(this.email.toString())) {
       errors.push({
         field: "email",
         message: "Email can not be empty",
         value: this.email,
       })
       throw new ValidationError(errors)
-    } else if (!validator.isEmpty(this.email)) {
-      const _email = this.email.toLowerCase()
+    } else if (!validator.isEmpty(this.email.toString())) {
+      const _email = this.email.toString().toLowerCase()
       if (!validator.isEmail(_email)) {
         errors.push({
           field: "email",
@@ -68,7 +68,7 @@ class ResetPwdObject {
       throw new ValidationError(errors)
     }
 
-    if (this.new_password != null && !validator.isEmpty(this.new_password)) {
+    if (this.new_password != null && !validator.isEmpty(this.new_password.toString())) {
       if (!validator.isLength(new_password, { min: 4, max: 255 })) {
         errors.push({
           field: "new_password",
@@ -78,7 +78,7 @@ class ResetPwdObject {
       }
     }
 
-    if (this.confirm_new_password != null && !validator.isEmpty(this.confirm_new_password)) {
+    if (this.confirm_new_password != null && !validator.isEmpty(this.confirm_new_password.toString())) {
       if (!validator.equals(new_password, confirm_new_password)) {
         errors.push({
           field: "confirm_new_password",

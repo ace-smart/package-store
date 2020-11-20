@@ -9,11 +9,11 @@ class ConfirmEmailObject {
   }
 
   async validate() {
-    if (this.email == null) {
+    if (this.email == null || validator.isEmpty(this.email.toString())) {
       throw new TypeError('email is not valid.')
     }
 
-    if (this.confirmString == null)  {
+    if (this.confirmString == null || validator.isEmpty(this.confirmString.toString()))  {
       throw new TypeError('confirmString is not valid.')
     }
 

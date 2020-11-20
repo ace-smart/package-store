@@ -2,6 +2,7 @@ const UserModel = require("../models/UserModel")
 const bcrypt = require("bcrypt")
 const ValidationError = require("../errors/validation")
 const UserObject = require("./UserObject")
+const { default: validator } = require("validator")
 
 class LoginObject {
   constructor({ username, password } = {}) {
@@ -13,13 +14,13 @@ class LoginObject {
   // Valid: => return UserObject
   async authenticate(role = null) {
     let errors = new Array()
-    if (this.username == null) {
+    if (this.username == null || validator.isEmpty(this.username.toString())) {
       errors.push({
         field: "username",
         message: "Username can not be empty"
       })
     }
-    if (this.password == null) {
+    if (this.password == null || validator.isEmpty(this.password.toString())) {
       errors.push({
         field: "password",
         message: "Password can not be empty"

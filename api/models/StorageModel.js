@@ -10,21 +10,17 @@ const StorageSchema = new mongoose.Schema({
     },
     addressId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Address',
-        required: true
+        ref: 'Address'
     },
     propertyType: {
         type: String,
+        enum: ['rental', 'owned'],
         default: 'rental',
         lowercase: true,
     },
     capacity: {
-        size: {type: Number, required: true},
-        unit: {type: String, default: 'kg', max:5,lowercase: true}
-    },
-    description: {
-        type: String,
-        max: 350
+        type: Number, 
+        required: true
     },
     status: {
         type: String,

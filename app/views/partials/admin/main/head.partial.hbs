@@ -7,6 +7,9 @@
 {{#ifMatch route 'products'}}
   {{> admin/product/head.partial}}
 {{/ifMatch}}
+{{#ifMatch route 'storages'}}
+  {{> admin/storage/head.partial}}
+{{/ifMatch}}
 {{#ifMatch route 'vouchers'}}
   {{> admin/voucher/head.partial}}
 {{/ifMatch}}

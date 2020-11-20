@@ -51,31 +51,31 @@ class ProfileObject {
     let errors = new Array()
 
     if (type === "create") {
-      if (this.firstName == null) {
+      if (this.firstName == null || validator.isEmpty(this.firstName.toString())) {
         errors.push({
           field: "firstName",
           message: "firstName must be required",
         })
       }
-      if (this.lastName == null) {
+      if (this.lastName == null  || validator.isEmpty(this.lastName.toString())) {
         errors.push({
           field: "lastName",
           message: "lastName must be required",
         })
       }
-      if (this.gender == null) {
+      if (this.gender == null || validator.isEmpty(this.gender.toString())) {
         errors.push({
           field: "gender",
           message: "gender must be required",
         })
       }
-      if (this.dateOfBirth == null) {
+      if (this.dateOfBirth == null || validator.isEmpty(this.dateOfBirth.toString())) {
         errors.push({
           field: "dateOfBirth",
           message: "dateOfBirth must be required",
         })
       }
-      if (this.phoneNumber == null) {
+      if (this.phoneNumber == null || validator.isEmpty(this.phoneNumber.toString())) {
         errors.push({
           field: "phoneNumber",
           message: "phoneNumber must be required",
@@ -90,7 +90,7 @@ class ProfileObject {
 
     // Validate after being filled
     // === firsName ===
-    if (this.firstName != null && !validator.isEmpty(this.firstName)) {
+    if (this.firstName != null && !validator.isEmpty(this.firstName.toString())) {
       if (!validator.isAlpha(this.firstName)) {
         errors.push({
           field: "firstName",
@@ -107,7 +107,7 @@ class ProfileObject {
       }
     }
     // === lastName ===
-    if (this.lastName != null && !validator.isEmpty(this.lastName)) {
+    if (this.lastName != null && !validator.isEmpty(this.lastName.toString())) {
       if (!validator.isAlpha(this.lastName)) {
         errors.push({
           field: "lastName",
@@ -124,7 +124,7 @@ class ProfileObject {
       }
     }
     // === gender ===
-    if (this.gender != null && !validator.isEmpty(this.gender)) {
+    if (this.gender != null && !validator.isEmpty(this.gender.toString())) {
       if (!validator.isAlpha(this.gender)) {
         errors.push({
           field: "gender",
@@ -141,7 +141,7 @@ class ProfileObject {
       }
     }
     // === dateOfBirth ===
-    if (this.dateOfBirth != null && !validator.isEmpty(this.dateOfBirth)) {
+    if (this.dateOfBirth != null && !validator.isEmpty(this.dateOfBirth.toString())) {
       if (!validator.isDate(this.dateOfBirth)) {
         errors.push({
           field: "dateOfBirth",
@@ -163,7 +163,7 @@ class ProfileObject {
       }
     }
     // === phoneNumber ===
-    if (this.phoneNumber != null && !validator.isEmpty(this.phoneNumber)) {
+    if (this.phoneNumber != null && !validator.isEmpty(this.phoneNumber.toString())) {
       if (!validator.isNumeric(this.phoneNumber)) {
         errors.push({
           field: "phoneNumber",
@@ -173,7 +173,7 @@ class ProfileObject {
       }
     }
     // === status ===
-    if (this.status != null && !validator.isEmpty(this.status)) {
+    if (this.status != null && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
         errors.push({
           field: "status",

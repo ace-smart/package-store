@@ -65,31 +65,31 @@ class VoucherObject {
     let errors = new Array()
 
     if (type === "create") {
-      if (this.name == null) {
+      if (this.name == null || validator.isEmpty(this.name.toString())) {
         errors.push({
           field: "name",
           message: "Must be required.",
         })
       }
-      if (this.code == null) {
+      if (this.code == null || validator.isEmpty(this.code.toString())) {
         errors.push({
           field: "code",
           message: "Must be required.",
         })
       }
-      if (this.minValue == null) {
+      if (this.minValue == null || validator.isEmpty(this.minValue.toString())) {
         errors.push({
           field: "minValue",
           message: "Must be required.",
         })
       }
-      if (this.maxValue == null) {
+      if (this.maxValue == null || validator.isEmpty(this.maxValue.toString())) {
         errors.push({
           field: "maxValue",
           message: "Must be required.",
         })
       }
-      if (this.validUntil == null) {
+      if (this.validUntil == null || validator.isEmpty(this.validUntil.toString())) {
         errors.push({
           field: "validUntil",
           message: "Must be required.",
@@ -288,7 +288,7 @@ class VoucherObject {
       const validation = await voucherObject.validate("create")
       if (validation) {
         voucherObject = voucherObject.clean()
-        const createdVoucher = await VoucherModel.create({ ...validation })
+        const createdVoucher = await VoucherModel.create({ ...voucherObject })
         if (createdVoucher) {
           const voucher = new VoucherObject({ ...createdVoucher })
           return voucher
@@ -324,7 +324,7 @@ class VoucherObject {
       if (validation) {
         updateObject = updateObject.clean()
         const updated = new VoucherObject(
-          await VoucherModel.findOneAndUpdate({ _id: this.id }, { ...validation }, { new: true })
+          await VoucherModel.findOneAndUpdate({ _id: this.id }, { ...updateObject }, { new: true })
         )
 
         return updated

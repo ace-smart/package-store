@@ -109,6 +109,7 @@ module.exports = {
 
       throw new Error("Failed to add new product")
     } catch (error) {
+      console.log(error);
       return ErrorHandler.sendErrors(res, error)
     }
   },

@@ -1,0 +1,11 @@
+<div class="p-4">
+    {{!-- flash --}}
+    {{> admin/flash.partial}}
+    
+    {{!-- form --}}
+    {{#ifeq formType 'create'}}
+    {{> admin/storage/form/create.partial }}
+    {{else}}
+    {{> admin/storage/form/update.partial }}
+    {{/ifeq}}
+</div>

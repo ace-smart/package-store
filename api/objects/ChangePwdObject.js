@@ -16,22 +16,22 @@ class ChangePwdObject {
   async validate() {
     let errors = new Array()
 
-    if (this.id == null) {
+    if (this.id == null || validator.isEmpty(this.id.toString())) {
       throw new TypeError("Id is not valid")
     }
-    if (this.password == null) {
+    if (this.password == null || validator.isEmpty(this.password.toString())) {
       errors.push({
         field: "password",
         message: "Must be required.",
       })
     }
-    if (this.new_password == null) {
+    if (this.new_password == null || validator.isEmpty(this.new_password.toString())) {
       errors.push({
         field: "new_password",
         message: "Must be required.",
       })
     }
-    if (this.confirm_new_password == null) {
+    if (this.confirm_new_password == null || validator.isEmpty(this.confirm_new_password.toString())) {
       errors.push({
         field: "confirm_new_password",
         message: "Must be required.",
@@ -42,7 +42,7 @@ class ChangePwdObject {
       throw new ValidationError(errors)
     }
 
-    if (typeof this.new_password !== "undefined" && !validator.isEmpty(this.new_password)) {
+    if (typeof this.new_password !== "undefined" && !validator.isEmpty(this.new_password.toString())) {
       if (!validator.isLength(this.new_password, { min: 4, max: 255 })) {
         errors.push({
           field: "new_password",
@@ -56,7 +56,7 @@ class ChangePwdObject {
     }
     if (
       typeof this.confirm_new_password !== "undefined" &&
-      !validator.isEmpty(this.confirm_new_password)
+      !validator.isEmpty(this.confirm_new_password.toString())
     ) {
       if (!validator.equals(this.confirm_new_password, this.new_password)) {
         errors.push({

@@ -8,8 +8,7 @@ const ValidationError = require('../errors/validation')
 class ProductObject {
   constructor({ _id, subcategoryId, name, details, price, status, createdAt }) {
     this.id = _id
-    this.subcategory = (subcategoryId) ? new SubcategoryObject({...subcategoryId}) : null
-    this.subcategoryId = (this.subcategory) ? this.subcategory.id : null
+    this.subcategoryId = subcategoryId
     this.name = name
     this.details = details
     this.price = price
@@ -17,16 +16,30 @@ class ProductObject {
     this.createdAt = createdAt
   }
 
+  async setSubcategory() {
+    if (this.subcategoryId instanceof Object) {
+      // populated
+      this.subcategory = new SubcategoryObject({...this.subcategoryId})
+      this.subcategoryId = this.subcategory.id.toString()
+    } else if (typeof this.subcategoryId === 'string') {
+      // create-upload
+      this.subcategory = await SubcategoryObject.getOneSubcategoryBy({_id: this.subcategoryId})
+    } else {
+      this.subcategory = null
+    }
+  }
+
   // @desc:     Get product by criteria
   // @return:   ProductObject
   static async getOneProductBy(criteria = {}, selectFields = null) {
     try {
-      const product = await ProductModel.findOne(criteria, selectFields)
+      const productDoc = await ProductModel.findOne(criteria, selectFields)
         .populate({path: 'subcategoryId'})
         .lean()
         
-      if (product) {
-        const productObject = new ProductObject({ subcategory: product.subcategoryId,...product })
+      if (productDoc) {
+        const productObject = new ProductObject({...productDoc })
+        await productObject.setSubcategory()
         return productObject
       }
 
@@ -46,9 +59,10 @@ class ProductObject {
       
       if (listOfProducts.length > 0) {
         let productObjects = new Array()
-        listOfProducts.forEach((element) => {
-          const object = new ProductObject({ ...element, subcategory: element.subcategoryId})
-          object.clean()
+        listOfProducts.forEach(async (element) => {
+          const object = new ProductObject({ ...element})
+          await object.setSubcategory()
+          // object.clean()
           productObjects.push(object)
         })
         
@@ -67,19 +81,19 @@ class ProductObject {
 
     // === CREATE === ----------  Required fields
     if (type === "create") {
-      if (this.subcategory == null) {
+      if (this.subcategoryId == null || validator.isEmpty(this.subcategoryId.toString())) {
         errors.push({
           field: "subcategoryId",
           message: "Must be required.",
         })
       }
-      if (this.name == null) {
+      if (this.name == null || validator.isEmpty(this.name.toString())) {
         errors.push({
           field: "name",
           message: "Must be required.",
         })
       }
-      if (this.price == null) {
+      if (this.price == null || validator.isEmpty(this.price.toString())) {
         errors.push({
           field: "price",
           message: "Must be required.",
@@ -93,19 +107,19 @@ class ProductObject {
     }
 
     // subcategory
-    if (this.subcategory != null) {
-      if (!validator.isMongoId(this.subcategory.id.toString())) {
+    if (this.subcategoryId != null) {
+      if (!validator.isMongoId(this.subcategoryId.toString())) {
         errors.push({
           field: "subcategoryId",
           message: "Invalid format.",
-          value: this.subcategory.id,
+          value: this.subcategoryId,
         })
       }
-      if (!(await isExistent(SubcategoryModel, { _id: this.subcategory.id }))) {
+      if (!(await isExistent(SubcategoryModel, { _id: this.subcategoryId }))) {
         errors.push({
           field: "subcategoryId",
           message: "Not existent.",
-          value: this.subcategory.id,
+          value: this.subcategoryId,
         })
       }
     }
@@ -175,19 +189,24 @@ class ProductObject {
             value: this.details.color,
           })
         }
-        if (hasSpecialChars(this.details.color.colorName)) {
-          errors.push({
-            field: "colorName",
-            message: "Must be only numbers and characters",
-            value: this.details.color.colorName,
-          })
+        if (!validator.isEmpty(this.details.color.colorName.toString())){
+          if (hasSpecialChars(this.details.color.colorName)) {
+            errors.push({
+              field: "colorName",
+              message: "Must be only numbers and characters",
+              value: this.details.color.colorName,
+            })
+          }
         }
-        if (!validator.isHexColor(this.details.color.hexCode)) {
-          errors.push({
-            field: "hexCode",
-            message: "Invalid value.",
-            value: this.details.color.hexCode,
-          })
+        
+        if (!validator.isEmpty(this.details.color.hexCode.toString())){
+          if (!validator.isHexColor(this.details.color.hexCode)) {
+            errors.push({
+              field: "hexCode",
+              message: "Invalid value.",
+              value: this.details.color.hexCode,
+            })
+          }
         }
       }
       // details.material
@@ -288,20 +307,21 @@ class ProductObject {
 
   // @desc:   Empty => return true
   static hasEmptyDetails(productData) {
+    const detailKeys = Object.keys(productData)
     let emptyProps = []
     for (const [key, value] of Object.entries(productData)) {
       if (value == null) {
         emptyProps.push(key)
-      } else if (!validator.isEmpty(value.toString())) {
+      } else if (validator.isEmpty(value.toString())) {
         emptyProps.push(key)
       }
     }
 
-    if (emptyProps.length > 0) {
-      return false
+    if (emptyProps.length === detailKeys.length) {
+      return true
     }
 
-    return true
+    return false
   }
 
   // @desc:     Create a product
@@ -310,22 +330,24 @@ class ProductObject {
   static async create({ ...productData } = {}) {
     try {
       // Check subcategoryId
-      if (productData.subcategoryId) {
-        const subcategory = await SubcategoryObject.getOneSubcategoryBy({_id: productData.subcategoryId})
-        if (subcategory) {
-          productData.subcategoryId = {_id: subcategory.id,...subcategory}
-        } else {
-          throw new ValidationError([{
-            field: "subcategoryId",
-            message: "Not existent.",
-            value: subcategoryId,
-          }])
-        }
-      }
+      // if (productData.subcategoryId) {
+      //   const subcategory = await SubcategoryObject.getOneSubcategoryBy({_id: productData.subcategoryId})
+      //   if (subcategory) {
+      //     productData.subcategoryId = {_id: subcategory.id, ...subcategory}
+      //   } else {
+      //     throw new ValidationError([{
+      //       field: "subcategoryId",
+      //       message: "Not existent.",
+      //       value: subcategoryId,
+      //     }])
+      //   }
+      // }
       
       // Check details
-      if (ProductObject.hasEmptyDetails(productData.details)) {
-        delete productData.details
+      if (productData.details) {
+        if (ProductObject.hasEmptyDetails(productData.details)) {
+          delete productData.details
+        }
       }
       
       // Add product
@@ -334,7 +356,7 @@ class ProductObject {
       if (validation) {
         productObject = productObject.clean()
         const createdProduct = await ProductModel.create(
-          {subcategoryId: productObject.subcategory.id,...validation })
+          {...productObject })
         if (createdProduct) {
           return new ProductObject(createdProduct)
         }
@@ -365,28 +387,15 @@ class ProductObject {
     }
 
     try {
-      // Check subcategoryId
-      if (productData.subcategoryId) {
-        const subcategory = await SubcategoryObject.getOneSubcategoryBy({_id: productData.subcategoryId})
-        if (subcategory) {
-          productData.subcategoryId = {_id: subcategory.id,...subcategory}
-        } else {
-          throw new ValidationError([{
-            field: "subcategoryId",
-            message: "Not existent.",
-            value: subcategoryId,
-          }])
+      // Check details
+      if (productData.details) {
+        console.log(ProductObject.hasEmptyDetails(productData.details))
+        if (ProductObject.hasEmptyDetails(productData.details)) {
+          delete productData.details
         }
       }
-      
-      // Check details
-      if (ProductObject.hasEmptyDetails(productData.details)) {
-        delete productData.details
-      }
+
       let productObject = new ProductObject({ ...productData })
-      if(productData.subcategoryId) {
-        productObject.subcategoryId = productData.subcategoryId
-      }
       const validation = await productObject.validate("update", this.id)
       if (validation) {
         productObject = productObject.clean()

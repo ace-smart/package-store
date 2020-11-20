@@ -173,7 +173,8 @@ module.exports = {
     try {
       const provider = await getProviderById(req.user.accessToken, req.params.id)
       if (provider) {
-        providerData = helper.getFilledFields(getProviderData(req.body),provider)
+        providerData = helper.getFilledFields(getProviderData(req.body), provider)
+        providerData.addressId = provider.addressId.toString()
       }
       const response = await axiosInstance.put(`/admin/providers/${req.params.id}`, providerData, {
         headers: {
@@ -211,7 +212,7 @@ module.exports = {
           csrfToken: req.csrfToken(),
           errors: helper.handleInvalidationErrors(errors),
           validData: validData,
-          provider: providerData
+          provider: await getProviderById(req.user.accessToken, req.params.id)
         })
       }
 

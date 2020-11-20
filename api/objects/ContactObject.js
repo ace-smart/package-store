@@ -53,19 +53,19 @@ class ContactObject {
     let errors = new Array()
 
     if (type === 'create') {
-      if (this.subject == null || validator.isEmpty(this.subject)) {
+      if (this.subject == null || validator.isEmpty(this.subject.toString())) {
         errors.push({
           field: 'subject',
           message: "Must be required."
         })
       }
-      if (this.email == null || validator.isEmpty(this.email)) {
+      if (this.email == null || validator.isEmpty(this.email.toString())) {
         errors.push({
           field: 'email',
           message: "Must be required."
         })
       }
-      if (this.message == null) {
+      if (this.message == null || validator.isEmpty(this.message.toString())) {
         errors.push({
           field: 'message',
           message: "Must be required."
@@ -78,7 +78,7 @@ class ContactObject {
     }
 
     // name
-    if (typeof this.subject !== "undefined" && !validator.isEmpty(this.subject)) {
+    if (typeof this.subject !== "undefined" && !validator.isEmpty(this.subject.toString())) {
       if (hasSpecialChars(this.subject)) {
         errors.push({
           field: 'subject',
@@ -95,7 +95,7 @@ class ContactObject {
       }
     }
     // email
-    if (typeof this.email !== "undefined" && !validator.isEmpty(this.email)) {
+    if (typeof this.email !== "undefined" && !validator.isEmpty(this.email.toString())) {
       const _email = this.email.toLowerCase()
       if (!validator.isEmail(_email)) {
         errors.push({
@@ -113,7 +113,7 @@ class ContactObject {
       }
     }
     // message
-    if (typeof this.message !== "undefined" && !validator.isEmpty(this.message)) {
+    if (typeof this.message !== "undefined" && !validator.isEmpty(this.message.toString())) {
       if (hasSpecialChars(this.message)) {
         errors.push({
           field: 'message',
@@ -130,7 +130,7 @@ class ContactObject {
       }
     }
     // status
-    if (typeof this.status !== "undefined" && !validator.isEmpty(this.status)) {
+    if (typeof this.status !== "undefined" && !validator.isEmpty(this.status.toString())) {
         if (!validator.isIn(this.status.toLowerCase(), CONTACT_STATUS)) {
           errors.push({
             field: 'status',

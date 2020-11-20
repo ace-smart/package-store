@@ -26,14 +26,14 @@ class RegisterObject {
     let errors = new Array()
     
     // [password] -- [required]
-    if (this.password == null) {
+    if (this.password == null || validator.isEmpty(this.password.toString())) {
       errors.push({
         field: "password",
         message: "Must be required.",
       })
     } 
     // confirm_password -- [required]
-    if (this.confirm_password == null) {
+    if (this.confirm_password == null || validator.isEmpty(this.confirm_password.toString())) {
       errors.push({
         field: "confirm_password",
         message: "Must be required.",

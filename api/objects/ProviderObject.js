@@ -9,21 +9,34 @@ class ProviderObject {
   constructor({ _id, name, addressId, email, status, createdAt }) {
     this.id = _id
     this.name = name
-    this.address = (addressId) ? new AddressObject({...addressId}) : null 
-    this.addressId = (this.address) ? this.address.id : null 
+    this.addressId = addressId
     this.email = email
     this.status = status
     this.createdAt = createdAt
   }
 
+  async setAddress() {
+    if(this.addressId instanceof Object) {
+      // populated
+      this.address = new AddressObject({...this.addressId})
+      this.addressId = this.address.id.toString()
+    } else if (typeof this.addressId === 'string') {
+      // create - update
+      this.address = await AddressObject.getOneAddressById(this.addressId)
+    } else {
+      this.address = null
+    }
+  }
+
   static async getOneProviderBy(criteria = {}, selectFields = null) {
     try {
-      let provider = await ProviderModel.findOne(criteria, selectFields)
+      const providerDoc = await ProviderModel.findOne(criteria, selectFields)
       .populate({path: 'addressId'})
       .lean()
       
-      if (provider) {
-        provider = new ProviderObject({ ...provider })
+      if (providerDoc) {
+        const provider = new ProviderObject({ ...providerDoc })
+        await provider.setAddress()
         return provider
       }
 
@@ -35,15 +48,16 @@ class ProviderObject {
 
   static async getProvidersBy(criteria = {}, selectFields = null) {
     try {
-      const providers = await ProviderModel.find(criteria, selectFields)
+      const providerDocs = await ProviderModel.find(criteria, selectFields)
       .populate({path: 'addressId'})
       .lean()
 
-      if (providers.length > 0) {
+      if (providerDocs.length > 0) {
         let providerList = new Array()
 
-        providers.forEach((element) => {
+        providerDocs.forEach(async (element) => {
           const object = new ProviderObject({ ...element })
+          await object.setAddress()
           providerList.push(object)
         })
 
@@ -60,13 +74,13 @@ class ProviderObject {
     let errors = new Array()
 
     if (type === "create") {
-      if (this.name == null) {
+      if (this.name == null || validator.isEmpty(this.name.toString())) {
         errors.push({
           field: "name",
           message: "Must be required.",
         })
       }
-      if (this.email == null) {
+      if (this.email == null || validator.isEmpty(this.email.toString())) {
         errors.push({
           field: "email",
           message: "Must be required.",
@@ -79,8 +93,8 @@ class ProviderObject {
     }
 
     // name
-    if (typeof this.name !== "undefined" && !validator.isEmpty(this.name.toString())) {
-      if (hasSpecialChars(this.name)) {
+    if (this.name != null && !validator.isEmpty(this.name.toString())) {
+      if (hasSpecialChars(this.name.toString())) {
         errors.push({
           field: "name",
           message: "Must contain only numbers, characters and spaces.",
@@ -96,7 +110,7 @@ class ProviderObject {
       }
     }
     // addressId
-    if (typeof this.addressId !== "undefined" && !validator.isEmpty(this.addressId.toString())) {
+    if (this.addressId != null && !validator.isEmpty(this.addressId.toString())) {
         if (!validator.isMongoId(this.addressId)) {
           errors.push({
             field: 'addressId',
@@ -104,15 +118,7 @@ class ProviderObject {
             value: this.addressId
           })
         }
-        try {
-          if (!(await isExistent(AddressModel, { _id: this.addressId }))) {
-            errors.push({
-              field: 'addressId',
-              message: "Not existent.",
-              value: this.addressId
-            })
-          }
-        } catch (error) {
+        if (!(await isExistent(AddressModel, { _id: this.addressId }))) {
           errors.push({
             field: 'addressId',
             message: "Not existent.",
@@ -121,7 +127,7 @@ class ProviderObject {
         }
     } 
     // email
-    if (typeof this.email !== "undefined" && !validator.isEmpty(this.email.toString())) {
+    if (this.email != null && !validator.isEmpty(this.email.toString())) {
       const _email = this.email.toLowerCase()
       if (!validator.isEmail(_email)) {
         errors.push({
@@ -146,7 +152,7 @@ class ProviderObject {
       }
     }
     // status
-    if (typeof this.status !== "undefined" && !validator.isEmpty(this.status.toString())) {
+    if (this.status != null && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
         errors.push({
           field: "status",
@@ -193,17 +199,17 @@ class ProviderObject {
 
   static async create({ ...providerData }) {
     try {
-      let addressId = null
-      if (!AddressObject.hasEmptyAddress(providerData.address)) {
+      // Add address
+      if (!AddressObject.hasEmptyAddressData(providerData.address)) {
         const createdAddress = await AddressObject.create({...providerData.address})
-        addressId = createdAddress.id
+        providerData.addressId = createdAddress.id.toString()
       }
-      providerData.addressId = addressId
+
       let providerObject = new ProviderObject({ ...providerData })
       const validation = await providerObject.validate("create")
       if (validation) {
         providerObject = providerObject.clean()
-        const createdProvider = await ProviderModel.create({ ...validation })
+        const createdProvider = await ProviderModel.create({ ...providerObject })
         if (createdProvider) {
           const provider = new ProviderObject({ ...createdProvider })
           return provider
@@ -235,16 +241,27 @@ class ProviderObject {
 
     try {
       // Update address
-      if (!ProviderObject.hasEmptyAddress(updateData.address)) {
-        await this.address.update({...updateData.address})
+      if (updateData.address) {
+        if (!AddressObject.hasEmptyAddressData(updateData.address)) {
+          if(updateData.address.id == null) {
+            // Create 
+            const createdAddress = await AddressObject.create({...updateData.address})
+            updateData.addressId = createdAddress.id.toString()
+          } else{
+            // Update
+            const addressObj = await AddressObject.getOneAddressById(updateData.address.id)
+            await addressObj.update({...updateData.address})
+          }
+        }
       }
+      
       // Update provider
       let updateObject = new ProviderObject({ ...updateData })
       const validation = await updateObject.validate("update", this.id)
       if (validation) {
         updateObject = updateObject.clean()
         const updated = new ProviderObject(
-          await ProviderModel.findOneAndUpdate({ _id: this.id }, { ...validation }, { new: true })
+          await ProviderModel.findOneAndUpdate({ _id: this.id }, { ...updateObject }, { new: true })
         )
 
         return updated

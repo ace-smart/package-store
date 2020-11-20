@@ -100,7 +100,7 @@ class CategoryObject {
     let errors = new Array()
 
     if (type === "create") {
-      if (typeof this.name === "undefined" || validator.isEmpty(this.name)) {
+      if (this.name == null || validator.isEmpty(this.name.toString())) {
         errors.push({
           field: "name",
           message: "Must be required.",
@@ -112,7 +112,7 @@ class CategoryObject {
       }
     }
 
-    if (this.name != null && !validator.isEmpty(this.name)) {
+    if (this.name != null && !validator.isEmpty(this.name.toString())) {
       if (!validator.isAlphanumeric(this.name)) {
         errors.push({
           field: "name",
@@ -136,7 +136,7 @@ class CategoryObject {
       }
     }
 
-    if (this.status != null && !validator.isEmpty(this.status)) {
+    if (this.status != null && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
         errors.push({
           field: "status",

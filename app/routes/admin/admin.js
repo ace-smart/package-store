@@ -23,6 +23,7 @@ router.use('/accounts', accountRouter)
 router.use('/categories', categoryRouter)
 router.use('/products', productRouter)
 router.use('/providers', providerRouter)
+router.use('/storages', storageRouter)
 router.use('/vouchers', voucherRouter)
 router.use('/contacts', contactRouter)
 

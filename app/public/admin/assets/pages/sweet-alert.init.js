@@ -131,6 +131,92 @@
     })
 
     // #sa-activate
+    $(".sa-set-full").on("click", function () {
+      const uid = this.dataset.uid
+      const _csrf = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+      Swal.fire({
+        title: "Set to FULL ?",
+        text: "Do you want to set this storage to 'FULL' status?",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, do it!",
+        cancelButtonText: "No, cancel!",
+        confirmButtonClass: "btn btn-success",
+        cancelButtonClass: "btn btn-danger m-l-10",
+        buttonsStyling: false,
+        allowOutsideClick: false,
+      }).then(function (e) {
+        // confirm => {value: true}
+        // cancel => {dismiss: "cancel"}
+        if (e.value === true) {
+          const toURL = window.location.href + "/set-full/" + uid
+          // send request to api server
+          const xmlhttp = new XMLHttpRequest()
+          xmlhttp.open("PUT", toURL, true)
+          xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+              Swal.fire("Successfully!", "The status of the storage was set to full.", "success").then((e) => {
+                if (e.value) {
+                  // press OK button
+                  return location.reload()
+                }
+              })
+            } else {
+              Swal.fire("Failed", "An error has occurred.", "error")
+            }
+          }
+
+          xmlhttp.setRequestHeader("CSRF-Token", _csrf)
+          xmlhttp.withCredentials = true
+          xmlhttp.send()
+        }
+      })
+    })
+
+    // #sa-activate
+    $(".sa-set-available").on("click", function () {
+      const uid = this.dataset.uid
+      const _csrf = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+      Swal.fire({
+        title: "Set to AVAILABLE ?",
+        text: "Do you want to set this storage to 'AVAILABLE' status?",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, do it!",
+        cancelButtonText: "No, cancel!",
+        confirmButtonClass: "btn btn-success",
+        cancelButtonClass: "btn btn-danger m-l-10",
+        buttonsStyling: false,
+        allowOutsideClick: false,
+      }).then(function (e) {
+        // confirm => {value: true}
+        // cancel => {dismiss: "cancel"}
+        if (e.value === true) {
+          const toURL = window.location.href + "/set-available/" + uid
+          // send request to api server
+          const xmlhttp = new XMLHttpRequest()
+          xmlhttp.open("PUT", toURL, true)
+          xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+              Swal.fire("Successfully!", "The status of the storage was set to full.", "success").then((e) => {
+                if (e.value) {
+                  // press OK button
+                  return location.reload()
+                }
+              })
+            } else {
+              Swal.fire("Failed", "An error has occurred.", "error")
+            }
+          }
+
+          xmlhttp.setRequestHeader("CSRF-Token", _csrf)
+          xmlhttp.withCredentials = true
+          xmlhttp.send()
+        }
+      })
+    })
+
+    // #sa-activate
     $(".sa-activate").on("click", function () {
       const uid = this.dataset.uid
       const _csrf = document.querySelector('meta[name="csrf-token"]').getAttribute("content")

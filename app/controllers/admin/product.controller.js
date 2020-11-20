@@ -63,6 +63,7 @@ module.exports = {
       })
       
       if (response.status === 200) {
+        console.log(response.data)
         return res.render("templates/admin/product/product.hbs", {
           layout: "admin/main.layout.hbs",
           content: "list",
@@ -197,9 +198,7 @@ module.exports = {
     try {
       product = await getProductById(req.user.accessToken, req.params.id)
       if (product) {
-        // console.log(product)
         productData = helper.getFilledFields(getProductData(req.body), product)
-        console.log(productData)
       }
 
       const response = await axiosInstance.put(`/admin/products/${req.params.id}`, productData, {
@@ -236,7 +235,7 @@ module.exports = {
           csrfToken: req.csrfToken(),
           user: await helper.getUserInstance(req),
           categories: await getCategoryList(req.user.accessToken),
-          product: productData,
+          product: await getProductById(req.user.accessToken, req.params.id),
           errors: helper.handleInvalidationErrors(errors),
           validData: validData,
         })

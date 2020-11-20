@@ -4,7 +4,6 @@ const AddressSchema = new mongoose.Schema(
     {
         street: {
             type: String,
-            required: true,
         },
         district: {
             type: String,
@@ -14,11 +13,9 @@ const AddressSchema = new mongoose.Schema(
         },
         country: {
             type: String,
-            required: true,
         },
         postalCode: {
             type: Number,
-            required: true,
         },
         status: {
             type: String,

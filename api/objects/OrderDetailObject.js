@@ -125,7 +125,7 @@ class OrderDetailObject {
     }
     }
     // status
-    if (typeof this.status !== "undefined" && !validator.isEmpty(this.status)) {
+    if (typeof this.status !== "undefined" && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
         errors.push({
           field: "status",

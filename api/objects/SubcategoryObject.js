@@ -55,13 +55,13 @@ class SubcategoryObject {
     let errors = new Array()
 
     if (type === "create") {
-      if (typeof this.name === "undefined" || validator.isEmpty(this.name)) {
+      if (this.name == null || validator.isEmpty(this.name.toString())) {
         errors.push({
           field: "name",
           message: "Must be required.",
         })
       }
-      if (typeof this.categoryId === "undefined" || validator.isEmpty(this.categoryId.toString())) {
+      if (this.categoryId == null || validator.isEmpty(this.categoryId.toString())) {
         errors.push({
           field: "categoryId",
           message: "Must be required.",
@@ -73,7 +73,7 @@ class SubcategoryObject {
       }
     }
 
-    if (this.name != null && !validator.isEmpty(this.name)) {
+    if (this.name != null && !validator.isEmpty(this.name.toString())) {
       if (!validator.isAlphanumeric(this.name)) {
         errors.push({
           field: "name",
@@ -99,7 +99,7 @@ class SubcategoryObject {
     }
 
     // category
-    if (typeof this.categoryId !== "undefined" && !validator.isEmpty(this.categoryId.toString())) {
+    if (this.categoryId != null && !validator.isEmpty(this.categoryId.toString())) {
       if (!validator.isMongoId(this.categoryId)) {
         errors.push({
           field: "categoryId",
@@ -116,7 +116,7 @@ class SubcategoryObject {
       }
     }
 
-    if (this.status != null && !validator.isEmpty(this.status)) {
+    if (this.status != null && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
         errors.push({
           field: "status",

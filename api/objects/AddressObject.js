@@ -46,28 +46,14 @@ class AddressObject {
     }
   }
 
-  static async getOneAddressById(userId = null, addressId = null, selectFields = null) {
-    if (userId == null) {
-      throw new TypeError("userId can not be null or undefined.")
-    }
+  static async getOneAddressById(addressId = null, selectFields = null) {
     if (addressId == null) {
       throw new TypeError("addressId can not be null or undefined.")
     }
-    if (!(await isExistent(UserModel, { _id: userId }))) {
-      throw new NotFoundError("No user found.")
-    }
-
     try {
-      const userObject = await UserModel.findOne({ _id: userId }, "addressId").lean()
-      const addressList = userObject.addressId
-      if (addressList.length > 0) {
-        const isExistent = addressList.find((element) => element == addressId)
-        if (isExistent) {
-          const address = await AddressModel.findOne({ _id: addressId }, selectFields).lean()
-          if (address) {
-            return new AddressObject(address)
-          }
-        }
+      const address = await AddressModel.findOne({ _id: addressId }, selectFields).lean()
+      if (address) {
+        return new AddressObject(address)
       }
 
       return null
@@ -80,36 +66,30 @@ class AddressObject {
     let errors = new Array()
 
     if (type === "create") {
-      if (this.street == null) {
-        errors.push({
-          field: "street",
-          message: "Must be required.",
-        })
-      }
-      if (this.district == null) {
-        errors.push({
-          field: "district",
-          message: "Must be required.",
-        })
-      }
-      if (this.city == null) {
-        errors.push({
-          field: "city",
-          message: "Must be required.",
-        })
-      }
-      if (this.country == null) {
-        errors.push({
-          field: "country",
-          message: "Must be required.",
-        })
-      }
-      if (this.postalCode == null) {
-        errors.push({
-          field: "postalCode",
-          message: "Must be required.",
-        })
-      }
+      // if (this.street == null || validator.isEmpty(this.street.toString())) {
+      //   errors.push({
+      //     field: "street",
+      //     message: "Must be required.",
+      //   })
+      // }
+      // if (this.district == null || validator.isEmpty(this.district.toString()) ) {
+      //   errors.push({
+      //     field: "district",
+      //     message: "Must be required.",
+      //   })
+      // }
+      // if (this.city == null || validator.isEmpty(this.city.toString())) {
+      //   errors.push({
+      //     field: "city",
+      //     message: "Must be required.",
+      //   })
+      // }
+      // if (this.country == null || validator.isEmpty(this.country.toString())) {
+      //   errors.push({
+      //     field: "country",
+      //     message: "Must be required.",
+      //   })
+      // }
 
       if (errors.length > 0) {
         throw new ValidationError(errors)
@@ -255,21 +235,22 @@ class AddressObject {
   }
 
   //@desc:    Empty => return true
-  static hasEmptyAddress(addressData) {
+  static hasEmptyAddressData(addressData) {
+    const addressKeys = Object.keys(addressData)
     let emptyProps = []
     for (const [key, value] of Object.entries(addressData)) {
       if (value == null) {
         emptyProps.push(key)
-      } else if (!validator.isEmpty(value.toString())) {
+      } else if (validator.isEmpty(value.toString())) {
         emptyProps.push(key)
       }
     }
 
-    if (emptyProps.length > 0) {
-      return false
+    if (emptyProps.length === addressKeys.length) {
+      return true
     }
 
-    return true
+    return false
   } 
   
   static async create({ ...addressData } = {}) {
@@ -279,7 +260,7 @@ class AddressObject {
       if (validation) {
         address = address.clean()
         const createdAddress = new AddressObject(await AddressModel.create({ ...address }))
-        return createdAddress.id
+        return createdAddress
       }
 
       throw new Error("Failed to create address")

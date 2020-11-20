@@ -16,7 +16,7 @@ class RestockObject {
     this.updatedAt = updatedAt
   }
 
-  
+
   static async getOneRestockBy(criteria = {}, selectFields = null) {
     try {
       let restock = await RestockModel.findOne(criteria, selectFields).lean()
