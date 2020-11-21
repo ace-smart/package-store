@@ -3,6 +3,7 @@ const router = require("express").Router()
 const {
     showProductList,
     viewProductById,
+    getProductById,
     showCreateProductForm,
     createProduct,
     showUpdateForm,
@@ -16,9 +17,14 @@ const {
 // @route   GET /products
 router.get("/", showProductList)
 
+
 // @desc    Get an product by id
 // @route   GET /products/view/:id
 router.get("/view/:id", viewProductById)
+
+// @desc    Get an product by id
+// @route   GET /products/get-data/:id
+router.get("/get-data/:id", getProductById)
 
 // @desc    Add a new product
 // @route   get /products/add

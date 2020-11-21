@@ -1,0 +1,65 @@
+{{#ifMatch content 'view'}}
+{{!-- {{> admin/restock/view/js.partial }} --}}
+{{/ifMatch}}
+
+{{#ifMatch content 'form'}}
+{{> admin/form/js.partial }}
+<script>
+  function setProductInfo(product = null) {
+    if (product) {
+        document.getElementById('product_id').value = (product.id) ? product.id : ''
+        document.getElementById('product_name').value = (product.name) ? product.name : ''
+        document.getElementById('product_subcategory').value = (product.subcategory.name) ? product.subcategory.name : ''
+        document.getElementById('product_price').value = (parseFloat(product.price.toString())) ? parseFloat(product.price.toString()) : ''
+        document.getElementById('product_colorName').value = (product.details.color.colorName) ? product.details.color.colorName : ''
+        document.getElementById('product_hexCode').value = (product.details.color.hexCode) ? product.details.color.hexCode : ''
+        document.getElementById('product_size').value = (product.details.size) ? product.details.size : ''
+        document.getElementById('product_material').value = (product.details.material) ? product.details.material : ''
+        document.getElementById('product_gender').value = (product.details.gender) ? product.details.gender : ''
+        document.getElementById('product_season').value = (product.details.season) ? product.details.season : ''
+    } else {
+        document.getElementById('product_id').value = ''
+        document.getElementById('product_name').value = ''
+        document.getElementById('product_subcategory').value = ''
+        document.getElementById('product_price').value = ''
+        document.getElementById('product_colorName').value = ''
+        document.getElementById('product_hexCode').value = ''
+        document.getElementById('product_size').value = ''
+        document.getElementById('product_material').value = ''
+        document.getElementById('product_gender').value = ''
+        document.getElementById('product_season').value = ''
+    }
+  }
+
+  function getProductInfo(element) {
+    setProductInfo()
+    const selectedElement = element.value
+    // Call ajax 
+    const toURL = window.location.origin + `/admin/products/get-data/${selectedElement}`
+    const httpReq = new XMLHttpRequest()
+    httpReq.open("GET", toURL, true)
+    httpReq.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        // Add product info to table
+        const product = JSON.parse(this.responseText)
+        return setProductInfo(product)
+      } else if (this.readyState == 4 && this.status >= 400) {
+        return setProductInfo()
+      }
+    }
+
+    httpReq.withCredentials = true
+    httpReq.send()
+  }
+</script>
+
+  {{#ifMatch formType 'update'}}
+  <script>
+    getProductInfo(document.getElementById('productId'))
+  </script>
+  {{/ifMatch}}
+{{/ifMatch}}
+
+{{#ifMatch content 'list'}}
+{{> admin/list/js.partial }}
+{{/ifMatch}}

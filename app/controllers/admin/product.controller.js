@@ -1,3 +1,4 @@
+const { response } = require('express')
 const axiosInstance = require('../../helper/axios.helper')
 const helper = require('../../helper/helper')
 const getCategoryList = async function(accessToken) {
@@ -75,6 +76,24 @@ module.exports = {
       }
     } catch (error) {
       return helper.handleErrors(res, error, "admin")
+    }
+  },
+
+  // @desc:   View products by Id
+  // @route   GET /products/get-data/:id
+  getProductById: async (req, res) => {
+    try {
+      const response = await axiosInstance.get(`/admin/products/${req.params.id}`, {
+        headers: {
+          Authorization: "Bearer " + req.user.accessToken,
+        },
+      })
+
+      if (response.status === 200) {
+        return res.status(200).json(response.data)
+      }
+    } catch (error) {
+      return res.sendStatus(error.response.status)
     }
   },
 
@@ -225,6 +244,7 @@ module.exports = {
         const errors = error.response.data.error.invalidation
         const validData = helper.getValidFields(errors, req.body)
 
+        req.flash("fail", "Your input is not valid. Please check and then fill in again.")
         return res.render("templates/admin/product/product.hbs", {
           layout: "admin/main.layout.hbs",
           content: "form",

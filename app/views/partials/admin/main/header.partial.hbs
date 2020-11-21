@@ -32,6 +32,9 @@
                 {{#ifMatch route 'providers'}}
                     {{> admin/provider/breadcrumb.partial }}
                 {{/ifMatch}} 
+                {{#ifMatch route 'restocks'}}
+                    {{> admin/restock/breadcrumb.partial }}
+                {{/ifMatch}}
                 {{#ifMatch route 'vouchers'}}
                     {{> admin/voucher/breadcrumb.partial }}
                 {{/ifMatch}}

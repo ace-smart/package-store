@@ -25,7 +25,7 @@ class StorageObject {
       this.address = new AddressObject({...this.addressId})
       this.addressId = this.address.id.toString()
     } else if (typeof this.addressId === 'string') {
-      // create - update
+      // existed
       this.address = await AddressObject.getOneAddressById(this.addressId)
     } else {
       this.address = null

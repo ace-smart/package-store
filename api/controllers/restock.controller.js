@@ -45,7 +45,6 @@ module.exports = {
 
       throw new Error("Failed to create restock.")
     } catch (error) {
-      console.log(error)
       return ErrorHandler.sendErrors(res, error)
     }
   },

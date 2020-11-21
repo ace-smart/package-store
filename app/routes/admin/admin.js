@@ -26,5 +26,6 @@ router.use('/providers', providerRouter)
 router.use('/storages', storageRouter)
 router.use('/vouchers', voucherRouter)
 router.use('/contacts', contactRouter)
+router.use('/restocks', restockRouter)
 
 module.exports = router

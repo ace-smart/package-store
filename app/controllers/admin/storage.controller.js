@@ -127,7 +127,7 @@ module.exports = {
         //ValidationError
         const errors = error.response.data.error.invalidation
         const validData = helper.getValidFields(errors, req.body)
-        console.log(validData)
+        
         req.flash("fail", "Your input is not valid. Please check and then fill in again.")
         return res.render("templates/admin/storage/storage.hbs", {
           layout: "admin/main.layout.hbs",

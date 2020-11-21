@@ -16,6 +16,9 @@
 {{#ifMatch route 'providers'}}
   {{> admin/provider/head.partial}}
 {{/ifMatch}}
+{{#ifMatch route 'restocks'}}
+  {{> admin/restock/head.partial}}
+{{/ifMatch}}
 {{#ifMatch route 'contacts'}}
   {{> admin/contact/head.partial}}
 {{/ifMatch}}

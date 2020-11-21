@@ -1,0 +1,248 @@
+<p class="text-muted font-14">Fill in these fields below and submit <strong>Create</strong>
+  button to finish. Those fields with <span class="text-danger">*</span> is required.</p>
+
+<form action="/admin/restocks/add" method="POST">
+  {{> csrf}}
+  <div class="row">
+    {{!-- LEFT COLUMN --}}
+    <div class="col-sm-6">
+      <p class="text-lime p-2 my-3 border-bottom">
+        <i class="mdi mdi-basket-fill mr-1"></i> Restock
+      </p>
+      {{!-- Product --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="name">
+              <i class="mdi mdi-tag-text-outline mr-2"></i>Product
+              <span class="text-danger">*</span>
+            </label>
+
+            <select id="productId" onchange="getProductInfo(this)" name="productId" class="form-control select2">
+              <option selected value="">Choose a product</option>
+              {{#each products}}
+              <option value="{{{this.id}}}">{{{this.name}}}</option>
+              {{/each}}
+            </select>
+
+            {{#if errors.productId}}
+            {{#with errors.productId}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Action type --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="action">
+              <i class="mdi mdi-qrcode-scan mr-2"></i>Action type
+              <span class="text-danger">*</span>
+            </label>
+
+            <select name="action" class="form-control select2">
+              <option selected value="">Choose an action</option>
+              <option value="import">Import</option>
+              <option value="export">Export</option>
+            </select>
+
+            {{#if errors.action}}
+            {{#with errors.action}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Amount --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="amount">
+              <i class="fa fa-percent mr-2"></i>Amount
+              <span class="text-danger">*</span>
+            </label>
+            {{#if errors.amount}}
+            <input id="amount" name="amount" type="number" required class="form-control parsley-error"
+              value="{{{errors.amount.value}}}">
+            {{#with errors.amount}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.amount}}
+            <input id="amount" name="amount" type="number" required class="form-control" value="{{{validData.amount}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="amount" name="amount" type="number" required class="form-control" placeholder="Amount" value="0">
+            {{/if}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Status --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <label class="control-label">
+            <i class="ion-ios7-circle-filled mr-2"></i>Status
+          </label>
+          <div class="form-group">
+            {{#if validData.status}}
+            <label class="btn btn-danger {{#ifMatch validData.status 'deactivated'}} active {{/ifMatch}}"
+              onclick="selectStatus(this)" for="deactivated-status">Deactivated</label>
+            <input type="radio" name="status" id="deactivated-status" value="deactivated"
+              {{#ifMatch validData.status 'deactivated'}} checked {{/ifMatch}}>
+            <label class="btn btn-success {{#ifMatch validData.status 'activated'}} active {{/ifMatch}}"
+              onclick="selectStatus(this)" for="activated-status">Activated</label>
+            <input type="radio" name="status" id="activated-status" value="activated"
+              {{#ifMatch validData.status 'activated'}} checked {{/ifMatch}}>
+
+            {{else}}
+            {{!-- First load --}}
+            <label class="btn btn-danger active" onclick="selectStatus(this)"
+              for="deactivated-status">Deactivated</label>
+            <input type="radio" name="status" id="deactivated-status" value="deactivated" checked>
+            <label class="btn btn-success" onclick="selectStatus(this)" for="activated-status">Activated</label>
+            <input type="radio" name="status" id="activated-status" value="activated">
+            {{/if}}
+
+            {{#if errors.status}}
+            {{#with errors.status}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Buttons --}}
+      <div class="row">
+        <div class="col-sm-12 mr-0 text-right">
+          <button type="submit" class="btn btn-success waves-effect waves-light">Create</button>
+          <button type="button" onclick="backward()" class="btn btn-secondary waves-effect">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    {{!-- RIGHT COLUMN --}}
+    <div class="col-sm-6 pl-3">
+      <p class="text-lime p-2 my-3 border-bottom">
+        <i class="ion-information-circled mr-1"></i> Product Information
+      </p>
+      <div class="row">
+        {{!-- Product ID --}}
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="product_id">
+              <i class="mdi mdi-barcode mr-2"></i>ID
+            </label>
+            <input id="product_id" name="product_id" type="text" disabled class="form-control">
+          </div>
+        </div>
+        {{!-- Product Name --}}
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="product_name">
+              <i class="mdi mdi-tag-text-outline mr-2"></i>Product name
+            </label>
+            <input id="product_name" name="product_name" type="text" disabled class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        {{!-- Subcategory --}}
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="product_subcategory">
+              <i class="mdi mdi-barcode mr-2"></i>Subcategory
+            </label>
+            <input id="product_subcategory" name="product_subcategory" type="text" disabled class="form-control">
+          </div>
+        </div>
+        {{!-- Price --}}
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="product_price">
+              <i class="ion-cash mr-2"></i>Price
+            </label>
+            <input id="product_price" name="product_price" type="number" disabled class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <p class="text-lime p-2 my-3 border-bottom">
+        <i class="ion-information-circled mr-1"></i> Product Details
+      </p>
+
+      <div class="row">
+        {{!-- ColorName --}}
+        <div class="col-sm-4">
+          <div class="form-group">
+            <label for="product_colorName">
+              <i class="fa fa-tag mr-2"></i>Color Name
+            </label>
+            <input id="product_colorName" name="product_colorName" type="text" disabled class="form-control">
+          </div>
+        </div>
+        {{!-- ColorHexCode --}}
+        <div class="col-sm-4">
+          <div class="form-group">
+            <label for="product_hexCode">
+              <i class="fa fa-wpforms mr-2"></i>Color Hexcode
+            </label>
+            <input id="product_hexCode" name="product_hexCode" type="text" disabled class="form-control">
+          </div>
+        </div>
+        {{!-- Size --}}
+        <div class="col-sm-4">
+          <div class="form-group">
+            <label for="product_size">
+              <i class="fa fa-child mr-2"></i>Size
+            </label>
+            <input id="product_size" name="product_size" type="text" disabled class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        {{!-- Material --}}
+        <div class="col-sm-4">
+          <div class="form-group">
+            <label for="product_material">
+              <i class="fa fa-chain-broken mr-2"></i>Material
+            </label>
+            <input id="product_material" name="product_material" type="text" disabled class="form-control">
+          </div>
+        </div>
+        {{!-- Gender --}}
+        <div class="col-sm-4">
+          <div class="form-group">
+            <label for="product_gender">
+              <i class="fa fa-transgender-alt mr-2"></i>Gender
+            </label>
+            <input id="product_gender" name="product_gender" type="text" disabled class="form-control">
+          </div>
+        </div>
+        {{!-- Season --}}
+        <div class="col-sm-4">
+          <div class="form-group">
+            <label for="product_season">
+              <i class="fa fa-cloud mr-2"></i>Season
+            </label>
+            <input id="product_season" name="product_season" type="text" disabled class="form-control">
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</form>
