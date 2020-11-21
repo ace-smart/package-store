@@ -28,16 +28,45 @@ module.exports = helper = {
   getFilledFields: function (body, data) {
     // return only fields that are filled 
     const bodyKeys = Object.keys(body)
+    const dataKeys = Object.keys(data)
     const filledFields = {}
+    let newFieldsFromBody = []
+    // Check inserted data has the same property as data object
+    if (JSON.stringify(bodyKeys) === JSON.stringify(dataKeys)) {
+      
+    } else {
+      bodyKeys.forEach((element) => {
+        if(!dataKeys.includes(element)) {
+          newFieldsFromBody.push(element)
+        }
+      })
+      // Add to filledFields
+      if (newFieldsFromBody.length > 0) {
+        newFieldsFromBody.forEach((element) => {
+          if (body[element] != null) {
+            filledFields[element] = body[element]
+          }
+        })
+      }
+    }
+
     for (let [key, value] of Object.entries(data)) {
       for (let i = 0; i < bodyKeys.length; i++) {
-        if (key === 'validUntil' || key === 'dateOfBirth') {
-          if (!helper.isSameDate(value, body[key])){
-            filledFields[key] = body[key]
-          }
-        } else if (key === bodyKeys[i] && value != body[key]) {
-          
-          filledFields[key] = body[key]
+        if (body[bodyKeys[i]] != null) {
+            if (key === 'validUntil' || key === 'dateOfBirth') {
+              if (!helper.isSameDate(value, body[key])){
+                filledFields[key] = body[key]
+              }
+            } else if (key === bodyKeys[i]) {
+              // Type: Object
+              if (value instanceof Object && body[key] instanceof Object){
+                if(JSON.stringify(value) !== JSON.stringify(body[key])) {
+                  filledFields[key] = body[key]
+                }
+              } else if (value != body[key]) {
+                filledFields[key] = body[key]
+              }
+            }
         }
       }
     }

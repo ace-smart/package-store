@@ -63,7 +63,6 @@ module.exports = {
       })
       
       if (response.status === 200) {
-        console.log(response.data)
         return res.render("templates/admin/product/product.hbs", {
           layout: "admin/main.layout.hbs",
           content: "list",

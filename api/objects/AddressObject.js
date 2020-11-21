@@ -259,8 +259,10 @@ class AddressObject {
       const validation = address.validate("create")
       if (validation) {
         address = address.clean()
-        const createdAddress = new AddressObject(await AddressModel.create({ ...address }))
-        return createdAddress
+        const createdAddress = await AddressModel.create({ ...address })
+        if (createdAddress) {
+          return new AddressObject({...createdAddress._doc})
+        }
       }
 
       throw new Error("Failed to create address")
@@ -269,7 +271,7 @@ class AddressObject {
     }
   }
 
-  async update(info = {}) {
+  async update({...updateData}) {
     if (this.id == null) {
       throw new TypeError("Can not update with null or undefined Id.")
     }
@@ -283,7 +285,7 @@ class AddressObject {
     }
 
     try {
-      let addressObject = new AddressObject({ ...info })
+      let addressObject = new AddressObject({ ...updateData })
       const isValid = addressObject.validate("update")
       if (isValid) {
         addressObject = addressObject.clean()

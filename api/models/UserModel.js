@@ -22,7 +22,7 @@ const UserSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Profile'
   },
-  addressId: [
+  addresses: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Address'

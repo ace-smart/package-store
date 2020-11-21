@@ -15,7 +15,7 @@ module.exports = {
     try {
       const profileId = await UserObject.getProfileIdById(req.user.id)
       if (profileId) {
-        const profile = await ProfileObject.getProfile(profileId)
+        const profile = await ProfileObject.getOneProfileById(profileId)
         if (profile) {
           return res.status(200).json(profile)
         }
@@ -31,7 +31,8 @@ module.exports = {
   // @route:  GET /profile
   getProfileById: async (req, res) => {
     try {
-      const profile = await ProfileObject.getProfile(req.params.id)
+      const profile = await ProfileObject.getOneProfileById(req.params.id)
+      
       if (profile) {
         return res.status(200).json(profile)
       }
@@ -61,23 +62,23 @@ module.exports = {
     try {
       // get profileId by accessToken
       const profileId = await UserObject.getProfileIdById(req.user.id)
-      const profileObject = new ProfileObject({...req.body})
+      let profileData = JSON.parse(JSON.stringify(req.body))
 
       if (req.body.avatar != null) {
-        profileObject.setAvatar = Buffer.from(req.body.avatar.data).toString('base64')
+        profileData.avatar = Buffer.from(req.body.avatar.data).toString('base64')
       }
 
       if (profileId == null) {
         // create for the 1st time
-        const createdProfile = await ProfileObject.create(req.user.id, profileObject)
+        const createdProfile = await ProfileObject.create(profileData)
         if (createdProfile) {
           return res.sendStatus(204)
         }
       } else {
         // update
-        profileObject.id = profileId
-        const updatedProfile = await profileObject.update(req.user.id, profileObject)
-        if (updatedProfile) {
+        const profileObject = await ProfileObject.getOneProfileById(profileId)
+        const isUpdated = await profileObject.update({...profileData})
+        if (isUpdated) {
           return res.sendStatus(204)
         }
       }

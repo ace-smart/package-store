@@ -2,11 +2,14 @@ const bcrypt = require("bcrypt")
 const UserModel = require("../models/UserModel")
 const validator = require("validator")
 const TokenObject = require("./TokenObject")
+const AddressObject = require('./AddressObject')
 const { isExistent } = require("../helper/validation")
 const TokenError = require("../errors/token")
 const ObjectError = require("../errors/object")
 const ValidationError = require("../errors/validation")
 const NotFoundError = require("../errors/not_found")
+const ProfileObject = require("./ProfileObject")
+const e = require("express")
 const USER_ROLES = ["user", "admin"]
 const STATUS_VALUES = ["deactivated", "activated", "pending", "reset password"]
 
@@ -16,7 +19,7 @@ class UserObject {
     username,
     email,
     password,
-    addressId,
+    addresses,
     status,
     role,
     confirmString,
@@ -27,7 +30,7 @@ class UserObject {
     this.username = username
     this.email = email
     this.password = password
-    this.addressId = addressId
+    this.addresses = addresses
     this.role = role
     this.confirmString = confirmString
     this.status = status
@@ -74,6 +77,19 @@ class UserObject {
 
   get getProfileId() {
     return this.profileId
+  }
+
+  async setProfile() {
+    if (this.profileId instanceof Object) {
+      // populated
+      this.profile = new ProfileObject({...this.profileId})
+      this.profileId = this.profile.id.toString()
+    } else if (typeof this.profileId === 'string') {
+      // existed
+      this.profile = await ProfileObject.getOneProfileById(this.profileId)
+    } else {
+      this.profile = null
+    }
   }
 
   set setConfirmString(confirmString) {
@@ -154,9 +170,12 @@ class UserObject {
   // @return:   UserObject
   static async getOneUserBy(criteria = {}, selectFields = null) {
     try {
-      const user = await UserModel.findOne(criteria, selectFields).lean()
+      const user = await UserModel.findOne(criteria, selectFields)
+      .populate({path: 'profileId'})
+      .populate({path: 'addressId.address'}).lean()
       if (user) {
         const userObject = new UserObject({ ...user })
+        await userObject.setProfile()
         // Avoid showing tokens
         delete userObject.accessToken
         delete userObject.refreshToken
@@ -206,16 +225,21 @@ class UserObject {
 
     // === CREATE === ----------  Required fields
     if (type === "create") {
-      if (typeof this.username === "undefined" || validator.isEmpty(this.username)) {
+      if (this.username == null || validator.isEmpty(this.username.toString())) {
         errors.push({
           field: "username",
           message: "Must be required.",
         })
       }
-
-      if (typeof this.email === "undefined" || validator.isEmpty(this.email)) {
+      if (this.email == null || validator.isEmpty(this.email.toString())) {
         errors.push({
           field: "email",
+          message: "Must be required.",
+        })
+      }
+      if (this.password == null || validator.isEmpty(this.password.toString())) {
+        errors.push({
+          field: "password",
           message: "Must be required.",
         })
       }
@@ -227,7 +251,7 @@ class UserObject {
     }
 
     // username   [required]
-    if (typeof this.username !== "undefined" && !validator.isEmpty(this.username)) {
+    if (this.username != null && !validator.isEmpty(this.username.toString())) {
       const _username = this.username.toLowerCase()
       if (!validator.isAlphanumeric(_username)) {
         errors.push({
@@ -236,7 +260,7 @@ class UserObject {
           value: _username,
         })
       }
-      if (!validator.isLength(_username, { min: 4, max: 255 })) {
+      if (!validator.isLength(_username.toString(), { min: 4, max: 255 })) {
         errors.push({
           field: "username",
           message: "Must be from 4 to 255 characters.",
@@ -253,8 +277,8 @@ class UserObject {
     }
 
     // email [required]
-    if (typeof this.email !== "undefined" && !validator.isEmpty(this.email)) {
-      const _email = this.email.toLowerCase()
+    if (this.email != null && !validator.isEmpty(this.email.toString())) {
+      const _email = this.email.toString().toLowerCase()
       if (!validator.isEmail(_email)) {
         errors.push({
           field: "email",
@@ -279,7 +303,7 @@ class UserObject {
     }
 
     // role
-    if (this.role != null) {
+    if (this.role != null && !validator.isEmpty(this.role.toString())) {
       if (!USER_ROLES.find((element) => element === this.role.toLowerCase())) {
         errors.push({
           field: "role",
@@ -290,7 +314,7 @@ class UserObject {
     }
 
     // status
-    if (this.status != null) {
+    if (this.status != null && !validator.isEmpty(this.status.toString())) {
       if (!STATUS_VALUES.find((element) => element === this.status.toLowerCase())) {
         errors.push({
           field: "status",
@@ -335,24 +359,32 @@ class UserObject {
   // @desc:     Create a user
   // @fields:   [username, email, password, role, status]
   // @return:   UserObject
-  static async create({ username, email, password, role, status } = {}) {
-    let userObject = new UserObject({ username, email, password, role, status })
+  static async create({ ...userData } = {}) {
     try {
-      userObject = await userObject.validate()
-      if (password == null) {
-        throw new ValidationError([
-          {
-            name: "password",
-            message: "Must be required.",
-          },
-        ])
+      // Create profile
+      if (userData.profile) {
+        if (!ProfileObject.hasEmptyProfileData(userData.profile)) {
+          const createdProfile = await ProfileObject.create({...userData.profile})
+          userData.profileId = createdProfile.id.toString()
+        } else {
+          delete userData.profile
+        }
       }
 
-      userObject.password = await bcrypt.hash(password, await bcrypt.genSalt())
-      userObject.setStatus = "pending"
-      userObject = userObject.clean() // set [role, status] to default if not provided.
-      const newUser = new UserObject(await UserModel.create(userObject))
-      return newUser
+      // Create user
+      let userObject = new UserObject({ ...userData })
+      const validation = await userObject.validate()
+      if (validation) {
+        userObject = userObject.clean()
+        userObject.password = await bcrypt.hash(userData.password, await bcrypt.genSalt())
+        userObject.setStatus = "pending"
+        const createdUser = await UserModel.create({...userObject})
+        if (createdUser){
+          return new UserObject({...createdUser._doc})
+        }
+      }
+
+      throw new Error("Failed to create user.")
     } catch (error) {
       throw error
     }
@@ -360,7 +392,7 @@ class UserObject {
 
   // @desc:     Update
   // @return:   <Boolean> True
-  async update(info = {}) {
+  async update({...userData}) {
     if (this.id == null) {
       throw new ObjectError({
         objectName: 'UserObject',
@@ -378,13 +410,49 @@ class UserObject {
     }
     
     try {
-      let userObject = new UserObject({ ...info })
-      userObject = userObject.clean()
-      const validation = await userObject.validate("update", this.id)
-      if (validation instanceof UserObject) {
-        const updatedUser = new UserObject(await UserModel.findOneAndUpdate({ _id: this.id }, {...userObject}, { new: true }))
-        return updatedUser
+      // [Create/Update] address
+      if (userData.address) {
+        if (!AddressObject.hasEmptyAddressData(userData.address)) {
+          if (userData.address.id == null) {
+            // Create
+            const createdAddress = await AddressObject.create({...userData.adress})
+            userData.address.id = createdAddress.id.toString()
+          } else {
+            // Update
+            const address = await AddressObject.getOneAddressById(userData.adress.id)
+            if (address) {
+              await address.update({...userData.address})
+            }
+          }
+        }else {
+          delete userData.address
+        }
+      } 
+
+      // [Create/Update] profile
+      if (userData.profile) {
+        if (!ProfileObject.hasEmptyProfileData(userData.profile)) {
+          if(userData.profile.id == null) {
+            const createdProfile = await ProfileObject.create({...userData.profile})
+            userData.profileId = createdProfile.id.toString()
+          } else {
+            const profile = await ProfileObject.getOneProfileById(userData.profile.id)
+            await profile.update({...userData.profile})
+          }
+        } else {
+          delete userData.profile
+        }
       }
+
+      let userObject = new UserObject({ ...userData })
+      const validation = await userObject.validate("update", this.id)
+      if (validation) {
+        userObject = userObject.clean()
+        const updatedUser = await UserModel.findOneAndUpdate(
+          { _id: this.id }, {...userObject}, { new: true })
+        return new UserObject({...updatedUser})
+      }
+
       throw new Error("Failed to update.")
     } catch (error) {
       throw error

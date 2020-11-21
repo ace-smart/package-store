@@ -290,8 +290,7 @@ class VoucherObject {
         voucherObject = voucherObject.clean()
         const createdVoucher = await VoucherModel.create({ ...voucherObject })
         if (createdVoucher) {
-          const voucher = new VoucherObject({ ...createdVoucher })
-          return voucher
+          return new VoucherObject({ ...createdVoucher._doc })
         }
       }
 
@@ -323,11 +322,10 @@ class VoucherObject {
       const validation = await updateObject.validate("update", this.id)
       if (validation) {
         updateObject = updateObject.clean()
-        const updated = new VoucherObject(
-          await VoucherModel.findOneAndUpdate({ _id: this.id }, { ...updateObject }, { new: true })
-        )
+        const updated = await VoucherModel.findOneAndUpdate(
+            { _id: this.id }, { ...updateObject }, { new: true })
 
-        return updated
+        return new VoucherObject(updated)
       }
 
       throw new Error("Failed to update voucher.")

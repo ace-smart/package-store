@@ -6,7 +6,10 @@
   <div class="row">
     {{!-- LEFT COL --}}
     <div class="col-sm-6 pr-3 add-product-left-col">
-      <p class="text-lime p-2 my-3 border-bottom"><i class="fa fa-info-circle mr-2"></i>Information</p>
+      <p class="text-lime p-2 my-3 border-bottom">
+        <i class="fa fa-info-circle mr-2"></i>Information
+      </p>
+
       {{!-- Name --}}
       <div class="row">
         <div class="col-sm-12">
@@ -71,7 +74,6 @@
           <div class="form-group">
             <label for="price">
               <i class="ion-cash mr-2"></i>Price
-              <span class="text-danger">*</span>
             </label>
 
             <div class="input-group">
@@ -79,15 +81,15 @@
                 <span class="input-group-text"><i class="ion ion-social-usd"></i></span>
               </div>
               {{#if errors.price}}
-              <input id="price" name="price" type="number" required  class="form-control parsley-error"
+              <input id="price" name="price" type="number" class="form-control parsley-error"
                 value="{{{errors.price.value}}}">
-              {{#with errors.price}}
               </div>
+              {{#with errors.price}}
               {{> admin/error.partial }}
               {{/with}}
               {{else}}
                 {{#if validData.price}}
-                <input  id="price" name="price" type="number" required class="form-control" value="{{{validData.price}}}">
+                <input  id="price" name="price" type="number" class="form-control" value="{{{validData.price}}}">
                 {{else}}
                 {{!-- First load  --}}
                 <input id="price" type="number" value="0" name="price" class="form-control">
@@ -285,6 +287,7 @@
           </div>
         </div>
       </div>
+      
     </div>
   </div>
 

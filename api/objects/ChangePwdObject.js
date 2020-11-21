@@ -47,10 +47,7 @@ class ChangePwdObject {
         errors.push({
           field: "new_password",
           message: "Must be from 4 to 255 characters.",
-          value: {
-            new_password: this.new_password,
-            confirm_new_password: this.confirm_new_password,
-          },
+          value:  this.new_password
         })
       }
     }
@@ -62,10 +59,7 @@ class ChangePwdObject {
         errors.push({
           field: "confirm_new_password",
           message: "Confirm password must match with password.",
-          value: {
-            new_password: this.new_password,
-            confirm_new_password: this.confirm_new_password,
-          },
+          value: this.confirm_new_password
         })
       }
     }
@@ -82,9 +76,7 @@ class ChangePwdObject {
           errors.push({
             field: "password",
             message: "Incorrect password.",
-            value: {
-              password: this.password,
-            },
+            value: this.password
           })
           throw new ValidationError(errors)
         }

@@ -1,210 +1,317 @@
-<h4 class="mt-0 header-title">Create Form</h4>
-<p class="text-muted m-b-30 font-14">Fill in these fields below and submit <strong>Create</strong>
-  button to finish.</p>
+<p class="text-muted font-14">Fill in these fields below and submit <strong>Create</strong>
+  button to finish. Those fields with <span class="text-danger">*</span> is required.</p>
 
 <form action="/admin/accounts/add" method="POST">
   {{> csrf}}
-  {{!-- Username --}}
   <div class="row">
-    <div class="col-sm-12">
-      <div class="form-group">
-        <label for="username">
-          <i class="mdi mdi-account-location mr-2"></i>Username
-        </label>
-        {{#if errors}} 
-        {{!-- Has error --}}
-          {{#each errors}}
-            {{#ifeq this.field 'username'}} 
-              <input id="username" name="username" type="text" required
-              class="form-control parsley-error" value="{{{this.value}}}">
-              <p class="form-validation-error">{{{this.message}}}</p>
-            {{else}} 
-            {{/ifeq}}
-          {{/each}}
+    {{!-- LEFT COL --}}
+    <div class="col-sm-6 pr-3 add-product-left-col">
+      <p class="text-lime p-2 my-3 border-bottom"><i class="fa fa-info-circle mr-2"></i>Information</p>
+      {{!-- Username --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="username">
+              <i class="mdi mdi-account-location mr-2"></i>Username
+              <span class="text-danger">*</span>
+            </label>
+            {{#if errors.username}}
+            <input id="username" name="username" type="text" required class="form-control parsley-error"
+              value="{{{errors.username.value}}}">
+            {{#with errors.username}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.username}}
+            <input id="username" name="username" type="text" required class="form-control" value="{{{validData.username}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="username" name="username" type="text" required class="form-control" placeholder="Username">
+            {{/if}}
+            {{/if}}
 
-          {{!-- Valid --}}
-          {{#if validData.username}}
-          <input id="username" name="username" type="text" required class="form-control" value="{{{validData.username}}}">
-          {{/if}} 
-        {{else}}
-        {{!-- First load --}}
-          <input id="username" name="username" type="text" required class="form-control"
-          {{#if validData.username}} value="{{{validData.username}}}"
-          {{/if}} >
-        {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Email --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="email">
+              <i class="ion-ios7-email mr-2"></i>Email
+              <span class="text-danger">*</span>
+            </label>
+            {{#if errors.email}}
+            <input id="email" name="email" type="email" required class="form-control parsley-error"
+              value="{{{errors.email.value}}}">
+            {{#with errors.email}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.email}}
+            <input id="email" name="email" type="email" required class="form-control" value="{{{validData.email}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="email" name="email" type="email" required class="form-control" placeholder="Email">
+            {{/if}}
+            {{/if}}
+
+          </div>
+        </div>
+      </div>
+
+      {{!-- Password --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="password">
+              <i class="ion ion-unlocked mr-2"></i>Password
+              <span class="text-danger">*</span>
+            </label>
+            {{#if errors.password}}
+            <input id="password" name="password" type="password" required class="form-control parsley-error"
+              value="{{{errors.password.value}}}">
+            {{#with errors.password}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.password}}
+            <input id="password" name="password" type="password" required class="form-control" value="{{{validData.password}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="password" name="password" type="password" required class="form-control" placeholder="Password">
+            {{/if}}
+            {{/if}}
+          </div>
+
+          {{!-- Confirm Password --}}
+          <div class="form-group">
+            <label for="confirm_password">
+              <i class="ion ion-unlocked mr-2"></i>Confirm Password
+              <span class="text-danger">*</span>
+            </label>
+            {{#if errors.confirm_password}}
+            <input id="confirm_password" name="confirm_password" type="password" required class="form-control parsley-error"
+              value="{{{errors.confirm_password.value}}}">
+            {{#with errors.confirm_password}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.confirm_password}}
+            <input id="confirm_password" name="confirm_password" type="password" required class="form-control" value="{{{validData.confirm_password}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="confirm_password" name="confirm_password" type="password" required class="form-control" placeholder="Confirm password">
+            {{/if}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Role --}}
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label class="control-label">
+              <i class="ion-ribbon-b mr-2"></i>Role
+              <span class="text-danger">*</span>
+            </label>
+            <select class="form-control select2" name="role" id="role" required>
+              <option value="" selected >Select a role</option>
+              <option value="admin" {{#ifMatch validData.role 'admin'}} selected {{/ifMatch}}> Admin
+              </option>
+              <option value="user" {{#ifMatch validData.role 'user'}} selected {{/ifMatch}}> Customer
+              </option>
+            </select>
+
+            {{#if errors.role}}
+            {{#with errors.role}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+
+          </div>
+        </div>
+        {{!-- Status --}}
+        <div class="col-sm-6">
+          <div class="form-group text-center">
+            <label class="control-label">
+              <i class="ion-ios7-circle-filled mr-2"></i>Status
+            </label>
+            <div class="col-sm-12 text-right">
+            {{#if validData.status}}
+            <label class="btn btn-danger {{#ifMatch validData.status 'deactivated'}} active {{/ifMatch}}"
+              onclick="selectStatus(this)" for="deactivated-status">Deactivated</label>
+            <input type="radio" name="status" id="deactivated-status" value="deactivated"
+              {{#ifMatch validData.status 'deactivated'}} checked {{/ifMatch}}>
+            <label class="btn btn-success {{#ifMatch validData.status 'activated'}} active {{/ifMatch}}"
+              onclick="selectStatus(this)" for="activated-status">Activated</label>
+            <input type="radio" name="status" id="activated-status" value="activated"
+              {{#ifMatch validData.status 'activated'}} checked {{/ifMatch}}>
+
+            {{else}}
+            {{!-- First load --}}
+            <label class="btn btn-danger active" onclick="selectStatus(this)"
+              for="deactivated-status">Deactivated</label>
+            <input type="radio" name="status" id="deactivated-status" value="deactivated" checked>
+            <label class="btn btn-success" onclick="selectStatus(this)" for="activated-status">Activated</label>
+            <input type="radio" name="status" id="activated-status" value="activated">
+            {{/if}}
+
+            {{#if errors.status}}
+            {{#with errors.status}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    {{!-- RIGHT COL --}}
+    <div class="col-sm-6 pl-3 add-product-right-col">
+      <p class="text-lime p-2 my-3 border-bottom"><i class="mdi mdi-face-profile mr-2"></i>Profile</p>
+      {{!-- First Name -- Last Name --}}
+      <div class="form-group row mt-2">
+        <div class="col-6">
+          <label for="firstName" class="mb-2">
+            <i class="mdi mdi-account-card-details mr-2"></i>First Name
+          </label>
+            {{#if errors.firstName}}
+            <input type="text" id="firstName" name="firstName" class="form-control parsley-error"
+              value="{{{errors.firstName.value}}}">
+            {{#with errors.firstName}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.profile.firstName}}
+            <input type="text" id="firstName" name="firstName"class="form-control" value="{{{validData.profile.firstName}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input type="text" id="firstName" name="firstName" class="form-control" placeholder="First Name">
+            {{/if}}
+            {{/if}}
+        </div>
+
+        <div class="col-6">
+          <label for="lastName" class="mb-2">
+            <i class="mdi mdi-account-card-details mr-2"></i>Last Name</label>
+            {{#if errors.lastName}}
+            <input type="text" id="lastName" name="lastName" class="form-control parsley-error"
+              value="{{{errors.lastName.value}}}">
+            {{#with errors.lastName}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.profile.lastName}}
+            <input type="text" id="lastName" name="lastName" class="form-control" value="{{{validData.profile.lastName}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input type="text" id="lastName" name="lastName" class="form-control" placeholder="Last Name">
+            {{/if}}
+            {{/if}}
+        </div>
+      </div>
+      {{!-- Gender - DateOfBirth - Phone Number --}}
+      <div class="form-group row mt-2">
+        {{!-- Date of birth --}}
+        <div class="col-sm-6">
+          <label for="dateOfBirth" class="mb-2"><i class="mdi mdi-cake-variant mr-2"></i>Date of birth</label>
+          <div class="input-group">
+            {{#if errors.dateOfBirth}}
+            <input type="text" name="dateOfBirth" placeholder="mm/dd/yyyy" id="datepicker-autoclose"
+            class="form-control parsley-error"
+              value="{{{formatDate errors.dateOfBirth.value}}}">
+              <div class="input-group-append">
+                <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+              </div>
+            </div>
+            {{#with errors.dateOfBirth}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+
+              {{#if validData.profile.dateOfBirth}}
+              <input type="text" name="dateOfBirth" placeholder="mm/dd/yyyy" id="datepicker-autoclose"
+              class="form-control" value="{{{formatDate validData.profile.dateOfBirth}}}">
+              {{else}}
+              {{!-- First load  --}}
+              <input type="text" name="dateOfBirth" placeholder="mm/dd/yyyy" id="datepicker-autoclose"
+              class="form-control" value=''>
+              {{/if}}
+            <div class="input-group-append">
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+            </div>
+          </div>
+          {{/if}}
+        </div>
+        {{!-- Phone number --}}
+        <div class="col-sm-6">
+          <label for="phoneNumber" class="mb-2"><i class="mdi mdi-cellphone-basic mr-2"></i>Phone number</label>
+          <div class="input-group">
+            {{#if errors.phoneNumber}}
+            <input type="text" name="phoneNumber" id="phoneNumber" class="form-control parsley-error"
+              value="{{{errors.phoneNumber.value}}}">
+              <div class="input-group-append">
+                <span class="input-group-text"><i class="ion-ios7-telephone"></i></span>
+              </div>
+            </div>
+            {{#with errors.phoneNumber}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+              {{#if validData.profile.phoneNumber}}
+              <input type="text" id="phoneNumber" name="phoneNumber" class="form-control" value="{{{validData.profile.phoneNumber}}}">
+              {{else}}
+              {{!-- First load  --}}
+              <input type="text" id="phoneNumber" name="phoneNumber" class="form-control" placeholder="Phone Number">
+              {{/if}}
+              <div class="input-group-append">
+                <span class="input-group-text"><i class="ion-ios7-telephone"></i></span>
+              </div>
+            </div>
+            {{/if}}
+        </div>
+      </div>
+      
+      <div class="form-group row mt-2">
+        <div class="col-sm-6">
+          {{!-- Gender --}}
+          <label class="mb-2">
+            <i class="mdi mdi-gender-transgender mr-2"></i>Gender
+          </label>
+          <select class="form-control select2" name="gender" id="gender" >
+            <option value="male" {{#ifMatch validData.profile.gender 'male'}} selected {{/ifMatch}}> 
+             Male
+            </option>
+            <option value="female" {{#ifMatch validData.profile.gender 'female'}} selected {{/ifMatch}}> 
+             <span>
+             Female
+             </span>
+            </option>
+          </select>
+
+            {{#if errors.gender}}
+            {{#with errors.gender}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+        </div>
       </div>
     </div>
   </div>
+  <hr>
 
-  {{!-- Email --}}
-  <div class="row">
-    <div class="col-sm-12">
-      <div class="form-group">
-        <label for="email">
-          <i class="ion-ios7-email mr-2"></i>Email
-        </label>
-        {{#if errors}} 
-        {{!-- Has error --}}
-          {{#each errors}}
-            {{#ifeq this.field 'email'}} 
-              <input id="email" name="email" type="email" required
-              class="form-control parsley-error" value="{{{this.value}}}">
-              <p class="form-validation-error">{{{this.message}}}</p>
-            {{else}} 
-            {{/ifeq}}
-          {{/each}}
-
-          {{!-- Valid --}}
-          {{#if validData.email}}
-          <input id="email" name="email" type="email" class="form-control" value="{{{validData.email}}}"
-            required>
-          {{/if}} 
-        {{else}}
-        {{!-- First load --}}
-          <input id="email" name="email" type="email" required class="form-control"
-          {{#if validData.email}} value="{{{validData.email}}}"
-          {{/if}} >
-        {{/if}}
-
-      </div>
-    </div>
-  </div>
-
-  {{!-- Password --}}
-  <div class="row">
-    <div class="col-sm-12">
-      <div class="form-group">
-        <label for="password">
-          <i class="ion ion-unlocked mr-2"></i>Password
-        </label>
-
-        {{#if errors}} 
-        {{!-- Has error --}}
-          {{#each errors}}
-            {{#ifeq this.field 'password'}} 
-              <input id="password" name="password" type="password" required
-              class="form-control parsley-error" value="{{{this.value.password}}}">
-              <p class="form-validation-error">{{{this.message}}}</p>
-            {{else}} 
-            {{/ifeq}}
-          {{/each}}
-          
-          {{!-- Valid --}}
-          {{#if validData.password}}
-          <input id="password" name="password" type="password" class="form-control" value="{{{validData.password}}}" required>
-          {{/if}} 
-        {{else}}
-        {{!-- First load --}}
-          <input id="password" name="password" type="password" required class="form-control"
-          {{#if validData.password}} value="{{{validData.password}}}"
-          {{/if}} >
-        {{/if}}
-      </div>
-
-      {{!-- Confirm Password --}}
-      <div class="form-group">
-        <label for="confirm_password">
-          <i class="ion ion-unlocked mr-2"></i>Confirm Password
-        </label>
-        
-        {{#if errors}} 
-        {{!-- Has error --}}
-          {{#each errors}}
-            {{#ifeq this.field 'confirm_password'}} 
-              <input id="confirm_password" name="confirm_password" type="password" required
-              class="form-control parsley-error" value="{{{this.value.confirm_password}}}">
-              <p class="form-validation-error">{{{this.message}}}</p>
-            {{else}} 
-            {{/ifeq}}
-          {{/each}}
-
-          {{!-- Valid --}}
-          {{#if validData.confirm_password}}
-          <input id="confirm_password" name="confirm_password" type="password" class="form-control" value="{{{validData.confirm_password}}}"
-            required>
-          {{/if}} 
-        {{else}}
-        {{!-- First load --}}
-          <input id="confirm_password" name="confirm_password" type="password" required class="form-control"
-          {{#if validData.confirm_password}} value="{{{validData.confirm_password}}}"
-          {{/if}} >
-        {{/if}}
-      </div>
-    </div>
-  </div>
-
-  {{!-- Role --}}
-  <div class="row">
-    <div class="col-sm-6">
-      <div class="form-group">
-        <label class="control-label">
-          <i class="ion-ribbon-b mr-2"></i>Role
-        </label>
-        <select class="form-control select2" name="role" id="role" required>
-          <option value="" selected disabled>Select a role</option>
-          <option value="admin" {{#ifMatch validData.role 'admin'}} selected {{/ifMatch}}> Admin
-          </option>
-          <option value="user" {{#ifMatch validData.role 'user'}} selected {{/ifMatch}}> Customer
-          </option>
-        </select>
-
-        {{#if errors}}
-          {{#each errors}}
-            {{#ifeq this.field 'role'}}
-            <p class="form-validation-error">{{{this.message}}}</p>
-            {{/ifeq}}
-          {{/each}}
-        {{else}}
-        {{/if}}
-
-      </div>
-    </div>
-  </div>
-
-  {{!-- Status --}}
-  <div class="row mt-1 pt-2">
-    <div class="col-sm-12">
-      <label class="control-label">
-        <i class="ion-ios7-circle-filled mr-2"></i>Status
-      </label>
-
-      {{#if errors}}
-        {{#each errors}}
-          {{#ifeq this.field 'status'}}
-          <p class="form-validation-error">{{{this.message}}}</p>
-          {{/ifeq}}
-        {{/each}}
-      {{else}}
-      {{/if}}
-    </div>
-    <div class="col-sm-12">
-      <div class="form-group">
-        {{#if validData.status}}
-        <label class="btn btn-danger {{#ifMatch validData.status 'deactivated'}} active {{/ifMatch}}" 
-        onclick="selectStatus(this)" for="deactivated-status">Deactivated</label>
-        <input type="radio" name="status" id="deactivated-status" value="deactivated"
-        {{#ifMatch validData.status 'deactivated'}} checked {{/ifMatch}}>
-        <label class="btn btn-success {{#ifMatch validData.status 'activated'}} active {{/ifMatch}}"
-        onclick="selectStatus(this)" for="activated-status">Activated</label>
-        <input type="radio" name="status" id="activated-status" value="activated"
-        {{#ifMatch validData.status 'activated'}} checked {{/ifMatch}}>
-        
-        {{else}}
-        {{!-- First load --}}
-        <label class="btn btn-danger active" onclick="selectStatus(this)" for="deactivated-status">Deactivated</label>
-        <input type="radio" name="status" id="deactivated-status" value="deactivated" checked>
-        <label class="btn btn-success" onclick="selectStatus(this)" for="activated-status">Activated</label>
-        <input type="radio" name="status" id="activated-status" value="activated">
-        {{/if}}
-
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-sm-12 mr-0 text-right">
-      <button type="submit" class="btn btn-success waves-effect waves-light">Create</button>
-      <button type="button" onclick="backward()" class="btn btn-secondary waves-effect">Cancel</button>
-    </div>
+  {{!-- Buttons --}}
+  <div class="col-sm-12 mr-0 text-right">
+    <button type="submit" class="btn btn-success waves-effect waves-light">Create</button>
+    <button type="button" onclick="backward()" class="btn btn-secondary waves-effect">Cancel</button>
   </div>
 </form>

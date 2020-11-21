@@ -1,6 +1,7 @@
 const NotFoundError = require('../errors/not_found')
 const {isExistent} = require('../helper/validation')
 const UserModel = require('../models/UserModel')
+const validator = require('validator')
 
 class ConfirmEmailObject {
   constructor({ email, confirmString } = {}) {

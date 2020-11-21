@@ -75,11 +75,11 @@ module.exports = {
   createNewUser: async (req, res) => {
     try {
       let validation = await (new RegisterObject({ ...req.body })).validate()
-      validation.setRole = (req.body.role != null) ? req.body.role : undefined
-      validation.setStatus = (req.body.status != null) ? req.body.status : undefined
-      const user = await UserObject.create({...validation})
-      if (user) {
-        return res.sendStatus(201)
+      if (validation) {
+        const user = await UserObject.create({...req.body})
+        if (user) {
+          return res.sendStatus(201)
+        }
       }
 
       throw new Error("Failed to create new user.")

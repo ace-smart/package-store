@@ -2,11 +2,10 @@ const validator = require("validator")
 const ProfileModel = require("../models/ProfileModel")
 const ValidationError = require("../errors/validation")
 const {toFormatDateStr, toCapitalize} = require('../helper/format')
-const UserObject = require("./UserObject")
 const ObjectError = require("../errors/object")
 const PROFILE_GENDER_VALUES = ["male", "female", "lgbt"]
 const STATUS_VALUES = ["deactivated", "activated"]
-const {isExistent} = require('../helper/validation')
+const {isExistent, hasSpecialChars} = require('../helper/validation')
 
 class ProfileObject {
   constructor({ _id, firstName, lastName, gender, dateOfBirth, phoneNumber, avatar } = {}) {
@@ -28,10 +27,28 @@ class ProfileObject {
     return this.avatar
   }
 
+  static hasEmptyProfileData(profileData) {
+    const profileKeys = Object.keys(profileData)
+    let emptyProps = []
+    for (const [key, value] of Object.entries(profileData)) {
+      if (value == null) {
+        emptyProps.push(key)
+      } else if (validator.isEmpty(value.toString())) {
+        emptyProps.push(key)
+      }
+    }
+
+    if (emptyProps.length === profileKeys.length) {
+      return true
+    }
+
+    return false
+  }
+
   // @desc:       Get profile
   // Existed:     => return ProfileObject
   // Not Existed  => return null
-  static async getProfile(profileId = null) {
+  static async getOneProfileById(profileId = null) {
       try {
         if (profileId != null) {
           const profile = await ProfileModel.findOne({ _id: profileId }).lean()
@@ -51,36 +68,36 @@ class ProfileObject {
     let errors = new Array()
 
     if (type === "create") {
-      if (this.firstName == null || validator.isEmpty(this.firstName.toString())) {
-        errors.push({
-          field: "firstName",
-          message: "firstName must be required",
-        })
-      }
-      if (this.lastName == null  || validator.isEmpty(this.lastName.toString())) {
-        errors.push({
-          field: "lastName",
-          message: "lastName must be required",
-        })
-      }
-      if (this.gender == null || validator.isEmpty(this.gender.toString())) {
-        errors.push({
-          field: "gender",
-          message: "gender must be required",
-        })
-      }
-      if (this.dateOfBirth == null || validator.isEmpty(this.dateOfBirth.toString())) {
-        errors.push({
-          field: "dateOfBirth",
-          message: "dateOfBirth must be required",
-        })
-      }
-      if (this.phoneNumber == null || validator.isEmpty(this.phoneNumber.toString())) {
-        errors.push({
-          field: "phoneNumber",
-          message: "phoneNumber must be required",
-        })
-      }
+      // if (this.firstName == null || validator.isEmpty(this.firstName.toString())) {
+      //   errors.push({
+      //     field: "firstName",
+      //     message: "firstName must be required",
+      //   })
+      // }
+      // if (this.lastName == null  || validator.isEmpty(this.lastName.toString())) {
+      //   errors.push({
+      //     field: "lastName",
+      //     message: "lastName must be required",
+      //   })
+      // }
+      // if (this.gender == null || validator.isEmpty(this.gender.toString())) {
+      //   errors.push({
+      //     field: "gender",
+      //     message: "gender must be required",
+      //   })
+      // }
+      // if (this.dateOfBirth == null || validator.isEmpty(this.dateOfBirth.toString())) {
+      //   errors.push({
+      //     field: "dateOfBirth",
+      //     message: "dateOfBirth must be required",
+      //   })
+      // }
+      // if (this.phoneNumber == null || validator.isEmpty(this.phoneNumber.toString())) {
+      //   errors.push({
+      //     field: "phoneNumber",
+      //     message: "phoneNumber must be required",
+      //   })
+      // }
       
       // has errors
       if (errors.length > 0) {
@@ -91,10 +108,10 @@ class ProfileObject {
     // Validate after being filled
     // === firsName ===
     if (this.firstName != null && !validator.isEmpty(this.firstName.toString())) {
-      if (!validator.isAlpha(this.firstName)) {
+      if (hasSpecialChars(this.firstName)) {
         errors.push({
           field: "firstName",
-          message: "Must be alphabetic characters.",
+          message: "Can not have special characters.",
           value: this.firstName,
         })
       }
@@ -108,10 +125,10 @@ class ProfileObject {
     }
     // === lastName ===
     if (this.lastName != null && !validator.isEmpty(this.lastName.toString())) {
-      if (!validator.isAlpha(this.lastName)) {
+      if (hasSpecialChars(this.lastName)) {
         errors.push({
           field: "lastName",
-          message: "Must be alphabetic characters.",
+          message: "Can not have special characters.",
           value: this.lastName,
         })
       }
@@ -145,7 +162,7 @@ class ProfileObject {
       if (!validator.isDate(this.dateOfBirth)) {
         errors.push({
           field: "dateOfBirth",
-          message: "Must be in format [YYYY/MM/DD]",
+          message: "Invalid format",
           value: this.dateOfBirth,
         })
       }
@@ -157,7 +174,7 @@ class ProfileObject {
       ) {
         errors.push({
           field: "dateOfBirth",
-          message: "Must be over 16 years old",
+          message: "Must be older 16 years old",
           value: this.dateOfBirth,
         })
       }
@@ -218,21 +235,16 @@ class ProfileObject {
     return profileObject
   }
 
-  static async create(userId = null, data = {}) {
-    if (!userId) {
-      throw new TypeError('userId can not be undefined or null')
-    }
-    
+  static async create({...profileData}) {
     try {
-      let profileData = new ProfileObject({...data})
-      profileData = profileData.validate('create')
-      profileData = profileData.clean()
-      const profile = await ProfileModel.create({...profileData})
-      const userObject = new UserObject({_id: userId})
-      userObject.setProfileId = profile._id
-      const isUpdated = await userObject.save()
-      if (isUpdated) {
-        return new ProfileObject({...profile})
+      let profileObject = new ProfileObject({...profileData})
+      const validation = profileObject.validate('create')
+      if (validation) {
+        profileObject = profileObject.clean()
+        const profile = await ProfileModel.create({...profileObject})
+        if (profile) {
+          return new ProfileObject({...profile._doc})
+        }
       }
 
       throw new Error("Failed to create profile.")
@@ -241,11 +253,7 @@ class ProfileObject {
     }
   }
 
-  async update(userId = null, updateData = {}) {
-    if (!userId) {
-      throw new TypeError('userId can not be undefined or null')
-    }
-
+  async update( updateData = {}) {
     if (!(await isExistent(ProfileModel, {_id: this.id}))){
       throw new ObjectError({
         objectName: 'ProfileObject',
@@ -256,16 +264,15 @@ class ProfileObject {
     
     try {
       let profileData = new ProfileObject({...updateData})
-      profileData = profileData.validate('update')
-      profileData = profileData.clean()
-      const profile = await ProfileModel.findOneAndUpdate({_id: this.id}, {...profileData}, {new: true})
-      const userObject = new UserObject({_id: userId})
-      userObject.setProfileId = profile._id
-      const isUpdated = await userObject.save()
-      if (isUpdated) {
-        return new ProfileObject({...profile})
+      const validation = profileData.validate('update')
+      if (validation) {
+        profileData = profileData.clean()
+        const profile = await ProfileModel.findOneAndUpdate({_id: this.id}, {...profileData}, {new: true})
+        if (profile) {
+          return new ProfileObject({...profile})
+        }
+  
       }
-
       throw new Error("Failed to update profile.")
     } catch (error) {
       throw error

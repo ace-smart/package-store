@@ -118,8 +118,8 @@
                   return location.reload()
                 }
               })
-            } else {
-              Swal.fire("Failed", "An error has occurred.", "error")
+            } else if (this.readyState == 4 && this.status >= 400) {
+              Swal.fire("Failed", this.responseText.replace(/\"/g, ""), "error")
             }
           }
 
@@ -161,8 +161,8 @@
                   return location.reload()
                 }
               })
-            } else {
-              Swal.fire("Failed", "An error has occurred.", "error")
+            } else if (this.readyState == 4 && this.status >= 400) {
+              Swal.fire("Failed", this.responseText.replace(/\"/g, ""), "error")
             }
           }
 
@@ -204,8 +204,8 @@
                   return location.reload()
                 }
               })
-            } else {
-              Swal.fire("Failed", "An error has occurred.", "error")
+            } else if (this.readyState == 4 && this.status >= 400) {
+              Swal.fire("Failed", this.responseText.replace(/\"/g, ""), "error")
             }
           }
 
@@ -263,8 +263,8 @@
                   return location.reload()
                 }
               })
-            } else {
-              Swal.fire("Failed", "An error has occurred.", "error")
+            } else if (this.readyState == 4 && this.status >= 400) {
+              Swal.fire("Failed", this.responseText.replace(/\"/g, ""), "error")
             }
           }
 
@@ -322,8 +322,8 @@
                   return location.reload()
                 }
               })
-            } else {
-              Swal.fire("Failed", "An error has occurred.", "error")
+            } else if (this.readyState == 4 && this.status >= 400) {
+              Swal.fire("Failed", this.responseText.replace(/\"/g, ""), "error")
             }
           }
 
@@ -362,12 +362,13 @@
           xmlhttp.open("PUT", toURL, true)
           xmlhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
-              Swal.fire("Successfully!", "Please check email to set a new password", "success").then((e) => {
+              Swal.fire("Successfully!", "Please check email to set a new password", "success")
+              .then((e) => {
                 if (e.value){
                   return location.reload()
                 }
               })
-            } else if (this.readyState == 4 && this.status > 400) {
+            } else if (this.readyState == 4 && this.status >= 400) {
               Swal.fire("Failed", this.responseText.replace(/\"/g, ""), "error")
             }
           }

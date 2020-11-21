@@ -188,8 +188,7 @@ class ContactObject {
       if (validation) {
         const createdContact = await ContactModel.create({...validation})
         if (createdContact){
-          const contact = new ContactObject({...createdContact})
-          return contact
+          return new ContactObject({...createdContact._doc})
         }
       }
       
@@ -221,11 +220,10 @@ class ContactObject {
       updateObject = updateObject.clean()
       const validation = await updateObject.validate("update")
       if (validation) {
-        const updated = new ContactObject(
-          await ContactModel.findOneAndUpdate({ _id: this.id }, { ...validation }, { new: true })
-        )
+        const updated = await ContactModel.findOneAndUpdate(
+            { _id: this.id }, { ...validation }, { new: true })
         
-        return updated
+        return new ContactObject(updated)
       }
 
       throw new Error("Failed to update.")

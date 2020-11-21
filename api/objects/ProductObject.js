@@ -22,7 +22,7 @@ class ProductObject {
       this.subcategory = new SubcategoryObject({...this.subcategoryId})
       this.subcategoryId = this.subcategory.id.toString()
     } else if (typeof this.subcategoryId === 'string') {
-      // create-upload
+      // existed
       this.subcategory = await SubcategoryObject.getOneSubcategoryBy({_id: this.subcategoryId})
     } else {
       this.subcategory = null
@@ -329,23 +329,9 @@ class ProductObject {
   // @return:   ProductObject
   static async create({ ...productData } = {}) {
     try {
-      // Check subcategoryId
-      // if (productData.subcategoryId) {
-      //   const subcategory = await SubcategoryObject.getOneSubcategoryBy({_id: productData.subcategoryId})
-      //   if (subcategory) {
-      //     productData.subcategoryId = {_id: subcategory.id, ...subcategory}
-      //   } else {
-      //     throw new ValidationError([{
-      //       field: "subcategoryId",
-      //       message: "Not existent.",
-      //       value: subcategoryId,
-      //     }])
-      //   }
-      // }
-      
-      // Check details
+      // [Update] Details
       if (productData.details) {
-        if (ProductObject.hasEmptyDetails(productData.details)) {
+        if (!ProductObject.hasEmptyDetails(productData.details)) {
           delete productData.details
         }
       }
@@ -358,7 +344,7 @@ class ProductObject {
         const createdProduct = await ProductModel.create(
           {...productObject })
         if (createdProduct) {
-          return new ProductObject(createdProduct)
+          return new ProductObject({...createdProduct._doc})
         }
       }
 
@@ -387,9 +373,8 @@ class ProductObject {
     }
 
     try {
-      // Check details
+      // [Update] Details
       if (productData.details) {
-        console.log(ProductObject.hasEmptyDetails(productData.details))
         if (ProductObject.hasEmptyDetails(productData.details)) {
           delete productData.details
         }
@@ -399,11 +384,10 @@ class ProductObject {
       const validation = await productObject.validate("update", this.id)
       if (validation) {
         productObject = productObject.clean()
-        const updatedProduct = new ProductObject(
-          await ProductModel.findOneAndUpdate({ _id: this.id }, 
+        const updatedProduct = await ProductModel.findOneAndUpdate({ _id: this.id }, 
             {...productObject }, { new: true })
-        )
-        return updatedProduct
+            
+        return new ProductObject(updatedProduct)
       }
       throw new Error("Failed to update product.")
     } catch (error) {

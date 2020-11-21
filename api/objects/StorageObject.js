@@ -52,16 +52,13 @@ class StorageObject {
 
   static async getStoragesBy (criteria = {}, selectFields = null) {
     try {
-      const storageDocs = await StorageModel.find(criteria, selectFields).populate({
-        path: 'addressId'
-      }).lean()
+      const storageDocs = await StorageModel.find(criteria, selectFields).lean()
 
       if (storageDocs.length > 0) {
         let storageList = new Array()
         
         storageDocs.forEach(async (element) => {
           const object = new StorageObject({...element})
-          await object.setAddress()
           storageList.push(object)
         })
 
@@ -231,6 +228,8 @@ class StorageObject {
         if (!AddressObject.hasEmptyAddressData(storageData.address)) {
           const createdAddress = await AddressObject.create({...storageData.address})
           storageData.addressId = createdAddress.id.toString()
+        } else {
+          delete storageData.address
         }
       }
       
@@ -240,8 +239,7 @@ class StorageObject {
         storageObject = storageObject.clean()
         const createdStorage = await StorageModel.create({...storageObject})
         if (createdStorage){
-          const storage = new StorageObject({...createdStorage})
-          return storage
+          return new StorageObject({...createdStorage._doc})
         }
       }
       
@@ -251,7 +249,7 @@ class StorageObject {
     }
   }
 
-  async update (updateData = {}) {
+  async update ({...updateData}) {
     if (this.id == null) {
       throw new ObjectError({
         objectName: 'StorageObject',
@@ -281,7 +279,8 @@ class StorageObject {
             const addressObj = await AddressObject.getOneAddressById(updateData.address.id)
             await addressObj.update({...updateData.address})
           }
-
+        } else{
+          delete updateData.address
         }
       }
       
@@ -289,11 +288,10 @@ class StorageObject {
       const validation = await updateObject.validate("update", this.id)
       if (validation) {
         updateObject = updateObject.clean()
-        const updated = new StorageObject(
-          await StorageModel.findOneAndUpdate({ _id: this.id }, { ...updateObject }, { new: true })
-        )
+        const updated = await StorageModel.findOneAndUpdate(
+          { _id: this.id }, { ...updateObject }, { new: true })
 
-        return updated
+        return new StorageObject(updated)
       }
 
       throw new Error("Failed to update.")

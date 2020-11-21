@@ -1,7 +1,31 @@
 const axiosInstance = require("../../helper/axios.helper")
 const helper = require("../../helper/helper")
 const authHelper = require("../../helper/auth.helper")
+const getProfile = async function(accessToken) {
+  try {
+    const response = await axiosInstance.get(`/profile`, {
+      headers: {
+        Authorization: "Bearer " +accessToken
+      }
+    })
 
+    if(response.status === 200) {
+      return response.data
+    }
+  } catch (error) {
+    throw error
+  }
+}
+const getProfileData = function (reqBody) {
+  reqBody = JSON.parse(JSON.stringify(reqBody))
+  return {
+    firstName: reqBody.firstName,
+    lastName: reqBody.lastName,
+    dateOfBirth: (reqBody.dateOfBirth != '') ? helper.toDateFormat(reqBody.dateOfBirth.toString()) : '',
+    gender: (reqBody.gender == '') ? 'male' : reqBody.gender ,
+    phoneNumber: reqBody.phoneNumber,
+  }
+}
 module.exports = {
   // @desc:   Show profile
   // @route   GET /profile
@@ -10,7 +34,7 @@ module.exports = {
       const user = await helper.getUserInstance(req)
       user.profile = await authHelper.getProfile({ ...req.user })
       const tabpane = req.query.tabpane != null ? req.query.tabpane : "account"
-
+      
       return res.render("templates/admin/profile/profile", {
         layout: "admin/profile.layout.hbs",
         user: user,
@@ -27,9 +51,9 @@ module.exports = {
   // @desc    Update profile
   // @route   POST /profile
   updateProfile: async (req, res) => {
-    const user = await helper.getUserInstance(req)
-
+    let profileData = {}
     try {
+      const user = await helper.getUserInstance(req)
       //  Avatar has error
       if (res.locals.file && res.locals.file.error) {
         return res.render("templates/admin/profile/profile", {
@@ -37,37 +61,47 @@ module.exports = {
           user: user,
           csrfToken: req.csrfToken(),
           tabpane: "profile",
-          error: res.locals.file.error,
+          errors: {
+            avatar: 
+              {
+                messages: [res.locals.file.error.message]
+              }
+          },
         })
       }
-
-      let updateData = helper.removeCSRF(req.body)
-      if (updateData.dateOfBirth != null) {
-        updateData.dateOfBirth = helper.toDateFormat(req.body.dateOfBirth.toString())
-      }
+      // Data from request
+      profileData = getProfileData(req.body)
       if (req.files.avatar != null) {
-        updateData.avatar = req.files.avatar[0].buffer
+        profileData.avatar = req.files.avatar[0].buffer
       }
-
-      const response = await axiosInstance.put("/profile", updateData, {
+      // Get Old profile
+      const oldProfile = await getProfile(req.user.accessToken)
+      if (oldProfile) {
+        profileData = helper.getFilledFields(profileData, oldProfile)
+      }
+      // Send API
+      const response = await axiosInstance.put("/profile", profileData, {
         headers: {
           Authorization: "Bearer " + req.user.accessToken,
         },
       })
-
       if (response.status === 204) {
         req.flash("success", "Your profile was updated.")
         return res.redirect("/admin/profile?tabpane=profile")
       }
     } catch (error) {
-      if (error.response.status === 400 && error.response.data.error.name === "ValidationError") {
+      if (error.response.status === 400) {
+        const errors = error.response.data.error.invalidation
+        const validData = helper.getValidFields(errors, req.body)
+
         req.flash("fail", "Failed to update.")
         return res.render("templates/admin/profile/profile", {
           layout: "admin/profile.layout.hbs",
-          user: user,
+          user: await helper.getUserInstance(req),
           csrfToken: req.csrfToken(),
           tabpane: "profile",
-          error: error.response.data.error,
+          errors: helper.handleInvalidationErrors(errors),
+          validData: validData
         })
       }
       
@@ -86,10 +120,15 @@ module.exports = {
   changePwd: async (req, res) => {
     // form inputs [password, new_password, confirm_new_password] 
     try {
-      const formData = require("../../helper/helper").removeCSRF(req.body)
+      const passwordData = {
+        password: req.body.password,
+        new_password: req.body.new_password,
+        confirm_new_password: req.body.confirm_new_password
+      }
+
       const response = await axiosInstance.put(
         "/profile/change-password",
-        { ...formData },
+        { ...passwordData },
         {
           headers: {
             Authorization: "Bearer " + req.user.accessToken,
@@ -101,14 +140,14 @@ module.exports = {
         return res.redirect('/admin/logout')
       }
     } catch (error) {
-      if (error.response.status === 400 && error.response.data.error.name === "ValidationError") {
+      if (error.response.status === 400) {
         req.flash("fail", "Failed to update.")
         return res.render("templates/admin/profile/profile", {
           layout: "admin/profile.layout.hbs",
           user: await helper.getUserInstance(req),
           csrfToken: req.csrfToken(),
           tabpane: "changePwd",
-          error: error.response.data.error.invalidation,
+          errors: helper.handleInvalidationErrors(error.response.data.error.invalidation),
         })
       }
 
