@@ -1,0 +1,414 @@
+<p class="text-muted font-14">Add product to the table and submit <strong>Save changes</strong>
+    button to finish. Those fields with <span class="text-danger">*</span> is required.</p>
+
+<form action="/admin/orders/edit/{{{order.id}}}" method="POST">
+    {{> csrf}}
+    <div class="row">
+        {{!-- LEFT COL --}}
+        <div class="col-sm-4 pr-3 add-product-left-col">
+            <p class="text-lime p-2 my-3 border-bottom">
+                <i class="fa fa-info-circle mr-2"></i>Product information
+            </p>
+
+            {{!-- Price --}}
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="product_price">
+                            <i class="ion-cash mr-2"></i>Price
+                        </label>
+                    </div>
+                </div>
+                <div class="col-sm-8">
+                    <div class=" input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="ion ion-social-usd"></i></span>
+                        </div>
+                        <input id="product_price" name="product_price" type="text" disabled class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            {{!-- Color Name --}}
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="product_colorName">
+                            <i class="fa fa-tag mr-2"></i>Color Name
+                        </label>
+                    </div>
+                </div>
+                <div class="col-sm-8">
+                    <input id="product_colorName" name="product_colorName" type="text" disabled class="form-control">
+                </div>
+            </div>
+
+            {{!-- Color Hexcode --}}
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="product_hexCode">
+                            <i class="fa fa-hashtag mr-2"></i>Color Hexcode
+                        </label>
+                    </div>
+                </div>
+                <div class="col-sm-8">
+                    <input id="product_hexCode" name="product_hexCode" type="text" disabled class="form-control">
+                </div>
+            </div>
+
+            {{!-- Size --}}
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="product_size">
+                            <i class="fa fa-child mr-2"></i>Size
+                        </label>
+                    </div>
+                </div>
+                <div class="col-sm-8">
+                    <input id="product_size" name="product_size" type="text" disabled class="form-control">
+                </div>
+            </div>
+
+            {{!-- Material --}}
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="product_material">
+                            <i class="fa fa-chain-broken mr-2"></i>Material
+                        </label>
+                    </div>
+                </div>
+                <div class="col-sm-8">
+                    <input id="product_material" name="product_material" type="text" disabled class="form-control">
+                </div>
+            </div>
+
+            {{!-- Gender --}}
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="product_gender">
+                            <i class="fa fa-transgender-alt mr-2"></i>Gender
+                        </label>
+                    </div>
+                </div>
+                <div class="col-sm-8">
+                    <input id="product_gender" name="product_gender" type="text" disabled class="form-control">
+                </div>
+            </div>
+
+            {{!-- Season --}}
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="product_season">
+                            <i class="fa fa-cloud mr-2"></i>Season
+                        </label>
+                    </div>
+                </div>
+                <div class="col-sm-8">
+                    <input id="product_season" name="product_season" type="text" disabled class="form-control">
+                </div>
+            </div>
+
+            <p class="text-lime p-2 my-3 border-bottom">
+                <i class="fa fa-plus-square mr-2"></i>Add product
+            </p>
+
+            {{!-- Subcategory --}}
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="subcategoryId">
+                            <i class="mdi mdi-cards mr-2"></i>Subcategory
+                        </label>
+
+                        <select id="subcategoryId" name="subcategoryId" class="form-control select2"
+                            onchange="showProductInfo()">
+                            <option selected value="">Choose a subcategory</option>
+                            {{#each subcategories}}
+                            <option value="{{{this.id}}}">{{{this.name}}}</option>
+                            {{/each}}
+                        </select>
+
+                        {{#if errors.subcategoryId}}
+                        {{#with errors.subcategoryId}}
+                        {{> admin/error.partial }}
+                        {{/with}}
+                        {{else}}
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+
+            {{!-- Product --}}
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="productId">
+                            <i class="fa fa-product-hunt mr-2"></i>Product
+                        </label>
+
+                        <select id="productId" name="productId" class="form-control select2"
+                            onchange="setProductInfo()">
+                            <option selected value="">Choose a product</option>
+                            {{!-- <option {{#ifeq ../../validData.subcategoryId id}}selected{{/ifeq}} value="{{{id}}}">{{{name}}} --}}
+                        </select>
+
+                        {{#if errors.productId}}
+                        {{#with errors.productId}}
+                        {{> admin/error.partial }}
+                        {{/with}}
+                        {{else}}
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+
+            {{!-- Amount --}}
+            <div class="row pt-1">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="amount">
+                            <i class="fa fa-cubes mr-2"></i>Amount
+                        </label>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    {{#if errors.amount}}
+                    <input id="amount" name="amount" type="number" class="form-control parsley-error text-center"
+                        value="{{{errors.amount.value}}}">
+                    {{#with errors.amount}}
+                    {{> admin/error.partial }}
+                    {{/with}}
+                    {{else}}
+                    {{#if validData.amount}}
+                    <input id="amount" name="amount" type="number" class="form-control text-center"
+                        value="{{{validData.amount}}}">
+                    {{else}}
+                    {{!-- First load  --}}
+                    <input id="amount" type="number" name="amount" class="form-control text-center" value="1" min="1"
+                        onchange="validateAmount(this)">
+                    {{/if}}
+                    {{/if}}
+                </div>
+            </div>
+
+            {{!-- Buttons --}}
+            <div class="row">
+                <div class="col-sm-12  mt-2 text-right">
+                    <button id="addProductBtn" onclick="addProduct" type="button"
+                        class="col-sm-2 btn btn-primary waves-effect waves-light">
+                        <i class="fa fa-plus-square mr-2"></i> Add
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        {{!-- RIGHT COL --}}
+        <div class="col-sm-8 p-3 ">
+            <p class="text-lime p-2 border-bottom"><i class="fa fa-wpforms mr-2"></i>Detail</p>
+
+            {{!-- Product table --}}
+            <div class="row ">
+                <div class="col-sm-12">
+                    <table id="product-table" class="table table-bordered table-striped dt-responsive nowrap mb-4"
+                        cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Product</th>
+                                <th>Subcategory</th>
+                                <th>Price</th>
+                                <th class="text-center">Amount</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{!-- Order details --}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <hr>
+
+            {{!-- Total cost --}}
+            <div class="row mt-2">
+                <div class="col-sm-5 text-right border-bottom border-right">
+                    <label for="totalCost ">
+                        <i class="fa fa-sitemap mr-2"></i>Total cost
+                    </label>
+                </div>
+                <div class="col-sm-7 text-right">
+                    <input type="text" name="totalCost" id="totalCost" class="text-dark col-sm-6 text-center bg-brown"
+                        readonly value="0">
+                </div>
+            </div>
+
+            {{!-- Shipping fee --}}
+            <div class="row mt-2">
+                <div class="col-sm-5 text-right border-bottom border-right">
+                    <label for="shippingFee">
+                        <i class="fa fa-truck mr-2"></i>Shipping fee
+                    </label>
+                </div>
+                <div class="col-sm-7 text-right">
+                    {{#if errors.shippingFee}}
+                    <input type="text" name="shippingFee" id="shippingFee"
+                        class="text-teal col-sm-6 text-center parsley-error" required
+                        value="{{{errors.shippingFee.value}}}" onchange="formatShippingFee(this)">
+                    {{else}}
+                    {{#if validData.shippingFee}}
+                    <input type="text" name="shippingFee" id="shippingFee" class="text-teal col-sm-6 text-center "
+                        value="{{{validData.shippingFee}}}" onchange="formatShippingFee(this)">
+                    {{else}}
+                    {{!-- First load  --}}
+                    <input type="text" name="shippingFee" id="shippingFee" class="text-teal col-sm-6 text-center "
+                        value="{{{order.shippingFee}}}" onchange="formatShippingFee(this)">
+                    {{/if}}
+                    {{/if}}
+                </div>
+            </div>
+
+            {{!-- Voucher --}}
+            <div class="row mt-2">
+                <div class="col-sm-5 text-right border-bottom border-right">
+                    <label for="voucherCode">
+                        <i class="mdi mdi-sale mr-2"></i>Voucher code
+                    </label>
+                </div>
+                <div class="col-sm-3">
+                    {{!-- Discount (%) --}}
+                </div>
+                <div class="col-sm-4">
+                    <select id="voucherCode" name="voucherCode" class="form-control select2 col-sm-12"
+                        onchange="bindOrderData()">
+                        <option selected value="">Choose a voucher code</option>
+                        {{#each vouchers}}
+                        <option 
+                        {{#if ../validData.voucherId}}
+                            {{#ifeq ../validData.voucherId id}} selected {{/ifeq}} value="{{{id}}}"
+                        {{else}}
+                            {{#ifeq ../order.voucherId id}} selected {{/ifeq}} value="{{{id}}}"
+                        {{/if}}
+                            data-rate={{{rate}}}>{{{code}}} - ({{{rate}}} %) </option>
+                        {{/each}}
+                    </select>
+
+                    {{#if errors.voucherId}}
+                    {{#with errors.voucherId}}
+                    {{> admin/error.partial }}
+                    {{/with}}
+                    {{else}}
+                    {{/if}}
+                </div>
+            </div>
+
+            {{!-- Final cost --}}
+            <div class="row mt-2">
+                <div class="col-sm-5 text-right border-bottom border-right">
+                    <label for="finalCost">
+                        <i class="ion-cash mr-2"></i>Final cost
+                    </label>
+                </div>
+                <div class="col-sm-7 text-right">
+                    <input type="text" name="finalCost" id="finalCost" class="text-dark col-sm-6 text-center bg-brown"
+                        readonly value="0" style="background-color: #fff;">
+                </div>
+            </div>
+
+            {{!-- Payment method --}}
+            <div class="row mt-2">
+                <div class="col-sm-5 text-right border-bottom border-right">
+                    <label for="paymentMethod">
+                        <i class="fa fa-cc-mastercard mr-2"></i>Payment method
+                        <span class="text-danger">*</span>
+                    </label>
+                </div>
+                <div class="col-sm-3 text-right">
+                    {{#if errors.paymentMethod}}
+                    {{#with errors.paymentMethod}}
+                    {{> admin/error.partial }}
+                    {{/with}}
+                    {{else}}
+                    {{/if}}
+                </div>
+                <div class="col-sm-4">
+                    <select name="paymentMethod" class="form-control 
+          {{#if errors.paymentMethod}} parsley-error {{/if}}select2 col-sm-5" required>
+                        <option value="">Choose a payment method</option>
+                        {{#if validData.paymentMethod}}
+                        <option {{#ifeq validData.paymentMethod 'COD'}} selected {{/ifeq}} value="COD">COD (Cash on
+                            delivery)</option>
+                        <option {{#ifeq validData.paymentMethod 'CREDITCARD'}} selected {{/ifeq}} value="CREDITCARD">
+                            VISA / MASTERCARD</option>
+                        {{else}}
+                        <option {{#ifeq order.paymentMethod 'COD'}} selected {{/ifeq}} value="COD">COD (Cash on
+                            delivery)</option>
+                        <option {{#ifeq order.paymentMethod 'CREDITCARD'}} selected {{/ifeq}} value="CREDITCARD">VISA /
+                            MASTERCARD</option>
+                            {{/if}}
+                    </select>
+                </div>
+            </div>
+
+            {{!-- Deliver day --}}
+            <div class="row mt-2 ">
+                <div class="col-sm-5 text-right border-bottom border-right">
+                    <label for="deliveryDay">
+                        <i class="fa fa-calendar-check-o mr-2"></i>Deliver day
+                        <span class="text-danger">*</span>
+                    </label>
+                </div>
+                {{!-- errors --}}
+                <div class="col-sm-3 text-center">
+                    {{#if errors.deliveryDay}}
+                    {{#with errors.deliveryDay}}
+                    {{> admin/error.partial }}
+                    {{/with}}
+                    {{/if}}
+                </div>
+                <div class="col-sm-4 text-right input-group">
+                    {{#if errors.deliveryDay}}
+                    <input type="text" name="deliveryDay" placeholder="mm/dd/yyyy" id="datepicker-autoclose"
+                        class="form-control parsley-error" required value="{{{formatDate errors.deliveryDay.value}}}">
+                    {{else}}
+                    {{#if validData.deliveryDay}}
+                    <input type="text" name="deliveryDay" placeholder="mm/dd/yyyy" id="datepicker-autoclose"
+                        class="form-control" required value="{{{formatDate validData.deliveryDay}}}">
+                    {{else}}
+                    {{!-- First load  --}}
+                    <input type="text" name="deliveryDay" placeholder="mm/dd/yyyy" required
+                        value="{{{formatDate order.deliveryDay}}}" id="datepicker-autoclose" class="form-control">
+                    {{/if}}
+                    {{/if}}
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            {{!--  Hidden input for {  Order details } --}}
+            <input type="hidden" name="orderDetails" id="orderDetails" {{#if validData.orderDetails}}
+                {{#if validData.orderDetails}} value='{{parseToString validData.orderDetails}}' {{/if}} 
+                {{else}}
+                    value='{{parseToString order.orderDetails}}'
+                {{/if}}>
+        </div>
+    </div>
+
+    <hr>
+
+    {{!-- Buttons --}}
+    <div class="row">
+        <div class="col-sm-12 mr-0 text-right">
+            <button id="createOrderBtn" type="submit" class="btn btn-success waves-effect waves-light">Save
+                changes</button>
+            <button type="button" onclick="backward()" class="btn btn-secondary waves-effect">Cancel</button>
+        </div>
+    </div>
+</form>

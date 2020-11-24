@@ -1,0 +1,336 @@
+{{#ifMatch content 'view'}}
+{{> admin/form/js.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'form'}}
+{{> admin/form/js.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'list'}}
+{{> admin/list/js.partial }}
+<script>
+    const priceElement = document.getElementsByClassName('price-value')
+    for (let i = 0; i < priceElement.length; i++) {
+        const formatValue = new Intl.NumberFormat('en-US', { style: 'currency', currency: "USD" }).format(parseFloat(priceElement[i].innerText))
+        priceElement[i].innerText = formatValue
+    }
+</script>
+{{/ifMatch}}
+
+<script>
+    let numOfProducts = 0
+    if (checkBlankTable()) {
+        embedDataToTable()
+    }
+    document.getElementById('addProductBtn').addEventListener('click', addProduct)
+
+    function validateAmount(element) {
+        const amount = parseInt(element.value)
+        const parentElement = element.parentNode
+        if (amount < 1) {
+            element.classList.add('parsley-error')
+            // Create error message
+            const errorMsg = document.createElement("p")
+            errorMsg.classList.add('form-validation-error', 'mb-0', 'mt-1')
+            errorMsg.innerText = 'Not valid. The value must be at least 1'
+            // Disable add button
+            document.getElementById('addProductBtn').setAttribute('disabled', 'disabled')
+
+            parentElement.appendChild(errorMsg)
+        } else if (element.classList.contains('parsley-error')) {
+            // Remove error message
+            element.classList.remove('parsley-error')
+            parentElement.removeChild(parentElement.children[1])
+            // Enable add button
+            document.getElementById('addProductBtn').removeAttribute('disabled')
+        }
+    }
+
+    function showProductInfo() {
+        // Reset product info
+        document.getElementById('product_price').value = ''
+        document.getElementById('product_colorName').value = ''
+        document.getElementById('product_hexCode').value = ''
+        document.getElementById('product_size').value = ''
+        document.getElementById('product_material').value = ''
+        document.getElementById('product_gender').value = ''
+        document.getElementById('product_season').value = ''
+
+        const subcategoryId = document.getElementById('subcategoryId').value
+        const selectTag = document.getElementById('productId')
+
+        // Reset element inside
+        selectTag.innerHTML = '<option selected value="">Choose a subcategory</option>'
+
+        // Call AJAX
+        const httpReq = new XMLHttpRequest()
+        const toURL = window.location.origin + `/admin/products?subcategoryId=${subcategoryId}`
+        httpReq.open('GET', toURL, true)
+        httpReq.onreadystatechange = function () {
+            if (this.readyState === 4 && this.status === 200) {
+                // Set product list to select
+                const productList = JSON.parse(this.responseText)
+                productList.forEach((value) => {
+                    const option = document.createElement('option')
+                    option.setAttribute('value', value.id)
+                    // Set product info 
+                    option.dataset.name = value.name
+                    option.dataset.subcategory = value.subcategory.name
+                    option.dataset.price = value.price
+                    option.dataset.colorName = value.details.color.colorName
+                    option.dataset.hexCode = value.details.color.hexCode
+                    option.dataset.size = value.details.size
+                    option.dataset.material = value.details.material
+                    option.dataset.gender = value.details.gender
+                    option.dataset.season = value.details.season
+                    option.innerText = value.name
+                    selectTag.appendChild(option)
+                })
+            }
+        }
+
+        httpReq.withCredentials = true
+        httpReq.send()
+    }
+
+    function setProductInfo() {
+        // Reset product info
+        document.getElementById('product_price').value = ''
+        document.getElementById('product_colorName').value = ''
+        document.getElementById('product_hexCode').value = ''
+        document.getElementById('product_size').value = ''
+        document.getElementById('product_material').value = ''
+        document.getElementById('product_gender').value = ''
+        document.getElementById('product_season').value = ''
+
+        const productSelectTag = document.getElementById('productId')
+        const productInfo = productSelectTag.options[productSelectTag.selectedIndex]
+
+        // Set info
+        document.getElementById('product_price').value = new Intl.NumberFormat('en-US').format(parseFloat(productInfo.dataset.price))
+        document.getElementById('product_colorName').value = productInfo.dataset.colorName
+        document.getElementById('product_hexCode').value = productInfo.dataset.hexCode
+        document.getElementById('product_size').value = productInfo.dataset.size
+        document.getElementById('product_material').value = productInfo.dataset.material
+        document.getElementById('product_gender').value = productInfo.dataset.gender
+        document.getElementById('product_season').value = productInfo.dataset.season
+    }
+
+    function createRow(productObject = {}) {
+        const isExistent = checkExistentProduct(productObject.productId, productObject.amount)
+        if (!isExistent) {
+            const row = document.createElement('tr')
+            // Create cells
+            for (const [key, value] of Object.entries(productObject)) {
+                const cell = document.createElement('td')
+                if (key === 'index') {
+                    cell.dataset.productId = productObject.productId
+                    cell.innerText = value.toString()
+                } else if (key === 'price') {
+                    cell.innerText = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(parseFloat(value))
+                    cell.dataset.price = parseFloat(value)
+                } else if (key === 'amount') {
+                    cell.classList.add('text-center')
+                    cell.innerText = parseInt(value)
+                } else if (key === 'productId') {
+                    cell.classList.add('text-center')
+                    cell.innerHTML = `
+                  <a class="dropdown-item" href="javascript:void(0);" onclick="removeProduct(this)" data-index="${productObject.index}">
+                    <i class="ion-trash-a mr-2"></i>
+                  </a>`
+                } else {
+                    cell.innerText = value.toString()
+                }
+
+                row.appendChild(cell)
+            }
+
+            return row
+        } else {
+            return null
+        }
+    }
+
+    function checkExistentProduct(productId, amount) {
+        const tbody = document.getElementById('product-table').children[1]
+        for (let i = 0; i < tbody.children.length; i++) {
+            const row = tbody.children[i]
+            if (row.children[0].dataset.productId == productId) {
+                row.children[4].innerText = parseInt(row.children[4].innerText) + parseInt(amount)
+                return true
+            }
+        }
+
+        return false
+    }
+
+    function addProduct() {
+        const productTable = document.getElementById('product-table')
+        const tbody = productTable.children[1]
+        const selectedProduct = document.getElementById('productId').options[document.getElementById('productId').options.selectedIndex]
+
+        const productInfo = {
+            index: numOfProducts + 1,
+            product: selectedProduct.dataset.name,
+            subcategory: selectedProduct.dataset.subcategory,
+            price: selectedProduct.dataset.price,
+            amount: document.getElementById('amount').value,
+            productId: document.getElementById('productId').value
+        }
+
+        const row = createRow(productInfo)
+        if (row) {
+            tbody.appendChild(row)
+            numOfProducts += 1
+        }
+
+        bindOrderData()
+    }
+
+    function removeProduct(element) {
+        const tbody = document.getElementById('product-table').children[1]
+        const elementRow = element.parentNode.parentNode
+        tbody.removeChild(elementRow)
+
+        // Update index
+        for (let i = 0; i < tbody.children.length; i++) {
+            const row = tbody.children[i]
+            if (row.children.length > 0) {
+                if (row.children[0].innerText != '1') {
+                    row.children[0].innerText = parseInt(row.children[0].innerText) - 1
+                }
+            }
+        }
+
+        if (numOfProducts > 0) {
+            numOfProducts -= 1
+        }
+
+        bindOrderData()
+    }
+
+    function bindOrderData() {
+        const tbody = document.getElementById('product-table').children[1]
+        let totalCost = 0
+        const shippingFee = (document.getElementById('shippingFee').dataset.value) ? document.getElementById('shippingFee').dataset.value : 0
+
+        for (let i = 0; i < tbody.children.length; i++) {
+            const price = parseFloat(tbody.children[i].children[3].dataset.price)
+            const amount = parseInt(tbody.children[i].children[4].innerText)
+            totalCost += price * amount
+        }
+        const saleRate = document.getElementById('voucherCode').options[document.getElementById('voucherCode').options.selectedIndex].dataset.rate
+        if (saleRate) {
+            totalCost -= totalCost * parseFloat(saleRate) / 100
+        }
+        let finalCost = totalCost + parseFloat(shippingFee)
+        document.getElementById('totalCost').value = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalCost)
+        document.getElementById('finalCost').value = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(finalCost)
+
+        // Update order details
+        saveOrderDetailData()
+        // Check
+        checkBlankTable()
+    }
+
+    function formatShippingFee(element) {
+        let shippingFee = parseFloat(element.value)
+        if (Number.isNaN(shippingFee)) {
+            shippingFee = parseFloat(element.value.replace(/\$|\,/g, ""))
+        }
+        const formatValue = new Intl.NumberFormat('en-US', { style: "currency", currency: "USD" }).format(parseFloat(shippingFee))
+        element.dataset.value = shippingFee
+        element.value = formatValue
+
+        bindOrderData()
+    }
+
+    function saveOrderDetailData() {
+        const tbody = document.getElementById('product-table').children[1]
+        let orderDetailData = []
+        for (let i = 0; i < tbody.children.length; i++) {
+            const row = tbody.children[i]
+            const orderDetail = {
+                id: (row.children[0].dataset.id) ? row.children[0].dataset.id : undefined,
+                productName: row.children[1].innerText,
+                subcategoryName: row.children[2].innerText,
+                price: row.children[3].innerText,
+                productId: row.children[0].dataset.productId,
+                amount: parseInt(row.children[4].innerText)
+            }
+            orderDetailData.push(orderDetail)
+        }
+
+        document.getElementById('orderDetails').value = JSON.stringify(orderDetailData)
+    }
+
+    function checkBlankTable() {
+        const tbody = document.getElementById('product-table').children[1]
+        if (tbody.children.length < 1) {
+            document.getElementById('createOrderBtn').setAttribute('disabled', true)
+        } else if (document.getElementById('createOrderBtn').hasAttribute('disabled')) {
+            document.getElementById('createOrderBtn').removeAttribute('disabled')
+        }
+
+        if (tbody.children.length == 0) {
+            return true
+        }
+
+        return false
+    }
+
+    function embedDataToTable() {
+        const tableData = (document.getElementById('orderDetails').value) ? JSON.parse(document.getElementById('orderDetails').value) : null
+        const tbody = document.getElementById('product-table').children[1]
+        console.log(tableData)
+        if (tbody.children.length == 0 && tableData) {
+            // Table Columns in order: [Index, Product, Subcategory, Price, Amount, Action] (6)
+            tableData.forEach((element, idx) => {
+                const row = document.createElement('tr')
+
+                for (let i = 0; i < 6; i++) {
+                    const cell = document.createElement('td')
+                    // Index
+                    if (i == 0) {
+                        cell.dataset.productId = element.productId._id
+                        cell.dataset.id = (element.id != null) ? element.id : null
+                        cell.innerText = idx + 1
+                    }
+                    // Product
+                    if (i == 1) {
+                        cell.innerText = element.productId.name
+                    }
+                    // Subcategory 
+                    if (i == 2) {
+                        cell.innerText = element.productId.subcategoryId.name
+                    }
+                    // Price 
+                    if (i == 3) {
+                        cell.innerText = parseFloat(element.productId.price.toString().replace(/\$|\,/g, ""))
+                        cell.dataset.price = element.productId.price
+                    }
+                    // Amount 
+                    if (i == 4) {
+                        cell.classList.add('text-center')
+                        cell.innerText = parseInt(element.amount)
+                    }
+                    // Action 
+                    if (i == 5) {
+                        cell.classList.add('text-center')
+                        cell.innerHTML = `
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="removeProduct(this)" data-index="${numOfProducts + 1}">
+                            <i class="ion-trash-a mr-2"></i>
+                        </a>`
+                    }
+                    // Add to table
+                    row.appendChild(cell)
+                }
+                tbody.appendChild(row)
+                numOfProducts += 1
+
+            })
+
+            bindOrderData()
+        }
+    }
+</script>

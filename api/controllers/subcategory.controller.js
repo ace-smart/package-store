@@ -1,13 +1,31 @@
+const NotFoundError = require("../errors/not_found")
 const ErrorHandler = require("../helper/errorHandler")
 const SubcategoryObject = require("../objects/SubcategoryObject")
 
 module.exports = {
-  // @desc:   Show subcategories
+  // @desc:   Get subcategories list
   // @route   GET /subcategories?categoryId='1234'
   showSubcategoriesByCategoryId: async (req, res) => {
     try {
-      const subcategories = await SubcategoryObject.getSubcategoriesBy({categoryId: req.query.categoryId})
+      const subcategories = await SubcategoryObject.getSubcategoriesBy({
+        categoryId: req.query.categoryId,
+      })
       return res.status(200).json(subcategories)
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc:   Show subcategories
+  // @route   GET /subcategories
+  getSubcategories: async (req, res) => {
+    try {
+      const subcategories = await SubcategoryObject.getSubcategoriesBy()
+      if (subcategories && subcategories.length > 0) {
+        return res.status(200).json(subcategories)
+      }
+
+      throw NotFoundError("No subcategory found.")
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -30,11 +48,11 @@ module.exports = {
   // @route   POST /subcategories
   createNewSubcategory: async (req, res) => {
     try {
-      const createdSubcategory = await SubcategoryObject.create({...req.body})
+      const createdSubcategory = await SubcategoryObject.create({ ...req.body })
       if (createdSubcategory) {
         return res.status(201).json(createdSubcategory)
       }
-      
+
       throw new Error("Failed to create category")
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
@@ -45,9 +63,9 @@ module.exports = {
   // @route   PUT /subcategories/:id
   updateSubcategoryById: async (req, res) => {
     try {
-      const subcategory = await SubcategoryObject.getOneSubcategoryBy({_id: req.params.id})
+      const subcategory = await SubcategoryObject.getOneSubcategoryBy({ _id: req.params.id })
       if (subcategory) {
-        const updatedSubcategory = await subcategory.update({...req.body})
+        const updatedSubcategory = await subcategory.update({ ...req.body })
         if (updatedSubcategory) {
           return res.sendStatus(204)
         }
@@ -63,17 +81,17 @@ module.exports = {
   // @route   DELETE /subcategories/:id
   removeSubcategoryById: async (req, res) => {
     try {
-      const subcategory = await SubcategoryObject.getOneSubcategoryBy({_id: req.params.id})
+      const subcategory = await SubcategoryObject.getOneSubcategoryBy({ _id: req.params.id })
       if (subcategory) {
         const isRemoved = await subcategory.remove()
         if (isRemoved) {
           return res.sendStatus(204)
         }
       }
-      
+
       throw new Error("Failed to remove subcategory.")
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
-  }
+  },
 }

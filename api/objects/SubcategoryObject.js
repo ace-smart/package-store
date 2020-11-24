@@ -22,10 +22,18 @@ class SubcategoryObject {
     }
 
     try {
-      const subcategories = await SubcategoryModel.find(criteria, selectFields).populate({path: 'categoryId'}).lean()
+      const subcategories = await SubcategoryModel.find(criteria, selectFields)
+      .populate({path: 'categoryId'}).lean()
       
-      if (subcategories) {
-        return subcategories
+      if (subcategories.length > 0) {
+        let subcategoryList = new Array()
+        
+        subcategories.forEach(async (element) => {
+          const object = new SubcategoryObject({...element})
+          subcategoryList.push(object)
+        })
+
+        return subcategoryList 
       }
 
       return null

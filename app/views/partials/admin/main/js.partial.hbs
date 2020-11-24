@@ -16,6 +16,9 @@
 {{#ifMatch route 'restocks'}}
 {{> admin/restock/js.partial}}
 {{/ifMatch}}
+{{#ifMatch route 'orders'}}
+{{> admin/order/js.partial}}
+{{/ifMatch}}
 {{#ifMatch route 'vouchers'}}
 {{> admin/voucher/js.partial}}
 {{/ifMatch}}

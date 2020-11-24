@@ -13,12 +13,6 @@ const OrderSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    currency: {
-        type: String,
-        max: 6,
-        uppercase: true,
-        default: 'USD'
-    },
     paymentMethod: {
         type: String,
         max: 30,
@@ -28,9 +22,9 @@ const OrderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    voucherCode: {
-        type: String,
-        ref: 'Voucher.code'
+    voucherId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Voucher'
     },
     deliveryDay: {
         type: Date,
@@ -38,7 +32,7 @@ const OrderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['processing','received','packing', 'delivering','done', 'refunded', 'canceled'],
+        enum: ['processing', 'packing', 'delivering', 'done',  'canceled'],
         default: 'processing'
     }
 }, {timestamps: true})

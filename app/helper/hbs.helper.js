@@ -39,4 +39,14 @@ module.exports = {
             return options.inverse(this)
         }
     },
+    parseToString: function (a) {
+        return  JSON.stringify(a)
+    },
+    increaseIndex: function(index){
+        index = parseInt(index)
+        return index + 1
+    },
+    formatPrice: function(price) {
+        return new Intl.NumberFormat('en-US', {style: "currency", currency: "USD"}).format(parseFloat(price))
+    }
 }

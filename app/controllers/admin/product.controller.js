@@ -1,28 +1,27 @@
-const { response } = require('express')
-const axiosInstance = require('../../helper/axios.helper')
-const helper = require('../../helper/helper')
-const getCategoryList = async function(accessToken) {
+const { response } = require("express")
+const axiosInstance = require("../../helper/axios.helper")
+const helper = require("../../helper/helper")
+const getCategoryList = async function (accessToken) {
   try {
-    const response = await axiosInstance.get('/admin/categories',
-    {
+    const response = await axiosInstance.get("/admin/categories", {
       headers: {
-        Authorization: "Bearer " + accessToken
-      }
+        Authorization: "Bearer " + accessToken,
+      },
     })
-    
-    if(response.status === 200) {
+
+    if (response.status === 200) {
       return response.data
     }
   } catch (error) {
-    return null    
+    return null
   }
 }
-const getProductById = async function(accessToken, productId) {
+const getProductById = async function (accessToken, productId) {
   try {
     const response = await axiosInstance.get(`/admin/products/${productId}`, {
       headers: {
-        Authorization: "Bearer " + accessToken
-      }
+        Authorization: "Bearer " + accessToken,
+      },
     })
 
     if (response.status === 200) {
@@ -32,7 +31,7 @@ const getProductById = async function(accessToken, productId) {
     throw error
   }
 }
-const getProductData = function(reqBody) {
+const getProductData = function (reqBody) {
   reqBody = JSON.parse(JSON.stringify(reqBody))
   return {
     name: reqBody.name,
@@ -42,37 +41,46 @@ const getProductData = function(reqBody) {
     details: {
       color: {
         colorName: reqBody.colorName,
-        hexCode: reqBody.hexCode
+        hexCode: reqBody.hexCode,
       },
       size: reqBody.size,
       material: reqBody.material,
       gender: reqBody.gender,
-      season: reqBody.season
-    }
+      season: reqBody.season,
+    },
   }
 }
 
 module.exports = {
   // @desc:   Show products
   // @route   GET /products
+  // @query: subcategoryId
   showProductList: async (req, res) => {
+    const subcategoryId = req.query.subcategoryId ? req.query.subcategoryId : null
     try {
       const response = await axiosInstance.get("/admin/products", {
         headers: {
           Authorization: "Bearer " + req.user.accessToken,
         },
       })
-      
+      let productList = response.data
       if (response.status === 200) {
-        return res.render("templates/admin/product/product.hbs", {
-          layout: "admin/main.layout.hbs",
-          content: "list",
-          header: "List of products",
-          route: "products",
-          products: response.data,
-          user: await helper.getUserInstance(req),
-          csrfToken: req.csrfToken(),
-        })
+        // Return productList by 'subcategoryId'
+        if (req.query.subcategoryId != null) {
+          productList = response.data.filter((element) => element.subcategoryId === subcategoryId)
+          return res.status(200).json(productList)
+        } else {
+          // Render template
+          return res.render("templates/admin/product/product.hbs", {
+            layout: "admin/main.layout.hbs",
+            content: "list",
+            header: "List of products",
+            route: "products",
+            products: response.data,
+            user: await helper.getUserInstance(req),
+            csrfToken: req.csrfToken(),
+          })
+        }
       }
     } catch (error) {
       return helper.handleErrors(res, error, "admin")
@@ -129,7 +137,7 @@ module.exports = {
     return res.render("templates/admin/product/product.hbs", {
       layout: "admin/main.layout.hbs",
       content: "form",
-      formType: 'create',
+      formType: "create",
       header: "Create a new product",
       route: "products",
       categories: await getCategoryList(req.user.accessToken),
@@ -143,11 +151,10 @@ module.exports = {
   createProduct: async (req, res) => {
     let productData = getProductData(req.body)
     try {
-      const response = await axiosInstance.post(`/admin/products`,
-      productData, {
+      const response = await axiosInstance.post(`/admin/products`, productData, {
         headers: {
-          Authorization: "Bearer " + req.user.accessToken
-        }
+          Authorization: "Bearer " + req.user.accessToken,
+        },
       })
 
       if (response.status === 201) {
@@ -155,7 +162,7 @@ module.exports = {
         return res.render("templates/admin/product/product.hbs", {
           layout: "admin/main.layout.hbs",
           content: "form",
-          formType: 'create',
+          formType: "create",
           header: "Create a new product",
           route: "products",
           categories: await getCategoryList(req.user.accessToken),
@@ -171,7 +178,7 @@ module.exports = {
         return res.render("templates/admin/product/product.hbs", {
           layout: "admin/main.layout.hbs",
           content: "form",
-          formType: 'create',
+          formType: "create",
           header: "Create a new product",
           route: "products",
           csrfToken: req.csrfToken(),
@@ -182,7 +189,7 @@ module.exports = {
         })
       }
 
-      return helper.handleErrors(res, error, 'admin')
+      return helper.handleErrors(res, error, "admin")
     }
   },
 
@@ -195,7 +202,7 @@ module.exports = {
         return res.render("templates/admin/product/product.hbs", {
           layout: "admin/main.layout.hbs",
           content: "form",
-          formType: 'update',
+          formType: "update",
           header: "Update product",
           route: "products",
           csrfToken: req.csrfToken(),
@@ -205,7 +212,7 @@ module.exports = {
         })
       }
     } catch (error) {
-      return helper.handleErrors(res, error, 'admin')
+      return helper.handleErrors(res, error, "admin")
     }
   },
 
@@ -221,16 +228,16 @@ module.exports = {
 
       const response = await axiosInstance.put(`/admin/products/${req.params.id}`, productData, {
         headers: {
-          Authorization: "Bearer " + req.user.accessToken
-        }
+          Authorization: "Bearer " + req.user.accessToken,
+        },
       })
 
-      if (response.status === 204){
+      if (response.status === 204) {
         req.flash("success", "Your changes were successfully saved.")
         return res.render("templates/admin/product/product.hbs", {
           layout: "admin/main.layout.hbs",
           content: "form",
-          formType: 'update',
+          formType: "update",
           header: "Update product",
           route: "products",
           csrfToken: req.csrfToken(),
@@ -248,7 +255,7 @@ module.exports = {
         return res.render("templates/admin/product/product.hbs", {
           layout: "admin/main.layout.hbs",
           content: "form",
-          formType: 'update',
+          formType: "update",
           header: "Update product",
           route: "products",
           csrfToken: req.csrfToken(),
@@ -259,7 +266,7 @@ module.exports = {
           validData: validData,
         })
       }
-      return helper.handleErrors(res, error, 'admin')
+      return helper.handleErrors(res, error, "admin")
     }
   },
 
@@ -267,21 +274,23 @@ module.exports = {
   // @route   PUT /products/deactivate/:id
   deactivateProductById: async (req, res) => {
     try {
-      const response = await axiosInstance.put(`/admin/products/${req.params.id}`,
-      {
-        status: "deactivated"
-      },
-      {
-        headers: {
-          Authorization: "Bearer " + req.user.accessToken
+      const response = await axiosInstance.put(
+        `/admin/products/${req.params.id}`,
+        {
+          status: "deactivated",
+        },
+        {
+          headers: {
+            Authorization: "Bearer " + req.user.accessToken,
+          },
         }
-      })
+      )
 
       if (response.status === 204) {
         return res.sendStatus(200)
       }
     } catch (error) {
-      return helper.handleErrors(res, error, 'admin')
+      return helper.handleErrors(res, error, "admin")
     }
   },
 
@@ -289,21 +298,23 @@ module.exports = {
   // @route   PUT /products/activate/:id
   activateProductById: async (req, res) => {
     try {
-      const response = await axiosInstance.put(`/admin/products/${req.params.id}`,
-      {
-        status: "activated"
-      },
-      {
-        headers: {
-          Authorization: "Bearer " + req.user.accessToken
+      const response = await axiosInstance.put(
+        `/admin/products/${req.params.id}`,
+        {
+          status: "activated",
+        },
+        {
+          headers: {
+            Authorization: "Bearer " + req.user.accessToken,
+          },
         }
-      })
+      )
 
       if (response.status === 204) {
         return res.sendStatus(200)
       }
     } catch (error) {
-      return helper.handleErrors(res, error, 'admin')
+      return helper.handleErrors(res, error, "admin")
     }
   },
 
@@ -311,18 +322,17 @@ module.exports = {
   // @route   DELETE /products/:id
   removeProductById: async (req, res) => {
     try {
-      const response = await axiosInstance.delete(`/admin/products/${req.params.id}`,
-      {
+      const response = await axiosInstance.delete(`/admin/products/${req.params.id}`, {
         headers: {
-          Authorization: "Bearer " + req.user.accessToken
-        }
+          Authorization: "Bearer " + req.user.accessToken,
+        },
       })
 
       if (response.status === 204) {
         return res.sendStatus(200)
       }
     } catch (error) {
-      return helper.handleErrors(res, error, 'admin')
+      return helper.handleErrors(res, error, "admin")
     }
   },
 }

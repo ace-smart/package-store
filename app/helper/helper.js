@@ -95,6 +95,11 @@ module.exports = helper = {
     return year + "/" + month + "/" + day
   },
 
+  formatPriceValue: (price) => {
+    // INPUT: '$123,000.00'
+    return parseFloat(price.replace(/\$|\,/g, ""))
+  },
+
   renderServerErrorPage: function (res, forRole = "user") {
     if (forRole === "user") {
       return res.render("templates/client/error/500", {

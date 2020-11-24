@@ -1,11 +1,15 @@
 const express = require('express')
 const router = express.Router()
-const { showSubcategoriesByCategoryId, getSubcategoryById, createNewSubcategory, updateSubcategoryById, removeSubcategoryById} 
+const { getSubcategories, showSubcategoriesByCategoryId, getSubcategoryById, createNewSubcategory, updateSubcategoryById, removeSubcategoryById} 
     = require('../../controllers/subcategory.controller')
 
 // @desc    Get subcategory list
+// @route   GET /subcategories?categoryId='1234'
+// router.get('/', showSubcategoriesByCategoryId)
+
+// @desc    Get subcategory list
 // @route   GET /subcategories/:categoryId
-router.get('/', showSubcategoriesByCategoryId)
+router.get('/', getSubcategories)
 
 // @desc    Get a subcategory
 // @route   GET /subcategories/:id

@@ -130,6 +130,68 @@
       })
     })
 
+    // #sa-set-stage
+    $(".sa-set-stage").on("click", function () {
+      const uid = this.dataset.uid
+      const stageType = this.dataset.stage_type
+      const stage =  this.dataset.stage
+      const _csrf = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+      let toStage = stageType
+      if (stageType === 'final') {
+        if (stage === 'canceled'){
+          toStage = 'done'
+        }else if (stage === 'done') {
+          toStage = 'canceled'
+        }
+      }
+      Swal.fire({
+        title: `Set to the ${toStage.toUpperCase()} stage ?`,
+        text: `Do you want to set this order to the ${toStage.toUpperCase()} stage?`,
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, do it!",
+        cancelButtonText: "No, cancel!",
+        confirmButtonClass: "btn btn-success",
+        cancelButtonClass: "btn btn-danger m-l-10",
+        buttonsStyling: false,
+        allowOutsideClick: false,
+      }).then(function (e) {
+        // confirm => {value: true}
+        // cancel => {dismiss: "cancel"}
+        if (e.value === true) {
+          let stageRoute = '/next-stage'
+          if (stageType === 'next') {
+            stageRoute = '/next-stage'
+          } else if (stageType === 'previous') {
+            stageRoute = '/previous-stage'
+          } else if (stageType === 'final') {
+            stageRoute = '/final-stage'
+          }
+          const queryParams = `?stage=${stage}&id=${uid}`
+          const toURL = window.location.href + stageRoute + queryParams
+          // send request to api server
+          const xmlhttp = new XMLHttpRequest()
+          xmlhttp.open("PUT", toURL, true)
+          xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+              Swal.fire("Successfully!", `The status of the order was set to the ${toStage.toUpperCase()} stage.`, "success").then((e) => {
+                if (e.value) {
+                  // press OK button
+                  return location.reload()
+                }
+              })
+            } else if (this.readyState == 4 && this.status >= 400) {
+              Swal.fire("Failed", this.responseText.replace(/\"/g, ""), "error")
+            }
+          }
+
+          xmlhttp.setRequestHeader("CSRF-Token", _csrf)
+          xmlhttp.withCredentials = true
+          xmlhttp.send()
+        }
+      })
+    })
+
     // #sa-activate
     $(".sa-set-full").on("click", function () {
       const uid = this.dataset.uid
