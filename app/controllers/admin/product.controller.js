@@ -1,6 +1,12 @@
-const { response } = require("express")
 const axiosInstance = require("../../helper/axios.helper")
-const helper = require("../../helper/helper")
+const {
+  handleErrors,
+  handleInvalidationErrors,
+  getUserInstance,
+  getValidFields,
+  getFilledFields,
+  renderNotFoundPage,
+} = require("../../helper/helper")
 const getCategoryList = async function (accessToken) {
   try {
     const response = await axiosInstance.get("/admin/categories", {
@@ -50,6 +56,34 @@ const getProductData = function (reqBody) {
     },
   }
 }
+const getGallery = async function (accessToken, productId) {
+  try {
+    const response = await axiosInstance.get(`/admin/gallery?productId=${productId}`, {
+      headers: {
+        Authorization: "Bearer " + accessToken,
+      },
+    })
+
+    if (response.status === 200) {
+      const fs = require("fs")
+      // Parse response.data to String
+      let gallery = response.data.map((image) => {
+        return {
+          id: image.id,
+          productId: image.productId._id,
+          fileName: image.fileName + "." + image.extension,
+          imageName: image.imageName,
+          mimeType: image.mimeType,
+          data: fs.readFileSync(`tmp/productImg/${image.fileName + "." + image.extension}`),
+        }
+      })
+
+      return gallery
+    }
+  } catch (error) {
+    throw error
+  }
+}
 
 module.exports = {
   // @desc:   Show products
@@ -77,13 +111,13 @@ module.exports = {
             header: "List of products",
             route: "products",
             products: response.data,
-            user: await helper.getUserInstance(req),
+            user: await getUserInstance(req),
             csrfToken: req.csrfToken(),
           })
         }
       }
     } catch (error) {
-      return helper.handleErrors(res, error, "admin")
+      return handleErrors(res, error, "admin")
     }
   },
 
@@ -122,12 +156,12 @@ module.exports = {
           header: "Product information",
           route: "products",
           product: response.data,
-          user: await helper.getUserInstance(req),
+          user: await getUserInstance(req),
           csrfToken: req.csrfToken(),
         })
       }
     } catch (error) {
-      return helper.handleErrors(res, error, "admin")
+      return handleErrors(res, error, "admin")
     }
   },
 
@@ -141,7 +175,7 @@ module.exports = {
       header: "Create a new product",
       route: "products",
       categories: await getCategoryList(req.user.accessToken),
-      user: await helper.getUserInstance(req),
+      user: await getUserInstance(req),
       csrfToken: req.csrfToken(),
     })
   },
@@ -166,14 +200,14 @@ module.exports = {
           header: "Create a new product",
           route: "products",
           categories: await getCategoryList(req.user.accessToken),
-          user: await helper.getUserInstance(req),
+          user: await getUserInstance(req),
           csrfToken: req.csrfToken(),
         })
       }
     } catch (error) {
       if (error.response.status === 400) {
         const errors = error.response.data.error.invalidation
-        const validData = helper.getValidFields(errors, productData)
+        const validData = getValidFields(errors, productData)
         req.flash("fail", "Your input is not valid. Please check and then fill in again.")
         return res.render("templates/admin/product/product.hbs", {
           layout: "admin/main.layout.hbs",
@@ -182,14 +216,14 @@ module.exports = {
           header: "Create a new product",
           route: "products",
           csrfToken: req.csrfToken(),
-          user: await helper.getUserInstance(req),
+          user: await getUserInstance(req),
           categories: await getCategoryList(req.user.accessToken),
-          errors: helper.handleInvalidationErrors(errors),
+          errors: handleInvalidationErrors(errors),
           validData: validData,
         })
       }
 
-      return helper.handleErrors(res, error, "admin")
+      return handleErrors(res, error, "admin")
     }
   },
 
@@ -206,13 +240,13 @@ module.exports = {
           header: "Update product",
           route: "products",
           csrfToken: req.csrfToken(),
-          user: await helper.getUserInstance(req),
+          user: await getUserInstance(req),
           categories: await getCategoryList(req.user.accessToken),
           product: product,
         })
       }
     } catch (error) {
-      return helper.handleErrors(res, error, "admin")
+      return handleErrors(res, error, "admin")
     }
   },
 
@@ -223,7 +257,7 @@ module.exports = {
     try {
       product = await getProductById(req.user.accessToken, req.params.id)
       if (product) {
-        productData = helper.getFilledFields(getProductData(req.body), product)
+        productData = getFilledFields(getProductData(req.body), product)
       }
 
       const response = await axiosInstance.put(`/admin/products/${req.params.id}`, productData, {
@@ -241,7 +275,7 @@ module.exports = {
           header: "Update product",
           route: "products",
           csrfToken: req.csrfToken(),
-          user: await helper.getUserInstance(req),
+          user: await getUserInstance(req),
           categories: await getCategoryList(req.user.accessToken),
           product: await getProductById(req.user.accessToken, req.params.id),
         })
@@ -249,7 +283,7 @@ module.exports = {
     } catch (error) {
       if (error.response.status === 400) {
         const errors = error.response.data.error.invalidation
-        const validData = helper.getValidFields(errors, req.body)
+        const validData = getValidFields(errors, req.body)
 
         req.flash("fail", "Your input is not valid. Please check and then fill in again.")
         return res.render("templates/admin/product/product.hbs", {
@@ -259,14 +293,14 @@ module.exports = {
           header: "Update product",
           route: "products",
           csrfToken: req.csrfToken(),
-          user: await helper.getUserInstance(req),
+          user: await getUserInstance(req),
           categories: await getCategoryList(req.user.accessToken),
           product: await getProductById(req.user.accessToken, req.params.id),
-          errors: helper.handleInvalidationErrors(errors),
+          errors: handleInvalidationErrors(errors),
           validData: validData,
         })
       }
-      return helper.handleErrors(res, error, "admin")
+      return handleErrors(res, error, "admin")
     }
   },
 
@@ -290,7 +324,7 @@ module.exports = {
         return res.sendStatus(200)
       }
     } catch (error) {
-      return helper.handleErrors(res, error, "admin")
+      return handleErrors(res, error, "admin")
     }
   },
 
@@ -314,7 +348,7 @@ module.exports = {
         return res.sendStatus(200)
       }
     } catch (error) {
-      return helper.handleErrors(res, error, "admin")
+      return handleErrors(res, error, "admin")
     }
   },
 
@@ -332,7 +366,125 @@ module.exports = {
         return res.sendStatus(200)
       }
     } catch (error) {
-      return helper.handleErrors(res, error, "admin")
+      return handleErrors(res, error, "admin")
+    }
+  },
+
+  // ==== GALLERY
+
+  //@desc     Show gallery page
+  //@route    GET /products/gallery?productId='123'
+  showGallery: async (req, res) => {
+    let productId = req.query.productId
+    try {
+      // No productId included in query
+      if (!productId) {
+        return renderNotFoundPage(res, "admin")
+      }
+
+      const product = await getProductById(req.user.accessToken, productId)
+      if (product) {
+        const gallery = await getGallery(req.user.accessToken, productId)
+        if (gallery) {
+          return res.render("templates/admin/product/product.hbs", {
+            layout: "admin/main.layout.hbs",
+            content: "gallery",
+            header: "Product Gallery",
+            route: "products",
+            productId: productId,
+            gallery: gallery,
+            user: await getUserInstance(req),
+            csrfToken: req.csrfToken(),
+          })
+        }
+      }
+    } catch (error) {
+      if (error.response.status === 404) {
+        // No image in the gallery
+        return res.render("templates/admin/product/product.hbs", {
+          layout: "admin/main.layout.hbs",
+          content: "gallery",
+          header: "Product Gallery",
+          route: "products",
+          productId: productId,
+          user: await getUserInstance(req),
+          csrfToken: req.csrfToken(),
+        })
+      }
+
+      return handleErrors(res, error, "admin")
+    }
+  },
+
+  //@desc     Add image to gallery
+  //@route    POST /products/gallery/add?productId='123'
+  addToGallery: async (req, res) => {
+    let productId = req.query.productId
+    try {
+      // has error
+      if (res.locals.file && res.locals.file.error) {
+        req.flash("fail", res.locals.file.error.message)
+
+        return res.redirect(`/admin/products/gallery?productId=${productId}`)
+      }
+      const [fileName, extension] = req.files.productImg[0].filename.split(".")
+      // Add imag data
+      const galleryData = {
+        fileName: fileName,
+        imageName: req.body.imageName,
+        extension: extension,
+        mimeType: req.files.productImg[0].mimetype,
+        size: req.files.productImg[0].size,
+        productId: productId,
+      }
+
+      const response = await axiosInstance.post(`/admin/gallery/`, galleryData, {
+        headers: {
+          Authorization: "Bearer " + req.user.accessToken,
+        },
+      })
+
+      if (response.status === 201) {
+        req.flash("success", "Your image was successfully added.")
+        return res.redirect(`/admin/products/gallery?productId=${productId}`)
+      }
+    } catch (error) {
+      if (error.response.status == 400) {
+        req.flash("fail", error.response.data.error.message)
+        return res.redirect(`/admin/products/gallery?productId=${productId}`)
+      }
+
+      return handleErrors(res, error, "admin")
+    }
+  },
+
+  // @desc    Delete image in gallery
+  // @route   DELETE /products/gallery/:id
+  removeImageById: async (req, res) => {
+    try {
+      const image = await axiosInstance.get(`/admin/gallery/${req.params.id}`, {
+        headers: {
+          Authorization: "Bearer " + req.user.accessToken,
+        },
+      })
+
+      if (image.status === 200) {
+        const fileName = image.data.fileName + "." + image.data.extension
+        const fs = require("fs")
+        fs.unlinkSync(`tmp\\productImg\\${fileName}`)
+        const response = await axiosInstance.delete(`/admin/gallery/${req.params.id}`, {
+          headers: {
+            Authorization: "Bearer " + req.user.accessToken,
+          },
+        })
+
+        if (response.status === 204) {
+          return res.sendStatus(200)
+        }
+      }
+    } catch (error) {
+      console.log(error)
+      return handleErrors(res, error, "admin")
     }
   },
 }

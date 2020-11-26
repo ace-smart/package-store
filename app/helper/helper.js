@@ -151,6 +151,7 @@ module.exports = helper = {
   getUserInstance: async function (req) {
     const authHelper = require("./auth.helper.js")
     return {
+      id: req.user.id,
       username: req.user.username,
       email: req.user.email,
       role: req.user.role,

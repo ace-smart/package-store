@@ -1,6 +1,8 @@
 const ProductModel = require("../models/ProductModel")
 const SubcategoryModel = require("../models/SubcategoryModel")
 const SubcategoryObject = require('./SubcategoryObject')
+const GalleryObject = require('./GalleryObject')
+const RestockModel = require("../models/RestockModel")
 const validator = require("validator")
 const { isExistent, hasSpecialChars, STATUS_VALUES } = require("../helper/validation")
 const ValidationError = require('../errors/validation')
@@ -14,6 +16,27 @@ class ProductObject {
     this.price = price
     this.status = status
     this.createdAt = createdAt
+    this.gallery = null
+    this.remainingNumber = 0
+  }
+
+  async getRemainingNumber() {
+    try {
+      let remainingNumber = 0
+      const restockData = await RestockModel.find({$and: [{status: 'activated'}, {productId: this.id}]}).lean()
+
+      restockData.forEach(data => {
+        if (data.action === 'import') {
+          remainingNumber += parseInt(data.amount)
+        } else if (data.action === 'export') {
+          remainingNumber -= parseInt(data.amount)
+        }
+      })
+
+      this.remainingNumber = remainingNumber
+    } catch (error) {
+      throw error
+    }
   }
 
   async setSubcategory() {
@@ -40,6 +63,8 @@ class ProductObject {
       if (productDoc) {
         const productObject = new ProductObject({...productDoc })
         await productObject.setSubcategory()
+        productObject.gallery = await GalleryObject.getImagesBy({productId: productObject.id})
+        await productObject.getRemainingNumber()
         return productObject
       }
 
@@ -59,12 +84,12 @@ class ProductObject {
       
       if (listOfProducts.length > 0) {
         let productObjects = new Array()
-        listOfProducts.forEach(async (element) => {
+        productObjects = await Promise.all(listOfProducts.map(async (element) => {
           const object = new ProductObject({ ...element})
           await object.setSubcategory()
-          // object.clean()
-          productObjects.push(object)
-        })
+          await object.getRemainingNumber()
+          return object
+        }))
         
         return productObjects
       }

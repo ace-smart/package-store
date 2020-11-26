@@ -11,12 +11,26 @@ const {
     deactivateProductById,
     activateProductById,
     removeProductById,
+    showGallery,
+    addToGallery,
+    removeImageById
 } = require("../../controllers/admin/product.controller")
 
 // @desc    Show list of products
 // @route   GET /products
 router.get("/", showProductList)
 
+//@desc     Show gallery page
+//@route    GET /products/gallery?productId='123'
+router.get("/gallery", showGallery)
+
+//@desc     Show gallery page
+//@route    GET /products/gallery/add
+router.post("/gallery/add", addToGallery)
+
+// @desc    Delete image in gallery
+    // @route   DELETE /products/:id
+router.delete("/gallery/:id", removeImageById)
 
 // @desc    Get an product by id
 // @route   GET /products/view/:id
@@ -53,5 +67,6 @@ router.put("/activate/:id", activateProductById)
 // @desc    Delete an product by id
 // @route   DELETE /products/:id
 router.delete("/:id", removeProductById)
+
 
 module.exports = router

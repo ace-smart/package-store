@@ -282,7 +282,7 @@
     function embedDataToTable() {
         const tableData = (document.getElementById('orderDetails').value) ? JSON.parse(document.getElementById('orderDetails').value) : null
         const tbody = document.getElementById('product-table').children[1]
-        console.log(tableData)
+        
         if (tbody.children.length == 0 && tableData) {
             // Table Columns in order: [Index, Product, Subcategory, Price, Amount, Action] (6)
             tableData.forEach((element, idx) => {

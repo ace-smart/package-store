@@ -184,10 +184,10 @@ class CategoryObject {
   static async create(categoryData = {}) {
     try {
       let categoryObject = new CategoryObject({ ...categoryData })
-      categoryObject = categoryObject.clean()
       const validation = await categoryObject.validate("create")
       if (validation) {
-        const isCreated = new CategoryObject(await CategoryModel.create({ ...validation }))
+        categoryObject = categoryObject.clean()
+        const isCreated = new CategoryObject(await CategoryModel.create({ ...categoryObject }))
         if (isCreated) {
           return isCreated
         }
@@ -218,11 +218,11 @@ class CategoryObject {
 
     try {
       let updateObject = new CategoryObject({ ...info })
-      updateObject = updateObject.clean()
       const validation = await updateObject.validate("update", this.id)
       if (validation) {
+        updateObject = updateObject.clean()
         const updatedCategory = new CategoryObject(
-          await CategoryModel.findOneAndUpdate({ _id: this.id }, { ...validation }, { new: true })
+          await CategoryModel.findOneAndUpdate({ _id: this.id }, { ...updateObject }, { new: true })
         )
         return updatedCategory
       }

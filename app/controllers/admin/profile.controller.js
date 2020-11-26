@@ -1,6 +1,7 @@
 const axiosInstance = require("../../helper/axios.helper")
 const helper = require("../../helper/helper")
 const authHelper = require("../../helper/auth.helper")
+const fs = require('fs')
 const getProfile = async function(accessToken) {
   try {
     const response = await axiosInstance.get(`/profile`, {
@@ -33,6 +34,9 @@ module.exports = {
     try {
       const user = await helper.getUserInstance(req)
       user.profile = await authHelper.getProfile({ ...req.user })
+      if(user.profile.avatar.fileName != 'default') {
+        user.profile.avatar.data = fs.readFileSync(`tmp\\avatar\\${user.profile.avatar.fileName}`).toString('base64')
+      }
       const tabpane = req.query.tabpane != null ? req.query.tabpane : "account"
       
       return res.render("templates/admin/profile/profile", {
@@ -54,8 +58,14 @@ module.exports = {
     let profileData = {}
     try {
       const user = await helper.getUserInstance(req)
+      user.profile = await authHelper.getProfile({ ...req.user })
       //  Avatar has error
       if (res.locals.file && res.locals.file.error) {
+        if(user.profile.avatar.fileName != 'default') {
+          user.profile.avatar.data = fs.readFileSync(`tmp\\avatar\\${user.profile.avatar.fileName}`).toString('base64')
+        }
+
+        req.flash("fail", res.locals.file.error.message)
         return res.render("templates/admin/profile/profile", {
           layout: "admin/profile.layout.hbs",
           user: user,
@@ -68,26 +78,27 @@ module.exports = {
               }
           },
         })
-      }
-      // Data from request
-      profileData = getProfileData(req.body)
-      if (req.files.avatar != null) {
-        profileData.avatar = req.files.avatar[0].buffer
-      }
-      // Get Old profile
-      const oldProfile = await getProfile(req.user.accessToken)
-      if (oldProfile) {
-        profileData = helper.getFilledFields(profileData, oldProfile)
-      }
-      // Send API
-      const response = await axiosInstance.put("/profile", profileData, {
-        headers: {
-          Authorization: "Bearer " + req.user.accessToken,
-        },
-      })
-      if (response.status === 204) {
-        req.flash("success", "Your profile was updated.")
-        return res.redirect("/admin/profile?tabpane=profile")
+      } else {
+          // Data from request
+          profileData = getProfileData(req.body)
+          if (req.files.avatar != null) {
+              profileData.avatar = {
+                  fileName: req.files.avatar[0].filename,
+                  mimeType: req.files.avatar[0].mimetype,
+              }
+          }
+
+          profileData = helper.getFilledFields(profileData, user.profile)
+          // Send API
+          const response = await axiosInstance.put("/profile", profileData, {
+              headers: {
+                  Authorization: "Bearer " + req.user.accessToken,
+              },
+          })
+          if (response.status === 204) {
+              req.flash("success", "Your profile was updated.")
+              return res.redirect("/admin/profile?tabpane=profile")
+          }
       }
     } catch (error) {
       if (error.response.status === 400) {

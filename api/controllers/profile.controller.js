@@ -63,11 +63,7 @@ module.exports = {
       // get profileId by accessToken
       const profileId = await UserObject.getProfileIdById(req.user.id)
       let profileData = JSON.parse(JSON.stringify(req.body))
-
-      if (req.body.avatar != null) {
-        profileData.avatar = Buffer.from(req.body.avatar.data).toString('base64')
-      }
-
+      
       if (profileId == null) {
         // create for the 1st time
         const createdProfile = await ProfileObject.create(profileData)

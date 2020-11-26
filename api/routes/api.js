@@ -13,6 +13,7 @@ const orderRouter = require('./admin/order.route')
 const storageRouter = require('./admin/storage.route')
 const restockRouter = require('./admin/restock.route')
 const contactRouter = require('./admin/contact.route')
+const galleryRouter = require('./admin/gallery.route')
 
 router.use(authRouter)
 router.use(_ensureAccessToken)
@@ -32,5 +33,6 @@ router.use('/admin/orders', orderRouter)
 router.use('/admin/storages', storageRouter)
 router.use('/admin/restocks', restockRouter)
 router.use('/admin/contacts', contactRouter)
+router.use('/admin/gallery/', galleryRouter)
 
 module.exports = router

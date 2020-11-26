@@ -1,11 +1,12 @@
 const validator = require("validator")
 const ProfileModel = require("../models/ProfileModel")
 const ValidationError = require("../errors/validation")
-const {toFormatDateStr, toCapitalize} = require('../helper/format')
+const { toFormatDateStr, toCapitalize } = require("../helper/format")
 const ObjectError = require("../errors/object")
 const PROFILE_GENDER_VALUES = ["male", "female", "lgbt"]
 const STATUS_VALUES = ["deactivated", "activated"]
-const {isExistent, hasSpecialChars} = require('../helper/validation')
+const AVATAR_MIMETYPE = ["image/jpeg", "image/png"]
+const { isExistent, hasSpecialChars } = require("../helper/validation")
 
 class ProfileObject {
   constructor({ _id, firstName, lastName, gender, dateOfBirth, phoneNumber, avatar } = {}) {
@@ -16,15 +17,6 @@ class ProfileObject {
     this.dateOfBirth = dateOfBirth
     this.phoneNumber = phoneNumber
     this.avatar = avatar
-  }
-
-  // === GET & SET ===
-  set setAvatar(base64Str) {
-    this.avatar = base64Str
-  }
-
-  get getAvatar() {
-    return this.avatar
   }
 
   static hasEmptyProfileData(profileData) {
@@ -49,19 +41,20 @@ class ProfileObject {
   // Existed:     => return ProfileObject
   // Not Existed  => return null
   static async getOneProfileById(profileId = null) {
-      try {
-        if (profileId != null) {
-          const profile = await ProfileModel.findOne({ _id: profileId }).lean()
-          if (profile) {
-            return new ProfileObject({ ...profile })
-          }
+    try {
+      if (profileId != null) {
+        const profile = await ProfileModel.findOne({
+          _id: profileId,
+        }).lean()
+        if (profile) {
+          return new ProfileObject({ ...profile })
         }
-
-        return null
-      } catch (error) {
-        throw error
       }
 
+      return null
+    } catch (error) {
+      throw error
+    }
   }
 
   validate(type = "create") {
@@ -98,7 +91,7 @@ class ProfileObject {
       //     message: "phoneNumber must be required",
       //   })
       // }
-      
+
       // has errors
       if (errors.length > 0) {
         throw new ValidationError(errors)
@@ -189,6 +182,18 @@ class ProfileObject {
         })
       }
     }
+    // mimeType
+    if (this.avatar != null && !validator.isEmpty(this.avatar.toString())) {
+      if (!validator.isIn(this.avatar.mimeType.toString(), AVATAR_MIMETYPE)) {
+        errors.push({
+          field: "mimeType",
+          message: "Invalid value.",
+          value: this.avatar,
+          mimeType,
+        })
+      }
+    }
+
     // === status ===
     if (this.status != null && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
@@ -199,7 +204,7 @@ class ProfileObject {
         })
       }
     }
-    
+
     if (errors.length > 0) {
       throw new ValidationError(errors)
     } else {
@@ -215,14 +220,14 @@ class ProfileObject {
       if (value != null) {
         const isFound = fieldsToClean.find((field) => key === field)
         if (isFound) {
-          if(key === 'firstName' || key === 'lastName') {
+          if (key === "firstName" || key === "lastName") {
             profileObject[key] = toCapitalize(validator.trim(value.toString().toLowerCase()))
           }
-          if(key === 'gender' || key === 'status') {
+          if (key === "gender" || key === "status") {
             profileObject[key] = validator.trim(value.toString().toLowerCase())
           }
         }
-        if (key === 'updatedAt') {
+        if (key === "updatedAt") {
           profileObject[key] = Date.now()
         }
       }
@@ -235,15 +240,15 @@ class ProfileObject {
     return profileObject
   }
 
-  static async create({...profileData}) {
+  static async create({ ...profileData }) {
     try {
-      let profileObject = new ProfileObject({...profileData})
-      const validation = profileObject.validate('create')
+      let profileObject = new ProfileObject({ ...profileData })
+      const validation = profileObject.validate("create")
       if (validation) {
         profileObject = profileObject.clean()
-        const profile = await ProfileModel.create({...profileObject})
+        const profile = await ProfileModel.create({ ...profileObject })
         if (profile) {
-          return new ProfileObject({...profile._doc})
+          return new ProfileObject({ ...profile._doc })
         }
       }
 
@@ -253,25 +258,29 @@ class ProfileObject {
     }
   }
 
-  async update( updateData = {}) {
-    if (!(await isExistent(ProfileModel, {_id: this.id}))){
+  async update(updateData = {}) {
+    if (!(await isExistent(ProfileModel, { _id: this.id }))) {
       throw new ObjectError({
-        objectName: 'ProfileObject',
-        errorProperty: 'Id',
-        message: "Id is not valid"
+        objectName: "ProfileObject",
+        errorProperty: "Id",
+        message: "Id is not valid",
       })
     }
-    
+
     try {
-      let profileData = new ProfileObject({...updateData})
-      const validation = profileData.validate('update')
+      let profileData = new ProfileObject({ ...updateData })
+      const validation = profileData.validate("update")
       if (validation) {
         profileData = profileData.clean()
-        const profile = await ProfileModel.findOneAndUpdate({_id: this.id}, {...profileData}, {new: true})
+        const profile = await ProfileModel.findOneAndUpdate(
+          { _id: this.id },
+          { ...profileData },
+          { new: true }
+        )
+
         if (profile) {
-          return new ProfileObject({...profile})
+          return new ProfileObject({ ...profile })
         }
-  
       }
       throw new Error("Failed to update profile.")
     } catch (error) {
@@ -283,14 +292,18 @@ class ProfileObject {
     const profileToSave = this.clean()
     if (this.id == null) {
       throw new ObjectError({
-        objectName: 'ProfileObject',
-        errorProperty: 'Id',
-        message: "Id is not valid"
+        objectName: "ProfileObject",
+        errorProperty: "Id",
+        message: "Id is not valid",
       })
     }
 
     try {
-      const profileObject = await ProfileModel.findOneAndUpdate({ _id: this.id }, {...profileToSave}, {new: true})
+      const profileObject = await ProfileModel.findOneAndUpdate(
+        { _id: this.id },
+        { ...profileToSave },
+        { new: true }
+      )
       return profileObject
     } catch (error) {
       throw error
@@ -300,14 +313,14 @@ class ProfileObject {
   async remove() {
     if (this.id == null) {
       throw new ObjectError({
-        objectName: 'ProfileObject',
-        errorProperty: 'Id',
-        message: "Id is not valid"
+        objectName: "ProfileObject",
+        errorProperty: "Id",
+        message: "Id is not valid",
       })
     }
 
     try {
-      const profileObject = await ProfileModel.findOneAndDelete({_id: this.id})
+      const profileObject = await ProfileModel.findOneAndDelete({ _id: this.id })
       return profileObject
     } catch (error) {
       throw error

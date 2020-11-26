@@ -48,5 +48,13 @@ module.exports = {
     },
     formatPrice: function(price) {
         return new Intl.NumberFormat('en-US', {style: "currency", currency: "USD"}).format(parseFloat(price))
+    },
+    parseImageToString(imageBuffer) {
+        return imageBuffer.toString('base64')
+    },
+    print64baseProductImg(fileName, extension) {
+        const path = `tmp\\productImg\\${fileName}.${extension}`
+        const fs = require('fs')
+        return fs.readFileSync(path).toString('base64')
     }
 }

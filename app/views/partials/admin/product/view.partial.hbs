@@ -3,39 +3,40 @@
   <div class="col-sm-4">
     {{!-- Image Gallery --}}
     <p class="text-lime p-2 border-bottom">
-      <i class="fa fa-image  mr-2"></i>Gallery (20)
+      <i class="fa fa-image  mr-2"></i>Gallery  (<span class="font-italic mr-1">{{{product.gallery.length}}}</span> pics)
     </p>
     <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
       <ol class="carousel-indicators">
+        {{#if product.gallery}}
+        {{#each product.gallery}}
+        <li data-target="#carouselExampleIndicators" data-slide-to="{{@index}}" 
+        {{#ifeq @index 0}} class="active" {{/ifeq}}
+        ></li>
+        {{/each}}
+        {{else}}
         <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
-        <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
-        <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+        {{/if}}
       </ol>
       <div class="carousel-inner popup-gallery" role="listbox">
-
+        {{#if product.gallery}}
+          {{#each product.gallery}}
+          <div class="carousel-item {{#ifeq @index 0}} active {{/ifeq}} ">
+            <a class="pull-left" href="data:{{{mimeType}}};base64,{{{print64baseProductImg fileName extension}}}" title="{{{imageName}}}">
+              <div class="img-responsive">
+                <img class="d-block img-fluid h-100" src="data:{{{mimeType}}};base64,{{{print64baseProductImg fileName extension}}}" style="max-height: 325px;">
+              </div>
+            </a>
+          </div>
+          {{/each}}
+        {{else}}
         <div class="carousel-item active">
-          <a class="pull-left" href="/admin/static/assets/images/small/img-1.jpg" title="Project 1">
+          <a class="pull-left" href="/static/blank-image-placeholder.png" title="Blank Image">
             <div class="img-responsive">
-              <img class="d-block img-fluid" src="/admin/static/assets/images/small/img-3.jpg" alt="First slide">
+              <img class="d-block img-fluid h-100" src="/static/blank-image-placeholder.png" style="max-height: 325px;">
             </div>
           </a>
         </div>
-
-        <div class="carousel-item">
-          <a class="pull-left" href="/admin/static/assets/images/small/img-2.jpg" title="Project 2">
-            <div class="img-responsive">
-              <img class="d-block img-fluid" src="/admin/static/assets/images/small/img-2.jpg" alt="Second slide">
-            </div>
-          </a>
-        </div>
-
-        <div class="carousel-item">
-          <a class="pull-left" href="/admin/static/assets/images/small/img-3.jpg" title="Project 3">
-            <div class="img-responsive">
-              <img class="d-block img-fluid" src="/admin/static/assets/images/small/img-3.jpg" alt="Third slide">
-            </div>
-          </a>
-        </div>
+        {{/if}}
       </div>
       {{!-- Swipe button --}}
       <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
@@ -67,12 +68,8 @@
               class="ion ion-checkmark-round mr-2"></i>{{{product.status}}}</span>
           {{/ifeq}}
         <li class="d-flex bg-purple justify-content-between">
-          <span><i class="mdi mdi-account-card-details mr-2"></i>Stock </span>
-          {{#ifeq product.role 'admin'}}
-          <span><i class="ion-ribbon-b mr-2 text-lime"></i>{{{product.role}}}</span>
-          {{else}}
-          <span>{{{product.role}}}</span>
-          {{/ifeq}}
+          <span><i class="fa fa-tasks mr-2"></i>Remaining number </span>
+          <span class="text-lime bg-white px-2">{{{product.remainingNumber}}}</span>
         </li>
         <li class="d-flex bg-purple justify-content-between">
           <span><i class="ion ion-calendar mr-2"></i>Added at </span>
@@ -123,8 +120,8 @@
               <div class="input-group-prepend">
                 <span class="input-group-text"><i class="ion ion-social-usd"></i></span>
               </div>
-              <input id="price" name="price" type="text" disabled class="form-control text-right" disabled
-                value="{{{product.price}}}">
+              <input id="price" name="price" type="text" disabled class="form-control text-right p-1" disabled
+                value="{{{formatPrice product.price}}}">
             </div>
           </div>
         </div>

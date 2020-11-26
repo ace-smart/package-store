@@ -75,7 +75,14 @@ module.exports = authHelper = {
       })
 
       if (response.status === 200 && response.statusText === "OK") {
-        return response.data
+        const fs = require("fs")
+        let profile = response.data
+        if (profile.avatar.fileName != "default") {
+          profile.avatar.data = fs
+            .readFileSync(`tmp\\avatar\\${profile.avatar.fileName}`)
+            .toString("base64")
+        }
+        return profile
       }
     } catch (error) {
       throw error
@@ -87,7 +94,7 @@ module.exports = authHelper = {
       if (req.user.status === "activated" && req.user.role === "admin") {
         return next()
       }
-      
+
       return helper.renderForbiddenPage(res, "admin")
     }
 
@@ -108,7 +115,7 @@ module.exports = authHelper = {
 
   _checkUnauthenticatedAdmin: (req, res, next) => {
     if (req.isUnauthenticated()) {
-        return next()
+      return next()
     } else if (req.user.status !== "activated" || req.user.role !== "admin") {
       console.log(1)
       req.logout()
@@ -146,23 +153,40 @@ module.exports = authHelper = {
   },
 
   _loginWithCookie: async (req, res, next) => {
-    if (req.isUnauthenticated() && req.cookies['tokens'] != null) {
-      const {refreshToken} = req.cookies['tokens']
+    if (req.isUnauthenticated() && req.cookies["tokens"] != null) {
+      const { refreshToken } = req.cookies["tokens"]
       let resData = await authHelper.getLoggedUser({ ...req.cookies["tokens"] })
 
       if (resData.data && resData.data.error) {
-        if (resData.status === 401 && resData.data.error.name === 'TokenExpiredError') {
+        if (resData.status === 401 && resData.data.error.name === "TokenExpiredError") {
           try {
             const newAccessTK = await authHelper.renewAccessToken(refreshToken)
-            res.clearCookie('tokens', {path: '/admin'})
-            res.cookie('tokens',
-            {accessToken: newAccessTK, refreshToken: refreshToken, rememberMe: true},
-            {path: '/admin', httpOnly: true, secure: false, expires: new Date(Date.now() + 1000 * 3600 * 24 * 7)})
-            resData = await authHelper.getLoggedUser({accessToken: newAccessTK, refreshToken, rememberMe: true})
-          } catch (error) { throw error }
+            res.clearCookie("tokens", { path: "/admin" })
+            res.cookie(
+              "tokens",
+              {
+                accessToken: newAccessTK,
+                refreshToken: refreshToken,
+                rememberMe: true,
+              },
+              {
+                path: "/admin",
+                httpOnly: true,
+                secure: false,
+                expires: new Date(Date.now() + 1000 * 3600 * 24 * 7),
+              }
+            )
+            resData = await authHelper.getLoggedUser({
+              accessToken: newAccessTK,
+              refreshToken,
+              rememberMe: true,
+            })
+          } catch (error) {
+            throw error
+          }
         }
       }
-      
+
       if (resData.user) {
         return req.logIn(resData.user, function (err) {
           if (err) {
@@ -173,33 +197,48 @@ module.exports = authHelper = {
         })
       }
     }
-    
+
     return next()
   },
 
-  _autoRenewAccessToken: async(req, res, next) => {
+  _autoRenewAccessToken: async (req, res, next) => {
     if (req.isAuthenticated()) {
-      const {refreshToken, rememberMe} = req.cookies['tokens']
+      const { refreshToken, rememberMe } = req.cookies["tokens"]
 
       const resData = await authHelper.getLoggedUser({ ...req.cookies["tokens"] })
-      
+
       if (resData.data && resData.data.error) {
-        if (resData.status === 401 && resData.data.error.name === 'TokenExpiredError') {
+        if (resData.status === 401 && resData.data.error.name === "TokenExpiredError") {
           try {
             const newAccessTK = await authHelper.renewAccessToken(refreshToken)
-            const expires = (rememberMe) ? new Date(Date.now() + 1000 * 3600 * 24 * 7) : 0
+            const expires = rememberMe ? new Date(Date.now() + 1000 * 3600 * 24 * 7) : 0
             if (newAccessTK) {
-              res.clearCookie('tokens', {path: '/admin'})
-              res.cookie('tokens',
-              {accessToken: newAccessTK, refreshToken: refreshToken, rememberMe},
-              {path: '/admin', httpOnly: true, secure: false, expires})
+              res.clearCookie("tokens", {
+                path: "/admin",
+              })
+              res.cookie(
+                "tokens",
+                {
+                  accessToken: newAccessTK,
+                  refreshToken: refreshToken,
+                  rememberMe,
+                },
+                {
+                  path: "/admin",
+                  httpOnly: true,
+                  secure: false,
+                  expires,
+                }
+              )
               return next()
             }
-          } catch (error) { throw error }
+          } catch (error) {
+            throw error
+          }
         }
       }
     }
-    
+
     return next()
-  }
+  },
 }

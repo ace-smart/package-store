@@ -9,6 +9,7 @@
       <th>ID</th>
       <th>Name</th>
       <th>Subcategory</th>
+      <th>Remaining number</th>
       <th class="text-center">Status</th>
       <th class="text-center">Created at</th>
       <th class="text-center">Action</th>
@@ -20,6 +21,7 @@
       <td id="{{{this.id}}}">{{{this.id}}}</td>
       <td>{{{this.name}}}</td>
       <td>{{{this.subcategory.name}}}</td>
+      <td class="text-center">{{{this.remainingNumber}}}</td>
       {{#ifMatch this.status 'activated'}}
       <td class="bg-teal text-white capitalized text-center">
         {{/ifMatch}}
@@ -38,6 +40,9 @@
           <div class="dropdown-menu dropdown-menu-right option-btn">
             <a class="dropdown-item" href="/admin/products/view/{{{this.id}}}">
               <i class="ion-ios7-eye mr-2"></i> View
+            </a>
+            <a class="dropdown-item" href="/admin/products/gallery?productId={{{this.id}}}">
+              <i class="fa fa-image mr-2"></i> Gallery
             </a>
             <a class="dropdown-item" href="/admin/products/edit/{{{this.id}}}">
               <i class="ion-edit mr-2"></i> Edit
