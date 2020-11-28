@@ -9,7 +9,7 @@ const getLatestOrder = async (accessToken) => {
     })
 
     if (response.status === 200) {
-      return response.data
+      return response.data.splice(0, 10)
     }
   } catch (error) {
     throw error
