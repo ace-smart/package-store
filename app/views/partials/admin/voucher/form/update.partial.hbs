@@ -1,0 +1,209 @@
+<p class="text-muted m-b-30 font-14">Edit the fields and submit <strong>Save changes</strong> button to save them.Those fields with <span class="text-danger">*</span> is required.</p>
+
+
+<form action="/admin/vouchers/edit/{{{voucher.id}}}" method="POST">
+    {{> csrf}}
+
+    {{!-- Name --}}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="name">
+                    <i class="mdi mdi-tag-text-outline mr-2"></i>Name
+                </label>
+                {{#if errors.name}}
+                <input id="code" name="name" type="text" required 
+                class="form-control parsley-error"
+                value="{{{errors.name.value}}}">
+                {{#with errors.name}}
+                {{> admin/error.partial }}
+                {{/with}}
+                {{else}}
+                    {{#if validData.name}}
+                    <input id="name" name="name" type="text" required class="form-control" value="{{{validData.name}}}">
+                    {{else}}
+                    {{!-- First load  --}}
+                    <input id="name" name="name" type="text" required class="form-control" placeholder="Name" 
+                    value="{{{voucher.name}}}">
+                    {{/if}}
+                {{/if}}
+            </div>
+        </div>
+    </div>
+    
+    {{!-- Code --}}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="name">
+                    <i class="mdi mdi-qrcode-scan mr-2"></i>Code
+                </label>
+                {{#if errors.code}}
+                <input id="code" name="code" type="text" required 
+                class="form-control parsley-error"
+                value="{{{errors.code.value}}}">
+                {{#with errors.code}}
+                {{> admin/error.partial }}
+                {{/with}}
+                {{else}}
+                    {{#if validData.code}}
+                    <input id="code" name="code" type="text" required class="form-control" value="{{{validData.code}}}">
+                    {{else}}
+                    {{!-- First load  --}}
+                    <input id="code" name="code" type="text" required class="form-control" placeholder="Voucher code" value="{{{voucher.code}}}">
+
+                    {{/if}}
+                {{/if}}
+            </div>
+        </div>
+    </div>
+
+
+    {{!-- Rate - Min - Max value --}}
+    <div class="row">
+        {{!-- Sales rate --}}
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="rate">
+                    <i class="fa fa-percent mr-2"></i>Sales rate
+                    <span class="text-danger">*</span>
+                </label>
+                {{#if errors.rate}}
+                <input id="rate" name="rate" type="number" required 
+                class="form-control parsley-error"
+                value="{{{errors.rate.value}}}">
+                {{#with errors.rate}}
+                {{> admin/error.partial }}
+                {{/with}}
+                {{else}}
+                    {{#if validData.rate}}
+                    <input id="rate" name="rate" type="number" required class="form-control" value="{{{validData.rate}}}">
+                    {{else}}
+                    {{!-- First load  --}}
+                    <input id="rate" name="rate" type="number" required class="form-control" placeholder="Sales rate (%)" value="{{{voucher.rate}}}">
+                    {{/if}}
+                {{/if}}
+            </div>
+        </div>
+
+        {{!--Min value --}}
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="minValue">
+                    <i class="mdi mdi-tag-text-outline mr-2"></i>Min Value
+                </label>
+                {{#if errors.minValue}}
+                <input id="minValue" name="minValue" type="number" required 
+                class="form-control parsley-error"
+                value="{{{errors.minValue.value}}}">
+                {{#with errors.minValue}}
+                {{> admin/error.partial }}
+                {{/with}}
+                {{else}}
+                    {{#if validData.minValue}}
+                    <input id="minValue" name="minValue" type="number" required class="form-control" value="{{{validData.minValue}}}">
+                    {{else}}
+                    {{!-- First load  --}}
+                    <input id="minValue" name="minValue" type="number" required class="form-control" placeholder="Minimum value" value="{{{voucher.minValue}}}">
+                    {{/if}}
+                {{/if}}
+            </div>
+        </div>
+
+        {{!--Max value --}}
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="maxValue">
+                    <i class="mdi mdi-tag-text-outline mr-2"></i>Max Value
+                </label>
+                {{#if errors.maxValue}}
+                <input id="maxValue" name="maxValue" type="number" required 
+                class="form-control parsley-error"
+                value="{{{errors.maxValue.value}}}">
+                {{#with errors.maxValue}}
+                {{> admin/error.partial }}
+                {{/with}}
+                {{else}}
+                    {{#if validData.maxValue}}
+                    <input id="maxValue" name="maxValue" type="number" required class="form-control" value="{{{validData.maxValue}}}">
+                    {{else}}
+                    {{!-- First load  --}}
+                    <input id="maxValue" name="maxValue" type="number" required class="form-control" placeholder="Maximum value" value="{{{voucher.maxValue}}}">
+                    {{/if}}
+                {{/if}}
+            </div>
+        </div>
+    </div>
+
+    {{!-- Valid until --}}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="validUntil" class="mb-2"><i class="fa fa-exclamation-triangle mr-2"></i>Valid until</label>
+                {{#if errors.validUntil}}
+                <input type="text" name="validUntil"  placeholder="mm/dd/yyyy"
+                    id="datepicker-autoclose" class="form-control parsley-error" value="{{{formatDate errors.validUntil.value}}}">
+                {{#with errors.validUntil}}
+                {{> admin/error.partial }}
+                {{/with}}
+                {{else}}
+                    {{#if validData.validUntil}}
+                    <input type="text" name="validUntil"  placeholder="mm/dd/yyyy"
+                        id="datepicker-autoclose" class="form-control" value="{{{formatDate validData.validUntil}}}">
+                    {{else}}
+                    {{!-- First load  --}}
+                    <input type="text" name="validUntil"  placeholder="mm/dd/yyyy"
+                        id="datepicker-autoclose" class="form-control " value="{{{formatDate voucher.validUntil}}}">
+                    {{/if}}
+                {{/if}}
+            </div>
+        </div>
+    </div>
+
+    {{!-- Status --}}
+    <div class="row">
+        <div class="col-sm-12">
+            <label class="control-label">
+                <i class="ion-ios7-circle-filled mr-2"></i>Status
+            </label>
+        </div>
+        <div class="col-sm-12">
+            <div class="form-group">
+                {{#if validData.status}}
+                <label class="btn btn-danger {{#ifMatch validData.status 'deactivated'}} active {{/ifMatch}}"
+                    onclick="selectStatus(this)" for="deactivated-status">Deactivated</label>
+                <input type="radio" name="status" id="deactivated-status" value="deactivated"
+                    {{#ifMatch validData.status 'deactivated'}} checked {{/ifMatch}}>
+                <label class="btn btn-success {{#ifMatch validData.status 'activated'}} active {{/ifMatch}}"
+                    onclick="selectStatus(this)" for="activated-status">Activated</label>
+                <input type="radio" name="status" id="activated-status" value="activated"
+                    {{#ifMatch validData.status 'activated'}} checked {{/ifMatch}}>
+
+                {{else}}
+                {{!-- First load --}}
+                <label class="btn btn-danger {{#ifMatch voucher.status 'deactivated'}} active {{/ifMatch}}" onclick="selectStatus(this)" for="deactivated-status">Deactivated</label>
+                <input type="radio" name="status" id="deactivated-status" value="deactivated" {{#ifMatch voucher.status 'deactivated'}} checked {{/ifMatch}}>
+                <label class="btn btn-success {{#ifMatch voucher.status 'activated'}} active {{/ifMatch}}" onclick="selectStatus(this)" for="activated-status">Activated</label>
+                <input type="radio" name="status" id="activated-status" value="activated" {{#ifMatch voucher.status 'activated'}} checked {{/ifMatch}}>
+                {{/if}}
+
+                {{#if errors.status}}
+                    {{#with errors.status}}
+                    {{> admin/error.partial }}
+                    {{/with}}
+                {{else}}
+                {{/if}}
+
+            </div>
+        </div>
+    </div>
+
+
+    {{!-- Buttons --}}
+    <div class="row">
+        <div class="col-sm-12 mr-0 text-right">
+            <button type="submit" class="btn btn-success waves-effect waves-light">Save changes</button>
+            <button type="button" onclick="backward()" class="btn btn-secondary waves-effect">Cancel</button>
+        </div>
+    </div>
+</form>

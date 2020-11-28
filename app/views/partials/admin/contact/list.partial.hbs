@@ -1,0 +1,28 @@
+<div class="card m-t-20">
+  <ul class="message-list">
+    {{#each contacts}}
+    <li {{#ifMatch this.status 'unread'}} class="unread" {{/ifMatch}}>
+      <a href="/admin/contacts/view/{{{this.id}}}">
+        <div class="col-mail col-mail-1">
+          <div class="checkbox-wrapper-mail">
+            <input class="select-box" type="checkbox" id="{{{this.id}}}" name="{{{this.id}}}">
+            <label for="{{{this.id}}}" class="toggle"></label>
+          </div>
+          {{!-- Starred --}}
+          {{#ifeq this.status 'starred'}}
+          <span class="star-toggle fa fa-star"></span>
+          {{else}}
+          <span class="star-toggle fa fa-star-o"></span>
+          {{/ifeq}}
+          <p class="title">{{{this.email}}}</p>
+        </div>
+        <div class="col-mail col-mail-2">
+          <div class="subject">{{{this.subject}}}</div>
+          <div class="date">{{{formatDate this.createdAt}}}</div>
+        </div>
+      </a>
+    </li>
+    {{/each}}
+
+  </ul>
+</div> <!-- panel -->

@@ -1,0 +1,193 @@
+<div class="row p-3 m-2">
+  {{!-- Left column --}}
+  <div class="p-0 col-3 d-flex flex-column justify-content-start align-items-center">
+    {{!-- Avatar --}}
+    <div class="my-3 ">
+      {{#ifeq account.profile.avatar 'default'}}
+      <img src="/static/default-user.png" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;" data-holder-rendered="true" class="img-thumbnail">
+      {{else}}
+      <img class="img-thumbnail" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
+        src="data:{{{account.profile.avatar.mimeType}}};base64,{{{parseImageToString account.profile.avatar.data}}}" data-holder-rendered="true">
+      {{/ifeq}}
+    </div>
+
+    {{!-- Info --}}
+    <div class="my-2  view-lower-left-col">
+      <ul>
+        <li class="d-flex bg-purple justify-content-between">
+          <span><i class="ion ion-android-user-menu mr-2"></i>ID </span>
+          <span>{{{account.id}}}</span>
+        </li>
+        <li class="d-flex bg-purple justify-content-between">
+          <span><i class="ion ion-android-note mr-2"></i>Status </span>
+          {{#ifeq account.status 'activated'}}
+          <span class="text-light bg-success px-2"><i
+              class="ion ion-checkmark-round mr-2"></i>{{{account.status}}}</span>
+          {{/ifeq}}
+          {{#ifeq account.status 'deactivated'}}
+          <span class="text-light bg-danger px-2"><i
+              class="ion ion-checkmark-round mr-2"></i>{{{account.status}}}</span>
+          {{/ifeq}}
+          {{#ifeq account.status 'pending'}}
+          <span class="text-light bg-warning px-2"><i class="ion ion-more mr-2"></i>{{{account.status}}}</span>
+          {{/ifeq}}
+          {{#ifeq account.status 'reset password'}}
+          <span class="text-light bg-lime px-2"><i class="ion ion-refresh mr-2"></i>{{{account.status}}}</span>
+          {{/ifeq}}
+        </li>
+        <li class="d-flex bg-purple justify-content-between">
+          <span><i class="mdi mdi-account-card-details mr-2"></i>Role </span>
+          {{#ifeq account.role 'admin'}}
+          <span><i class="ion-ribbon-b mr-2 text-lime"></i>{{{account.role}}}</span>
+          {{else}}
+          <span>{{{account.role}}}</span>
+          {{/ifeq}}
+        </li>
+        <li class="d-flex bg-purple justify-content-between">
+          <span><i class="ion ion-calendar mr-2"></i>Created at </span>
+          <span>{{{formatDate account.createdAt}}}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+  {{!-- Right column --}}
+  <div class="pl-3 col">
+    <p class="text-lime p-2 border-bottom">
+      <i class="fa fa-user-circle mr-2"></i>Account
+    </p>
+
+    <div class="form-group row mt-2">
+    {{!-- Username --}}
+      <div class="col-sm-6">
+        <label for="userID" class="mb-2"><i class="mdi mdi-account-location mr-2"></i>Username</label>
+        <div class="input-group">
+          <input type="text" name="userID" placeholder="" value="{{{account.username}}}" class="form-control" disabled>
+        </div>
+      </div>
+    {{!-- Email --}}
+      <div class="col-sm-6">
+        <label for="userID" class="mb-2"><i class="ion ion-ios7-email mr-2"></i>Email</label>
+        <div class="input-group">
+          <input type="text" name="userID" placeholder="" value="{{{account.email}}}" class="form-control" disabled>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-lime p-2 border-bottom">
+      <i class="mdi mdi-face-profile  mr-2"></i>Profile
+    </p>
+    {{!-- First Name -- Last Name --}}
+    <div class="form-group row mt-2">
+      <div class="col-6">
+        <label for="firstName" class="mb-2">
+          <i class="mdi mdi-account-card-details mr-2"></i>First Name</label>
+        <input type="text" id="firstName" name="firstName" value="{{{account.profile.firstName}}}" class="form-control"
+          disabled>
+      </div>
+
+      <div class="col-6">
+        <label for="lastName" class="mb-2">
+          <i class="mdi mdi-account-card-details mr-2"></i>Last Name</label>
+        <input type="text" id="lastName" name="lastName" placeholder="" value="{{{account.profile.lastName}}}"
+          class="form-control" disabled>
+      </div>
+    </div>
+    {{!-- Gender - DateOfBirth - Phone Number --}}
+    <div class="form-group row mt-2">
+      <div class="col-sm-4">
+        {{!-- Gender --}}
+        <div class="form-group mt-2">
+        <label class="mb-2"><i class="mdi mdi-gender-transgender mr-2"></i>Gender</label>
+        <div class="input-group">
+            <input type="text" name="gender" placeholder="Unknown" 
+              value="{{{account.profile.gender}}}" class="form-control" disabled>
+            <div class="input-group-append">
+              <span class="input-group-text"><i class="mdi mdi-gender-transgender mr-2"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        {{!-- Date of birth --}}
+        <div class="form-group mt-2">
+          <label for="dateOfBirth" class="mb-2"><i class="mdi mdi-cake-variant mr-2"></i>Date of birth</label>
+          <div class="input-group">
+            <input type="text" name="dateOfBirth" placeholder="mm/dd/yyyy" id="datepicker-autoclose"
+              value="{{{formatDate account.profile.dateOfBirth}}}" class="form-control" disabled>
+            <div class="input-group-append">
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        {{!-- Phone number --}}
+        <div class="form-group mt-2">
+          <label for="phoneNumber" class="mb-2"><i class="mdi mdi-cellphone-basic mr-2"></i>Phone number</label>
+          <div class="input-group">
+            <input type="text" name="phoneNumber" id="phoneNumber" placeholder=""
+              value="{{{account.profile.phoneNumber}}}" class="form-control" disabled>
+            <div class="input-group-append">
+              <span class="input-group-text"><i class="ion-ios7-telephone"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-lime p-2 border-bottom">
+      <i class="fa fa-address-book  mr-2"></i>Address
+    </p>
+
+    {{!-- Address --}}
+    <div class="form-group row mt-2">
+      {{!-- Street --}}
+      <div class="col-sm-8">
+        <div class="form-group mt-2">
+          <label for="street">
+            <i class="fa fa-road mr-2"></i>Street
+          </label>
+          <input id="street" name="street" type="text" disabled class="form-control" value="{{{account.address.street}}}">
+        </div>
+      </div>
+      {{!-- District --}}
+      <div class="col-sm-4">
+        <div class="form-group mt-2">
+          <label for="district">
+            <i class="fa fa-dot-circle-o mr-2"></i>District
+          </label>
+          <input id="district" name="district" type="text" disabled class="form-control" value="{{{account.address.district}}}">
+        </div>
+      </div>
+
+      {{!-- City --}}
+      <div class="col-sm-4">
+        <div class="form-group">
+          <label for="city">
+            <i class="fa fa-bank mr-2"></i>City
+          </label>
+          <input id="city" name="city" type="text" disabled class="form-control" value="{{{account.address.city}}}">
+        </div>
+      </div>
+      {{!-- Country  --}}
+      <div class="col-sm-4">
+        <div class="form-group">
+          <label for="country">
+            <i class="fa fa-flag mr-2"></i>Country
+          </label>
+          <input id="country" name="country" type="text" disabled class="form-control" value="{{{account.address.country}}}">
+        </div>
+      </div>
+      {{!-- Postal code --}}
+      <div class="col-sm-4">
+        <div class="form-group">
+          <label for="postalCode">
+            <i class="fa fa-barcode mr-2"></i>Postal code
+          </label>
+          <input id="postalCode" name="postalCode" type="text" disabled class="form-control" value="{{{account.address.postalCode}}}">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,60 @@
+<!-- Left sidebar -->
+<div class="email-leftbar pt-2">
+  <div class="mail-list m-t-40">
+    <ul >
+      <li>
+        <a id="contact-all-msg" href="/admin/contacts" class="active border-bottom mb-2">
+          <i class="fa fa-inbox mr-2"></i>Inbox <span class="ml-1">(18)</span>
+        </a>
+      </li>
+      <li>
+        <a id="contact-starred-msg" href="/admin/contacts?status=starred" class="border-bottom mb-2">
+          <i class="fa fa-star mr-2"></i>Starred</a>
+      </li>
+      <li>
+
+        <a id="contact-removed-msg" href="/admin/contacts?status=removed" class="border-bottom mb-2">
+          <i class="fa fa-trash mr-2"></i>Trash</a>
+      </li>
+    </ul>
+  </div>
+</div>
+<!-- End Left sidebar -->
+
+
+<!-- Right Sidebar -->
+<div class="email-rightbar">
+  {{#ifMatch content 'list'}}
+  <div class="btn-toolbar" role="toolbar">
+    <div class="btn-group ml-1">
+      <button id="star-message" type="button" onclick="changeMsgStatus('star')" class="btn btn-primary waves-light waves-effect">
+        <i class="fa fa-star"></i></button>
+      <button id="read-message" type="button" onclick="changeMsgStatus('read')" class="btn btn-primary waves-light waves-effect">
+        <i class="fa fa-get-pocket"></i></button>
+      <button id="remove-message" type="button" onclick="changeMsgStatus('remove')" class="btn btn-primary waves-light waves-effect">
+        <i class="fa fa-trash-o"></i></button>
+    </div>
+    
+    <div class="btn-group ml-1">
+      <button id="delete-message" type="button" onclick="changeMsgStatus('delete')" class="btn btn-danger waves-light waves-effect">
+        <i class="fa fa-ban"></i></button>
+    </div>
+  </div>
+  {{/ifMatch}}
+
+  {{#ifeq content 'view'}}
+    <button onclick="backward()" type="button" class="btn btn-blue-grey waves-effect waves-light">
+        <i class="ion-arrow-left-c"></i>
+    </button>
+  {{/ifeq}}
+
+  {{!-- CONTENT --}}
+  {{#ifMatch content 'list'}}
+  {{> admin/contact/list.partial}}
+  {{> admin/contact/pagination.partial }}
+  {{/ifMatch}}
+  {{#ifMatch content 'view'}}
+  {{> admin/contact/view.partial}}
+  {{/ifMatch}}
+
+</div> <!-- end Col-9 -->

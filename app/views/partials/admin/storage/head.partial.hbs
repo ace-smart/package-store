@@ -1,0 +1,14 @@
+{{#ifMatch content 'view'}}
+{{> admin/meta.partial }}
+{{> admin/css.partial }}
+{{> admin/main/css.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'list'}}
+{{> admin/list/head.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'form'}}
+{{> admin/form/head.partial }}
+{{/ifMatch}}
+

@@ -1,0 +1,18 @@
+{{#ifMatch content 'view'}}
+{{> admin/category/view/head.partial}}
+{{/ifMatch}}
+
+{{#ifMatch content 'list'}}
+{{> admin/list/head.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'form'}}
+{{> admin/list/head.partial }}
+{{> admin/form/head.partial }}
+{{/ifMatch}}
+
+<style>
+  div.subcategories-table {
+    border-top: 2px solid #fff;
+  }
+</style>

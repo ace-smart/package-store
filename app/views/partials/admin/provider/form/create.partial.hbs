@@ -1,0 +1,237 @@
+<p class="text-muted m-b-30 font-14">Fill in these fields below and submit <strong>Create</strong>
+  button to finish. Those fields with <span class="text-danger">*</span> is required.</p>
+
+<form action="/admin/providers/add" method="POST">
+  {{> csrf}}
+
+  <div class="row">
+    {{!-- Information --}}
+    <div class="col-sm-6">
+      <p class="text-lime p-2 my-3 border-bottom"><i class="ion-information-circled mr-1"></i> Information</p>
+      {{!-- Name --}}
+      <div class="row px-2">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="name">
+              <i class="mdi mdi-tag-text-outline mr-2"></i>Name
+              <span class="text-danger">*</span>
+            </label>
+            {{#if errors.name}}
+            <input id="name" name="name" type="text" required class="form-control parsley-error"
+              value="{{{errors.name.value}}}">
+            {{#with errors.name}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.name}}
+            <input id="name" name="name" type="text" required class="form-control" value="{{{validData.name}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="name" name="name" type="text" required class="form-control" placeholder="Provider's name" >
+            {{/if}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Email --}}
+      <div class="row px-2">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="email">
+              <i class="fa fa-envelope-open mr-2"></i>Email
+              <span class="text-danger">*</span>
+            </label>
+            {{#if errors.email}}
+            <input id="email" name="email" type="email" required class="form-control parsley-error"
+              value="{{{errors.email.value}}}">
+            {{#with errors.email}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.email}}
+            <input id="email" name="email" type="email" required class="form-control" value="{{{validData.email}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="email" name="email" type="email" required class="form-control" placeholder="Provider's email">
+            {{/if}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Status --}}
+      <div class="row px-2">
+        <div class="col-sm-12">
+          <label class="control-label">
+            <i class="ion-ios7-circle-filled mr-2"></i>Status
+          </label>
+        </div>
+        <div class="col-sm-12">
+          <div class="form-group">
+            {{#if validData.status}}
+            <label class="btn btn-danger {{#ifMatch validData.status 'deactivated'}} active {{/ifMatch}}"
+              onclick="selectStatus(this)" for="deactivated-status">Deactivated</label>
+            <input type="radio" name="status" id="deactivated-status" value="deactivated"
+              {{#ifMatch validData.status 'deactivated'}} checked {{/ifMatch}}>
+            <label class="btn btn-success {{#ifMatch validData.status 'activated'}} active {{/ifMatch}}"
+              onclick="selectStatus(this)" for="activated-status">Activated</label>
+            <input type="radio" name="status" id="activated-status" value="activated"
+              {{#ifMatch validData.status 'activated'}} checked {{/ifMatch}}>
+
+            {{else}}
+            {{!-- First load --}}
+            <label class="btn btn-danger active" onclick="selectStatus(this)"
+              for="deactivated-status">Deactivated</label>
+            <input type="radio" name="status" id="deactivated-status" value="deactivated" checked>
+            <label class="btn btn-success" onclick="selectStatus(this)" for="activated-status">Activated</label>
+            <input type="radio" name="status" id="activated-status" value="activated">
+            {{/if}}
+
+            {{#if errors.status}}
+            {{#with errors.status}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    {{!-- Address --}}
+    <div class="col-sm-6">
+      <p class="text-lime p-2 my-3 border-bottom"><i class="ion-location mr-1"></i> Address</p>
+      {{!-- Street --}}
+      <div class="row px-2">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-road mr-2"></i>Street
+            </label>
+            {{#if errors.street}}
+            <input id="street" name="street" type="text" class="form-control parsley-error"
+              value="{{{errors.street.value}}}">
+            {{#with errors.street}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.street}}
+            <input id="street" name="street" type="text" class="form-control" value="{{{validData.street}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="street" name="street" type="text" class="form-control" placeholder="Street's name">
+            {{/if}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- District - City --}}
+      <div class="row px-2">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-dot-circle-o mr-2"></i>District
+            </label>
+
+            {{#if errors.district}}
+            <input id="district" name="district" type="text" class="form-control" class="form-control parsley-error"
+              value="{{{errors.district.value}}}">
+            {{#with errors.district}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.district}}
+            <input id="district" name="district" type="text" class="form-control"
+              value="{{{validData.district}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="district" name="district" type="text" class="form-control" placeholder="District's name">
+            {{/if}}
+            {{/if}}
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-bank mr-2"></i>City
+            </label>
+
+            {{#if errors.city}}
+            <input id="city" name="city" type="text" class="form-control" class="form-control parsley-error"
+              value="{{{errors.city.value}}}">
+            {{#with errors.city}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.city}}
+            <input id="city" name="city" type="text" class="form-control" value="{{{validData.city}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="city" name="city" type="text" class="form-control" placeholder="City's name">
+            {{/if}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Country - Postal code --}}
+      <div class="row px-2">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-flag mr-2"></i>Country
+            </label>
+            {{#if errors.country}}
+            <input id="country" name="country" type="text" class="form-control" class="form-control parsley-error"
+              value="{{{errors.country.value}}}">
+            {{#with errors.country}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.country}}
+            <input id="country" name="country" type="text" class="form-control" value="{{{validData.country}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="country" name="country" type="text" class="form-control" placeholder="EX: USA">
+            {{/if}}
+            {{/if}}
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-barcode mr-2"></i>Postal code
+            </label>
+            {{#if errors.postalCode}}
+            <input id="postalCode" name="postalCode" type="text" class="form-control" class="form-control parsley-error"
+              value="{{{errors.postalCode.value}}}">
+            {{#with errors.postalCode}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.postalCode}}
+            <input id="postalCode" name="postalCode" type="text" class="form-control"
+              value="{{{validData.postalCode}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="postalCode" name="postalCode" type="text" class="form-control" placeholder="EX: 100000">
+            {{/if}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <hr>
+  <div class="row mt-4">
+    <div class="col-sm-12 mr-0 text-right">
+      <button type="submit" class="btn btn-success waves-effect waves-light">Create</button>
+      <button type="button" onclick="backward()" class="btn btn-secondary waves-effect">Cancel</button>
+    </div>
+  </div>
+</form>

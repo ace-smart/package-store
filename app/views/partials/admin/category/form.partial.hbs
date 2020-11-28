@@ -1,0 +1,11 @@
+<div class="py-4 px-5">
+    {{!-- flash --}}
+    {{> admin/flash.partial}}
+    
+    {{!-- form --}}
+    {{#ifeq formType 'create'}}
+    {{> admin/category/form/create.partial }}
+    {{else}}
+    {{> admin/category/form/update.partial }}
+    {{/ifeq}}
+</div>

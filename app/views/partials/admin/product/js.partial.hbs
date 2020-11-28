@@ -1,0 +1,81 @@
+{{#ifMatch content 'view'}}
+{{> admin/product/view/js.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'gallery'}}
+{{> admin/product/view/js.partial }}
+<!-- Sweet-Alert  -->
+<script src="/admin/plugins/sweet-alert2/sweetalert2.all.min.js"></script>
+<script src="/admin/static/assets/pages/sweet-alert.init.js"></script>
+<script> 
+  {{#if messages.success}}
+    document.getElementById('add-img').click()
+  {{else}}
+    {{#if messages.fail}}
+    document.getElementById('add-img').click()
+    {{/if}}
+  {{/if}}
+
+      var loadFile = function (event) {
+        var output = document.getElementById('product-img-block')
+        output.src = URL.createObjectURL(event.target.files[0])
+        output.onload = function () {
+          URL.revokeObjectURL(output.src)
+
+          // Set file info
+          document.getElementById('fileName').value = event.target.files[0].name
+          document.getElementById('fileType').value = event.target.files[0].type
+          document.getElementById('size').value = event.target.files[0].size
+        }
+      }
+
+      const removeImage = function(element) {
+        const id = element.dataset.id
+        const _csrf = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+        Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "No, cancel!",
+        confirmButtonClass: "btn btn-success",
+        cancelButtonClass: "btn btn-danger m-l-10",
+        buttonsStyling: false,
+        allowOutsideClick: false,
+      }).then(function (e) {
+        // confirm => {value: true}
+        // cancel => {dismiss: "cancel"}
+        if (e.value === true) {
+          const toURL = window.location.origin + "/admin/products/gallery/" + id
+          // send request to api server
+          const xmlhttp = new XMLHttpRequest()
+          xmlhttp.open("DELETE", toURL, true)
+          xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+              Swal.fire("Deleted!", "Your file has been deleted.", "success").then((e) => {
+                if (e.value) {
+                  return location.reload()
+                }
+              })
+            } else if (this.readyState == 4 && this.status >= 400) {
+              Swal.fire("Failed", this.responseText.replace(/\"/g, ""), "error")
+            }
+          }
+
+          xmlhttp.setRequestHeader("CSRF-Token", _csrf)
+          xmlhttp.withCredentials = true
+          xmlhttp.send()
+        }
+      })
+    }
+</script>
+{{/ifMatch}}
+
+{{#ifMatch content 'form'}}
+{{> admin/form/js.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'list'}}
+{{> admin/list/js.partial }}
+{{/ifMatch}}

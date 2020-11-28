@@ -1,0 +1,13 @@
+{{#ifMatch content 'view'}}
+{{!-- <script src="/admin/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+<script src="/admin/static/assets/pages/form-advanced.js"></script> --}}
+{{> admin/form/js.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'list'}}
+{{> admin/list/js.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'form'}}
+{{> admin/form/js.partial }}
+{{/ifMatch}}

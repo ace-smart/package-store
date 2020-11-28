@@ -1,0 +1,50 @@
+{{> admin/meta.partial }}
+
+<meta name="csrf-token" content="{{csrfToken}}">
+
+<!-- Select 2 -->
+<link href="/admin/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+
+{{> admin/css.partial }}
+
+<!-- DataTables -->
+<link href="/admin/plugins/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+<link href="/admin/plugins/datatables/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+<!-- Responsive datatable examples -->
+<link href="/admin/plugins/datatables/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+
+<!-- Sweet Alert -->
+<link href="/admin/plugins/sweet-alert2/sweetalert2.min.css" rel="stylesheet" type="text/css">
+
+{{> admin/main/css.partial }}
+
+{{> admin/list/head.partial }}
+
+<style>
+    p.form-validation-error {
+        font-size: 14px;
+        color: #ea553d;
+        margin-top: 8px;
+    }
+
+    input#deactivated-status,
+    input#activated-status {
+        display: none;
+    }
+
+    label[for='deactivated-status'],
+    label[for='activated-status'] {
+        cursor: pointer;
+        margin-right: 5px;
+    }
+
+    label[for='deactivated-status'].active {
+        border: solid 5px #fff;
+        background-color: #bd2130;
+    }
+
+    label[for='activated-status'].active {
+        background-color: #1e7e34;
+        border: solid 5px #fff
+    }
+</style>
