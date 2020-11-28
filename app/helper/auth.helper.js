@@ -29,11 +29,8 @@ module.exports = authHelper = {
               }
             ]
         } */
-      if (error.response.status >= 400) {
-        return { error: error.response.data.error }
-      }
 
-      throw new Error(error)
+      throw error
     }
   },
 
