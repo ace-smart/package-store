@@ -35,7 +35,7 @@ app.use(morgan("dev"))
 // session
 app.use(
     session({
-        name: "user_session",
+        name: "userSession",
         secret: process.env.SESSION_SECRET,
         // cookie: { path: "/", httpOnly: true, secure: false, maxAge: 1000 * 3600 * 24 * 7 },
         resave: true,
