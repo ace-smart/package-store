@@ -1,0 +1,301 @@
+<p class="text-muted font-14">Fill in these fields below and submit <strong>Create</strong>
+  button to finish. Those fields with <span class="text-danger">*</span> is required.</p>
+
+<form action="/admin/products/add" method="POST">
+  {{> csrf}}
+  <div class="row">
+    {{!-- LEFT COL --}}
+    <div class="col-sm-6 pr-3 add-product-left-col">
+      <p class="text-lime p-2 my-3 border-bottom">
+        <i class="fa fa-info-circle mr-2"></i>Information
+      </p>
+
+      {{!-- Name --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="name">
+              <i class="mdi mdi-tag-text-outline mr-2"></i>Name
+              <span class="text-danger">*</span>
+            </label>
+            {{#if errors.name}}
+            <input id="name" name="name" type="text" required class="form-control parsley-error"
+              value="{{{errors.name.value}}}">
+            {{#with errors.name}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+              {{#if validData.name}}
+              <input  id="name" name="name" type="text" required class="form-control" value="{{{validData.name}}}">
+              {{else}}
+              {{!-- First load  --}}
+              <input  id="name" name="name" type="text" required class="form-control" placeholder="Product's name">
+              {{/if}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Subcategory --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="subcategoryId">
+              <i class="mdi mdi-cards mr-2"></i>Subcategory
+              <span class="text-danger">*</span>
+            </label>
+
+            <select name="subcategoryId" class="form-control select2">
+              <option selected value="">Choose a subcategory</option>
+              {{#each categories}}
+              <optgroup label="{{{this.name}}}">
+                {{#each this.subcategories}}
+                <option {{#ifeq ../../validData.subcategoryId id}}selected{{/ifeq}}
+                value="{{{id}}}">{{{name}}}
+                </option>
+                {{/each}}
+              </optgroup>
+              {{/each}}
+            </select>
+
+            {{#if errors.subcategoryId}}
+            {{#with errors.subcategoryId}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Price --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="price">
+              <i class="ion-cash mr-2"></i>Price
+            </label>
+
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="ion ion-social-usd"></i></span>
+              </div>
+              {{#if errors.price}}
+              <input id="price" name="price" type="number" class="form-control parsley-error"
+                value="{{{errors.price.value}}}">
+              </div>
+              {{#with errors.price}}
+              {{> admin/error.partial }}
+              {{/with}}
+              {{else}}
+                {{#if validData.price}}
+                <input  id="price" name="price" type="number" class="form-control" value="{{{validData.price}}}">
+                {{else}}
+                {{!-- First load  --}}
+                <input id="price" type="number" value="0" name="price" class="form-control">
+                {{/if}}
+              </div>
+              {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Status --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <label for="status" class="control-label">
+            <i class="ion-ios7-circle-filled mr-2"></i>Status
+          </label>
+        </div>
+        <div class="col-sm-12">
+          <div class="form-group">
+            {{#if validData.status}}
+            <label class="btn btn-danger {{#ifMatch validData.status 'deactivated'}} active {{/ifMatch}}"
+              onclick="selectStatus(this)" for="deactivated-status">Deactivated</label>
+            <input type="radio" name="status" id="deactivated-status" value="deactivated"
+              {{#ifMatch validData.status 'deactivated'}} checked {{/ifMatch}}>
+            <label class="btn btn-success {{#ifMatch validData.status 'activated'}} active {{/ifMatch}}"
+              onclick="selectStatus(this)" for="activated-status">Activated</label>
+            <input type="radio" name="status" id="activated-status" value="activated"
+              {{#ifMatch validData.status 'activated'}} checked {{/ifMatch}}>
+
+            {{else}}
+            {{!-- First load --}}
+            <label class="btn btn-danger active" onclick="selectStatus(this)"
+              for="deactivated-status">Deactivated</label>
+            <input type="radio" name="status" id="deactivated-status" value="deactivated" checked>
+            <label class="btn btn-success" onclick="selectStatus(this)" for="activated-status">Activated</label>
+            <input type="radio" name="status" id="activated-status" value="activated">
+            {{/if}}
+
+            {{#if errors.status}}
+            {{#with errors.status}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{!-- RIGHT COL --}}
+    <div class="col-sm-6 pl-3 add-product-right-col">
+      <p class="text-lime p-2 my-3 border-bottom"><i class="fa fa-wpforms mr-2"></i>Details</p>
+      {{!-- Color --}}
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="colorName">
+              <i class="fa fa-tag mr-2"></i>Color Name
+            </label>
+            {{#if errors.colorName}}
+              <input id="colorName" name="colorName" type="text" class="form-control parsley-error"
+                value="{{{errors.colorName.value}}}">
+              {{#with errors.colorName}}
+              {{> admin/error.partial }}
+              {{/with}}
+              {{else}}
+              {{#if validData.details.color.colorName}}
+              <input id="colorName" name="colorName" type="text" class="form-control" value="{{{validData.details.color.colorName}}}">
+              {{else}}
+              {{!-- First load  --}}
+              <input id="colorName" name="colorName" type="text" class="form-control"
+              placeholder="Exp: White" >
+              {{/if}}
+            {{/if}}
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="hexCode">
+              <i class="fa fa-hashtag mr-2"></i>Color Hexcode
+            </label>
+              {{#if errors.hexCode}}
+              <input id="hexCode" name="hexCode" type="text" class="form-control parsley-error"
+                value="{{{errors.hexCode.value}}}">
+              {{#with errors.hexCode}}
+              {{> admin/error.partial }}
+              {{/with}}
+              {{else}}
+              {{#if validData.details.color.hexCode}}
+              <input id="hexCode" name="hexCode" type="text" class="form-control" value="{{{validData.details.color.hexCode}}}">
+              {{else}}
+              {{!-- First load --}}
+              <input id="hexCode" name="hexCode" type="text" class="form-control"
+                placeholder="Exp: #ffffff">
+              {{/if}}
+              {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Material - Size --}}
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="size">
+              <i class="fa fa-child mr-2"></i>Size
+            </label>
+
+            <select name="size" class="form-control select2">
+              <option {{#if validData.details.size}} {{else}} selected {{/if}} value="">Choose a size</option>
+              <option {{#ifeq validData.details.size 'XS'}} selected {{/ifeq}} value="XS">XS (Extra small)</option>
+              <option {{#ifeq validData.details.size 'S'}} selected {{/ifeq}} value="S">S (Small)</option>
+              <option {{#ifeq validData.details.size 'M'}} selected {{/ifeq}} value="M">M (Medium)</option>
+              <option {{#ifeq validData.details.size 'L'}} selected {{/ifeq}} value="L">L (Large)</option>
+              <option {{#ifeq validData.details.size 'XL'}} selected {{/ifeq}} value="XL">XL (Extra large)</option>
+              <option {{#ifeq validData.details.size 'XXL'}} selected {{/ifeq}} value="XXL">XXL (Double extra small)</option>
+            </select>
+
+            {{#if errors.size}}
+            {{#with errors.size}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="material">
+              <i class="fa fa-chain-broken mr-2"></i>Material
+            </label>
+              {{#if errors.material}}
+              <input id="material" name="material" type="text" class="form-control parsley-error"
+                value="{{{errors.material.value}}}">
+              {{#with errors.material}}
+              {{> admin/error.partial }}
+              {{/with}}
+              {{else}}
+                {{#if validData.details.material}}
+                <input id="material" name="material" type="text" class="form-control" value="{{{validData.details.material}}}">
+                {{else}}
+                {{!-- First load --}}
+                <input id="material" name="material" type="text" class="form-control"
+                placeholder="Exp: Jean" >
+                {{/if}}
+              {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Gender --}}
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form- roup">
+            <label for="gender">
+              <i class="fa fa-transgender-alt mr-2"></i>Gender
+            </label>
+
+            <select name="gender" class="form-control select2">
+              <option {{#if validData.details.gender }} {{else}}selected {{/if}} value="">Choose a gender</option>
+              <option {{#ifeq validData.details.gender 'male'}} selected {{/ifeq}} value="male">Male</option>
+              <option {{#ifeq validData.details.gender 'female'}} selected {{/ifeq}} value="female">Female</option>
+              <option {{#ifeq validData.details.gender 'unisex'}} selected {{/ifeq}} value="unisex">Unisex</option>
+            </select>
+
+            {{#if errors.gender}}
+            {{#with errors.gender}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="season">
+              <i class="fa fa-cloud mr-2"></i>Season
+            </label>
+
+            <select name="season" class="form-control select2">
+              <option {{#if validData.details.season }} {{else}} selected {{/if}} value="">Choose a season</option>
+              <option {{#ifeq validData.details.season 'spring'}} selected {{/ifeq}}value="spring">Spring</option>
+              <option {{#ifeq validData.details.season 'summer'}} selected {{/ifeq}}value="summer">Summer</option>
+              <option {{#ifeq validData.details.season 'fall'}} selected {{/ifeq}}value="fall">Fall</option>
+              <option {{#ifeq validData.details.season 'winter'}} selected {{/ifeq}}value="winter">Winter</option>
+              <option {{#ifeq validData.details.season 'all'}} selected {{/ifeq}}value="all">All</option>
+            </select>
+
+            {{#if errors.season}}
+            {{#with errors.season}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <hr>
+
+  {{!-- Buttons --}}
+  <div class="col-sm-12 mr-0 text-right">
+    <button type="submit" class="btn btn-success waves-effect waves-light">Create</button>
+    <button type="button" onclick="backward()" class="btn btn-secondary waves-effect">Cancel</button>
+  </div>
+</form>

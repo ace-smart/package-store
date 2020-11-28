@@ -1,83 +1,89 @@
-const Storage = require("../models/StorageModel")
-const {validate_add_inp, validate_update_inp} = require("../validation/storage")
-const sanitize = require("../validation/sanitize")
-const { outputErrors } = require("../validation/validation")
+const StorageObject = require("../objects/StorageObject")
+const ErrorHandler = require('../helper/errorHandler')
+const NotFoundError = require('../errors/not_found')
 
 module.exports = {
-    // @desc:   Show storages
-    // @route   GET /storages
-    showStorageList: async (req, res) => {
-        try {
-            const storages = await Storage.find().lean()
-            return res.status(200).json({ success: true, storages: storages })
-        } catch (error) {
-            return res.status(500).json({ success: false, message: error.message })
-        }
-    },
+  // @desc:   Show storages
+  // @route   GET /storages
+  showStorageList: async (req, res) => {
+    try {
+      const storageList = await StorageObject.getStoragesBy({})
+      if (storageList && storageList.length > 0) {
+        return res.status(200).json(storageList)
+      }
 
-    // @desc:   Get storages by Id
-    // @route   GET /storages/:id
-    getStorageById: async (req, res) => {
-        try {
-            const storage = await Storage.findOne({ _id: req.params.id }).lean()
-            if (storage)
-                return res.status(200).json({
-                    success: true,
-                    storage: storage,
-                })
-            // Not found
-            return res.status(404).json({ success: false, message: "No storage found." })
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
-        }
-    },
+      throw new NotFoundError("No storage found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 
-    // @desc    Add new storage
-    // @route   POST /storages
-    createNewStorage: async (req, res) => {
-        try {
-            const isValidInp = await validate_add_inp({ ...req.body })
-            if (isValidInp) {
-                const newStorage = await Storage.create(
-                    sanitize.storage({ ...req.body }, "create")
-                )
-                return res.status(201).json({
-                    success: true,
-                    storage: newStorage,
-                })
-            }
-        } catch (error) {
-            return res.status(500).json({ success: false, error: outputErrors(error) })
-        }
-    },
+  // @desc:   Get storages by Id
+  // @route   GET /storages/:id
+  getStorageById: async (req, res) => {
+    try {
+      const storage = await StorageObject.getOneStorageBy({_id: req.params.id})
+      if (storage){
+        return res.status(200).json(storage)
+      }
+      // Not found
+      throw new NotFoundError("No storage found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 
-    // @desc    Update storages
-    // @route   PUT /storages/:id
-    updateStorageById: async (req, res) => {
-        try {
-            const storage = await Storage.findOne({ _id: req.params.id }).lean()
-            const isValidInp = await validate_update_inp({ ...req.body }, storage._id)
-            if (isValidInp) {
-                await Storage.findOneAndUpdate(
-                    { _id: req.params.id },
-                    sanitize.storage({ ...req.body }, "update")
-                )
-                return res.sendStatus(204)
-            }
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
-        }
-    },
+  // @desc    Add new storage
+  // @route   POST /storages
+  createNewStorage: async (req, res) => {
+    try {
+      const createdStorage = await StorageObject.create({...req.body})
+      if (createdStorage) {
+        return res.status(201).json(createdStorage)
+      }
+      
+      throw new Error("Failed to create storage.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 
-    // @desc    Delete storages
-    // @route   DELETE /storages/:id
-    removeStorageById: async (req, res) => {
-        try {
-            const storage = await Storage.findOneAndDelete({ _id: req.params.id })
-
-            return res.sendStatus(204)
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
+  // @desc    Update storages
+  // @route   PUT /storages/:id
+  updateStorageById: async (req, res) => {
+    try {
+      const storage = await StorageObject.getOneStorageBy({_id: req.params.id})
+      if (storage) {
+        const isUpdated = await storage.update({...req.body})
+        if (isUpdated) {
+          return res.sendStatus(204)
         }
-    },
+
+        throw new Error("Failed to update storage.")
+      }
+      throw new NotFoundError("No storage found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc    Delete storages
+  // @route   DELETE /storages/:id
+  removeStorageById: async (req, res) => {
+    try {
+      const storage = await StorageObject.getOneStorageBy({_id: req.params.id})
+      if (storage) {
+        const isRemoved = await storage.remove()
+        if (isRemoved) {
+          return res.sendStatus(204)
+        }
+
+        throw new Error("Failed to remove storage.")
+      }
+
+      throw new NotFoundError("No storage found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 }

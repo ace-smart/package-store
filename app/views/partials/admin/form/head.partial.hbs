@@ -1,15 +1,41 @@
-<head>
-    {{> admin/meta.partial }}
+{{> admin/meta.partial }}
+<meta name="csrf-token" content="{{csrfToken}}">
 
-    <!-- App Icons -->
-    <link rel="shortcut icon" href="/admin/static/assets/images/favicon.ico">
+<!-- Plugins css -->
+<link href="/admin/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css" rel="stylesheet">
+<link href="/admin/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
+<link href="/admin/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+<link href="/admin/plugins/bootstrap-touchspin/css/jquery.bootstrap-touchspin.min.css" rel="stylesheet" />
 
-    <!-- Select 2 -->
-    <link href="/admin/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+{{> admin/css.partial }}
 
-    <!-- Basic Css files -->
-    <link href="/admin/static/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-    <link href="/admin/static/assets/css/icons.css" rel="stylesheet" type="text/css">
-    <link href="/admin/static/assets/css/style.css" rel="stylesheet" type="text/css">
+{{> admin/main/css.partial }}
 
-</head>
+<style>
+    p.form-validation-error {
+        font-size: 14px;
+        color: #ea553d;
+        margin-top: 8px;
+    }
+
+    input#deactivated-status,
+    input#activated-status {
+        display: none;
+    }
+
+    label[for='deactivated-status'],
+    label[for='activated-status'] {
+        cursor: pointer;
+        margin-right: 5px;
+    }
+
+    label[for='deactivated-status'].active {
+        border: solid 5px #fff;
+        background-color: #bd2130;
+    }
+
+    label[for='activated-status'].active {
+        background-color: #1e7e34;
+        border: solid 5px #fff
+    }
+</style>

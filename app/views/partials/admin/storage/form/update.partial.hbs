@@ -1,0 +1,267 @@
+<p class="text-muted font-14">Fill in these fields below and submit <strong>Create</strong>
+  button to finish. Those fields with <span class="text-danger">*</span> is required.</p>
+
+<form action="/admin/storages/edit/{{{storage.id}}}" method="POST">
+  {{> csrf}}
+
+  <div class="row">
+    {{!-- Information --}}
+    <div class="col-sm-6">
+      <p class="text-lime p-2 my-3 border-bottom"><i class="ion-information-circled mr-1"></i> Information</p>
+      {{!-- Name --}}
+      <div class="row px-2">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="name">
+              <i class="mdi mdi-tag-text-outline mr-2"></i>Name
+              <span class="text-danger">*</span>
+            </label>
+            {{#if errors.name}}
+            <input id="name" name="name" type="text" required class="form-control parsley-error"
+              value="{{{errors.name.value}}}">
+            {{#with errors.name}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.name}}
+            <input id="name" name="name" type="text" required class="form-control" value="{{{validData.name}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="name" name="name" type="text" required class="form-control" value="{{{storage.name}}}">
+            {{/if}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      <div class="row px-2">
+      {{!-- Property type --}}
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="propertyType">
+              <i class="fa fa-transgender-alt mr-2"></i>Property type
+            </label>
+
+            <select name="propertyType" class="form-control select2">
+              <option selected value="rental">Rental</option>
+              <option {{#ifeq validData.propertyType 'rental'}} selected {{/ifeq}} value="owned">Owned</option>
+            </select>
+
+            {{#if errors.propertyType}}
+            {{#with errors.propertyType}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+          </div>
+        </div>
+      {{!-- Capacity --}}
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="capacity">
+              <i class="fa fa-cloud mr-2"></i>Capacity
+            </label>
+            <div class="input-group">
+            {{#if errors.capacity}}
+            <input id="capacity" name="capacity" type="number" class="form-control parsley-error"
+              value="{{{errors.capacity.value}}}">
+              <div class="input-group-append">
+                <span class="input-group-text">kg</span>
+              </div>
+            </div>
+              {{#with errors.capacity}}
+              {{> admin/error.partial }}
+              {{/with}}
+            {{else}}
+              {{#if validData.capacity}}
+              <input id="capacity" name="capacity" type="number" class="form-control" value="{{{validData.capacity}}}">
+              {{else}}
+              {{!-- First load  --}}
+                <input id="capacity" name="capacity" type="number" class="form-control"
+                  value="{{{storage.capacity}}}">
+              {{/if}}
+              <div class="input-group-append">
+                <span class="input-group-text">kg</span>
+              </div>
+            </div>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Status --}}
+      <div class="row px-2">
+        <div class="col-sm-12">
+          <label class="control-label">
+            <i class="ion-ios7-circle-filled mr-2"></i>Status
+          </label>
+        </div>
+        <div class="col-sm-12">
+          <div class="form-group">
+            {{#if validData.status}}
+            <label class="btn btn-danger {{#ifMatch validData.status 'full'}} active {{/ifMatch}}"
+              onclick="selectStatus(this)" for="deactivated-status">Full</label>
+            <input type="radio" name="status" id="deactivated-status" value="full"
+              {{#ifMatch validData.status 'full'}} checked {{/ifMatch}}>
+            <label class="btn btn-success {{#ifMatch validData.status 'available'}} active {{/ifMatch}}"
+              onclick="selectStatus(this)" for="activated-status">Available</label>
+            <input type="radio" name="status" id="activated-status" value="available"
+              {{#ifMatch validData.status 'available'}} checked {{/ifMatch}}>
+
+            {{else}}
+            {{!-- First load --}}
+            <label class="btn btn-danger {{#ifMatch storage.status 'full'}} active {{/ifMatch}}" onclick="selectStatus(this)"
+              for="deactivated-status">Full</label>
+            <input type="radio" name="status" id="deactivated-status" value="full" {{#ifMatch storage.status 'full'}} checked {{/ifMatch}}>
+            <label class="btn btn-success {{#ifMatch storage.status 'available'}} active {{/ifMatch}}" onclick="selectStatus(this)" for="activated-status">Available</label>
+            <input type="radio" name="status" id="activated-status" value="available" {{#ifMatch storage.status 'available'}} checked {{/ifMatch}}>
+            {{/if}}
+
+            {{#if errors.status}}
+            {{#with errors.status}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    {{!-- Address --}}
+    <div class="col-sm-6">
+      <p class="text-lime p-2 my-3 border-bottom"><i class="ion-location mr-1"></i> Address</p>
+      {{!-- Street --}}
+      <div class="row px-2">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-road mr-2"></i>Street
+            </label>
+            {{#if errors.street}}
+            <input id="street" name="street" type="text" class="form-control parsley-error"
+              value="{{{errors.street.value}}}">
+            {{#with errors.street}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.street}}
+            <input id="street" name="street" type="text" class="form-control" value="{{{validData.street}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="street" name="street" type="text" class="form-control" value="{{{storage.address.street}}}">
+            {{/if}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- District - City --}}
+      <div class="row px-2">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-dot-circle-o mr-2"></i>District
+            </label>
+
+            {{#if errors.district}}
+            <input id="district" name="district" type="text" class="form-control" class="form-control parsley-error"
+              value="{{{errors.district.value}}}">
+            {{#with errors.district}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.district}}
+            <input id="district" name="district" type="text" class="form-control"
+              value="{{{validData.district}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="district" name="district" type="text" class="form-control" value="{{{storage.address.district}}}">
+            {{/if}}
+            {{/if}}
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-bank mr-2"></i>City
+            </label>
+
+            {{#if errors.city}}
+            <input id="city" name="city" type="text" class="form-control" class="form-control parsley-error"
+              value="{{{errors.city.value}}}">
+            {{#with errors.city}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.city}}
+            <input id="city" name="city" type="text" class="form-control" value="{{{validData.city}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="city" name="city" type="text" class="form-control" value="{{{storage.address.city}}}">
+            {{/if}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- Country - Postal code --}}
+      <div class="row px-2">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-flag mr-2"></i>Country
+            </label>
+            {{#if errors.country}}
+            <input id="country" name="country" type="text" class="form-control" class="form-control parsley-error"
+              value="{{{errors.country.value}}}">
+            {{#with errors.country}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.country}}
+            <input id="country" name="country" type="text" class="form-control" value="{{{validData.country}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="country" name="country" type="text" class="form-control" value="{{{storage.address.country}}}">
+            {{/if}}
+            {{/if}} 
+
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-barcode mr-2"></i>Postal code
+            </label>
+            {{#if errors.postalCode}}
+            <input id="postalCode" name="postalCode" type="text" class="form-control" class="form-control parsley-error"
+              value="{{{errors.postalCode.value}}}">
+            {{#with errors.postalCode}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.postalCode}}
+            <input id="postalCode" name="postalCode" type="text" class="form-control"
+              value="{{{validData.postalCode}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="postalCode" name="postalCode" type="text" class="form-control" value="{{{storage.address.postalCode}}}">
+            {{/if}}
+            {{/if}}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <hr>
+  <div class="row mt-4">
+    <div class="col-sm-12 mr-0 text-right">
+      <button type="submit" class="btn btn-success waves-effect waves-light">Save changes</button>
+      <button type="button" onclick="backward()" class="btn btn-secondary waves-effect">Cancel</button>
+    </div>
+  </div>
+</form>

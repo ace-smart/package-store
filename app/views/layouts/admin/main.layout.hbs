@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    {{> admin/main/head.partial }}
+</head>
+
+<body class="fixed-left">
+
+    {{> admin/loader.partial }}
+
+    <!-- Begin page -->
+    <div id="wrapper">
+
+        {{> admin/left-sidebar.partial }}
+
+        <!-- Start right Content here -->
+        <div class="content-page">
+            <!-- Start content -->
+            <div class="content">
+
+                {{> admin/top-bar.partial }}
+                <!-- ==================
+                         PAGE CONTENT START
+                         ================== -->
+                <div class="page-content-wrapper">
+
+                    <div class="container-fluid">
+                        {{{body}}}
+                    </div>
+                </div>
+
+            </div> <!-- content -->
+
+            {{> admin/footer.partial }}
+
+
+        </div>
+        <!-- End Right content here -->
+
+    </div>
+    <!-- END wrapper -->
+    {{> admin/main/js.partial }}
+</body>
+
+</html>

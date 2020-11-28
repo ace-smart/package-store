@@ -1,9 +1,9 @@
 const router = require('express').Router({mergeParams: true})
 const { showOrderDetailList, getOrderDetailById, createNewOrderDetail, updateOrderDetailById, 
-    removeOrderDetailById, isExistentOrder } 
+    removeOrderDetailById } 
     = require('../../controllers/order_detail.controller')
 
-router.use(isExistentOrder)
+// router.use(isExistentOrder)
 
 // @desc    Show list of orderDetails by orderId
 // @route   GET /orders/:id/details

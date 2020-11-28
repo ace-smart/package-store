@@ -1,0 +1,23 @@
+{{> admin/main/header.partial }}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card m-b-20">
+            <div class="card-body">
+                {{!-- View --}}
+                {{#ifMatch content 'view'}}
+                    {{> admin/account/view.partial}}
+                {{/ifMatch}}
+
+                {{!-- List --}}
+                {{#ifMatch content 'list'}}
+                    {{> admin/account/list.partial}}
+                {{/ifMatch}}
+
+                {{!-- Form --}}
+                {{#ifMatch content 'form'}}
+                    {{> admin/account/form.partial}}
+                {{/ifMatch}}
+                
+    </div> <!-- end col -->
+</div> <!-- end row -->

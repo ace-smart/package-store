@@ -1,0 +1,75 @@
+<h4 class="mt-0 header-title">Update Form</h4>
+<p class="text-muted m-b-30 font-14">Edit the fields and submit <strong>Save changes</strong> button to save them.</p>
+
+<form action="/admin/categories/edit/{{{category.id}}}" method="POST">
+    {{> csrf}}
+
+    {{!-- Name --}}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="name">
+                    <i class="mdi mdi-tag-text-outline mr-2"></i>Name
+                </label>
+                {{#if errors}}
+                {{!-- Has error --}}
+                {{#each errors}}
+                {{#ifeq this.field 'name'}}
+                <input id="name" name="name" type="text" required class="form-control parsley-error"
+                    value="{{{this.value}}}">
+                <p class="form-validation-error">{{{this.message}}}</p>
+                {{else}}
+                {{/ifeq}}
+                {{/each}}
+
+                {{!-- Valid --}}
+                {{#if validData.name}}
+                <input id="name" name="name" type="text" required class="form-control" value="{{{validData.name}}}">
+                {{/if}}
+                {{else}}
+                {{!-- First load --}}
+                <input id="name" name="name" type="text" required class="form-control" {{#if category.name}}
+                    value="{{{category.name}}}" {{/if}}>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+
+    {{!-- Status --}}
+    <div class="row mt-1 pt-2">
+        <div class="col-sm-12">
+            <label class="control-label">
+                <i class="ion-ios7-circle-filled mr-2"></i>Status
+            </label>
+
+            {{#if errors}}
+            {{#each errors}}
+            {{#ifeq this.field 'status'}}
+            <p class="form-validation-error">{{{this.message}}}</p>
+            {{/ifeq}}
+            {{/each}}
+            {{else}}
+            {{/if}}
+        </div>
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label class="btn btn-danger {{#ifMatch category.status 'deactivated'}} active {{/ifMatch}}"
+                    onclick="selectStatus(this)" for="deactivated-status">Deactivated</label>
+                <input type="radio" name="status" value="deactivated" id="deactivated-status" {{#ifMatch category.status 'deactivated'}} checked
+                    {{/ifMatch}}>
+                <label class="btn btn-success {{#ifMatch category.status 'activated'}} active {{/ifMatch}}"
+                    onclick="selectStatus(this)" for="activated-status">Activated</label>
+                <input type="radio" name="status" value="activated" id="activated-status" {{#ifMatch category.status 'activated'}} checked
+                    {{/ifMatch}}>
+            </div>
+        </div>
+    </div>
+
+    {{!-- Buttons --}}
+    <div class="row">
+        <div class="col-sm-12 mr-0 text-right">
+            <button type="submit" class="btn btn-success waves-effect waves-light">Save changes</button>
+            <button type="button" onclick="backward()" class="btn btn-secondary waves-effect">Cancel</button>
+        </div>
+    </div>
+</form>

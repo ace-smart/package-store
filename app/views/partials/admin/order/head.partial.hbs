@@ -1,0 +1,20 @@
+{{#ifMatch content 'view'}}
+{{> admin/list/head.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'list'}}
+{{> admin/list/head.partial }}
+{{/ifMatch}}
+
+{{#ifMatch content 'form'}}
+{{> admin/form/head.partial }}
+{{/ifMatch}}
+
+<style>
+  #addProductBtn[disabled],
+  #createOrderBtn[disabled] {
+    cursor: not-allowed;
+    background-color: gray;
+    border-color: gray;
+  }
+</style>

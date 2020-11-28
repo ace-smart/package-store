@@ -1,0 +1,28 @@
+<div class="card m-t-20">
+  <div class="card-body">
+
+    <div class="media m-b-30 row pl-2">
+      <div class="col-sm-2 mb-2">
+        <p class="mr-4 mb-0"><i class="mdi mdi-send mr-2"></i>From: </p>
+        <p class="mr-4 mb-0"><i class="mdi mdi-calendar-multiple-check mr-2"></i> Received date: </span>
+      </div>
+      <div class="col-sm-4 text-left">
+        <p class="mb-0 text-lime">{{{contact.email}}}</p>
+        <p class="mb-0">{{{formatDate contact.createdAt}}}</p>
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="contact-message pl-2">
+
+      <h2 class="mt-0 font-18">{{{contact.subject}}}</h2>
+
+      <p>{{{contact.message}}}</p>
+      <hr />
+
+      {{!-- <a href="email-compose.html" class="btn btn-secondary waves-effect m-t-30"><i class="mdi mdi-reply"></i> Reply</a> --}}
+    </div>
+  </div>
+
+</div

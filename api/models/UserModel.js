@@ -22,6 +22,12 @@ const UserSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Profile'
   },
+  addresses: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Address'
+    }
+  ],
   role: {
     type: String,
     required: true,
@@ -37,6 +43,10 @@ const UserSchema = new mongoose.Schema({
   refresh_secret: {
     type: String,
     default: require('crypto').randomBytes(12).toString('hex')
+  },
+  confirmString: {
+    type: String,
+    default: require('crypto').randomBytes(64).toString('hex')
   },
   status: {
     type: String,

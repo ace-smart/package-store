@@ -1,0 +1,64 @@
+<p class="text-muted m-b-30 font-14">Each restock has a unique ID and belongs to a subcategory. Management features are added in the 'Action' column.
+</p>
+
+<table id="datatable-buttons" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0"
+  width="100%">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Product</th>
+      <th>Amount</th>
+      <th class="text-center">Action Type</th>
+      <th class="text-center">On date</th>
+      <th class="text-center">Status</th>
+      <th class="text-center">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each restocks}}
+    <tr>
+      <td id="{{{this.id}}}">{{{this.id}}}</td>
+      <td>{{{this.product.name}}}</td>
+      <td>{{{this.amount}}}</td>
+      <td class="text-center 
+      {{#ifeq this.action 'import'}} bg-indigo {{else}} bg-brown {{/ifeq}}" 
+      style="text-transform: uppercase;">
+        {{{this.action}}}
+      </td>
+      <td class="text-center">{{#formatDate this.createdAt}} {{/formatDate}}</td>
+      {{#ifMatch this.status 'activated'}}
+      <td class="bg-teal text-white capitalized text-center">
+        {{/ifMatch}}
+        {{#ifMatch this.status 'deactivated'}}
+      <td class="bg-danger text-white capitalized text-center">
+        {{/ifMatch}}
+        {{{this.status}}}
+      </td>
+      <td class="text-center">
+        <div class="btn-group">
+          <button class="btn btn-secondary" type="button" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false">
+            <i class="ion-more font-18"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-right option-btn">
+            <a class="dropdown-item" href="/admin/restocks/edit/{{{this.id}}}">
+              <i class="ion-edit mr-2"></i> Edit
+            </a>
+            {{#ifeq status 'activated'}}
+            <a class="dropdown-item sa-deactivate" href="javascript:void(0);" data-uid="{{{this.id}}}">
+              <i class="ion-minus-round mr-2"></i> Deactivate
+              {{else}}
+              <a class="dropdown-item sa-activate" href="javascript:void(0);" data-uid="{{{this.id}}}">
+                <i class="ion-checkmark-round mr-2"></i> Activate
+                {{/ifeq}}
+              </a>
+              <a class="dropdown-item sa-delete" href="javascript:void(0);" data-uid="{{{this.id}}}">
+                <i class="ion-trash-a mr-2"></i> Delete
+              </a>
+          </div>
+        </div>
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>

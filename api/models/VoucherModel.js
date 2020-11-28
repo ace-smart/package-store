@@ -6,10 +6,6 @@ const VoucherSchema = new mongoose.Schema({
         required: true,
         max: 200,
     },
-    description: {
-        type: String,
-        max: 350,
-    },
     code: {
         type: String,
         required: true,
@@ -29,22 +25,11 @@ const VoucherSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    usageLimit: {
-        limitType: {
-            type: String,
-            enum: ['daily', 'weekly', 'seasonal', 'unlimited', 'personal', 'manually'],
-            default: 'manually',
-        },
-        maxOfUse: {
-            type: Number,
-            default: 0
-        },
-    },
     validUntil: {
         type: Date,
         required: true
-    }
-    ,status: {
+    },
+    status: {
         type: String,
         default: 'deactivated'
     }

@@ -1,172 +1,168 @@
-const axios = require("axios")
-const axiosInstance = axios.create({
-    baseURL: `${process.env.BASE_URL}:${process.env.API_SERVER_PORT}/api`,
-    timeout: 10000,
-    headers: { "Content-Type": "application/json" },
-    validateStatus: function (status) {
-        return status < 500 // Resolve only if the status code is less than 500
-    },
-})
-const {toDateFormat} = require('../../helper/helper')
+const axiosInstance = require("../../helper/axios.helper")
+const helper = require("../../helper/helper")
+const authHelper = require("../../helper/auth.helper")
+const fs = require('fs')
+const getProfile = async function(accessToken) {
+  try {
+    const response = await axiosInstance.get(`/profile`, {
+      headers: {
+        Authorization: "Bearer " +accessToken
+      }
+    })
 
+    if(response.status === 200) {
+      return response.data
+    }
+  } catch (error) {
+    throw error
+  }
+}
+const getProfileData = function (reqBody) {
+  reqBody = JSON.parse(JSON.stringify(reqBody))
+  return {
+    firstName: reqBody.firstName,
+    lastName: reqBody.lastName,
+    dateOfBirth: (reqBody.dateOfBirth != '') ? helper.toDateFormat(reqBody.dateOfBirth.toString()) : '',
+    gender: (reqBody.gender == '') ? 'male' : reqBody.gender ,
+    phoneNumber: reqBody.phoneNumber,
+  }
+}
 module.exports = {
-    // @desc:   Show profile
-    // @route   GET /profile
-    showProfilePage: async (req, res) => {
-        try {
-            const tabpane = (req.query.tabpane != null) ? req.query.tabpane : 'account'
+  // @desc:   Show profile
+  // @route   GET /profile
+  showProfilePage: async (req, res) => {
+    try {
+      const user = await helper.getUserInstance(req)
+      user.profile = await authHelper.getProfile({ ...req.user })
+      if(user.profile.avatar.fileName != 'default') {
+        user.profile.avatar.data = fs.readFileSync(`tmp\\avatar\\${user.profile.avatar.fileName}`).toString('base64')
+      }
+      const tabpane = req.query.tabpane != null ? req.query.tabpane : "account"
+      
+      return res.render("templates/admin/profile/profile", {
+        layout: "admin/profile.layout.hbs",
+        user: user,
+        tabpane: tabpane,
+        csrfToken: req.csrfToken(),
+      })
+    } catch (error) {
+      return res.render("templates/admin/error/404", {
+        layout: "admin/error.layout.hbs",
+      })
+    }
+  },
 
-            return res.render("templates/admin/profile/profile", {
-                layout: "admin/profile.layout.hbs",
-                user: {
-                    username: req.user.username,
-                    email: req.user.email,
-                    role: req.user.role,
-                    profile: req.user.profileId,
-                    status: req.user.status,
-                    createdAt: req.user.createdAt,
-                },
-                tabpane: tabpane,
-                csrfToken: req.csrfToken(),
-            })
-        } catch (error) {
-            return res.render("templates/admin/error/404", {
-                layout: "admin/auth.layout.hbs",
-            })
+  // @desc    Update profile
+  // @route   POST /profile
+  updateProfile: async (req, res) => {
+    let profileData = {}
+    try {
+      const user = await helper.getUserInstance(req)
+      user.profile = await authHelper.getProfile({ ...req.user })
+      //  Avatar has error
+      if (res.locals.file && res.locals.file.error) {
+        if(user.profile.avatar.fileName != 'default') {
+          user.profile.avatar.data = fs.readFileSync(`tmp\\avatar\\${user.profile.avatar.fileName}`).toString('base64')
         }
-    },
 
-    // @desc    Update profile
-    // @route   POST /profile
-    updateProfile: async (req, res) => {
-        try {
-            let updateData = {...req.body}
-            delete updateData._csrf
-            if (updateData.dateOfBirth != null)
-                updateData.dateOfBirth = toDateFormat(req.body.dateOfBirth.toString())
-            if (req.files.avatar != null) 
-                updateData.avatar = req.files.avatar[0].buffer
-            
-            const response = await axiosInstance.put(
-                "/profile",
-                updateData,
-                {
-                    responseType: "json",
-                    responseEncoding: "utf-8",
-                    headers: { 
-                        Authorization: "Bearer " + req.user.accessToken,
-                    }
-                },
-            )
+        req.flash("fail", res.locals.file.error.message)
+        return res.render("templates/admin/profile/profile", {
+          layout: "admin/profile.layout.hbs",
+          user: user,
+          csrfToken: req.csrfToken(),
+          tabpane: "profile",
+          errors: {
+            avatar: 
+              {
+                messages: [res.locals.file.error.message]
+              }
+          },
+        })
+      } else {
+          // Data from request
+          profileData = getProfileData(req.body)
+          if (req.files.avatar != null) {
+              profileData.avatar = {
+                  fileName: req.files.avatar[0].filename,
+                  mimeType: req.files.avatar[0].mimetype,
+              }
+          }
 
-            if (response.status === 204) {
-                await require('../../helper/auth.helper').getUser({...req.user})
-                req.flash('success', 'Your profile was updated.')
-                return res.redirect("/admin/profile?tabpane=profile")
-            }
+          profileData = helper.getFilledFields(profileData, user.profile)
+          // Send API
+          const response = await axiosInstance.put("/profile", profileData, {
+              headers: {
+                  Authorization: "Bearer " + req.user.accessToken,
+              },
+          })
+          if (response.status === 204) {
+              req.flash("success", "Your profile was updated.")
+              return res.redirect("/admin/profile?tabpane=profile")
+          }
+      }
+    } catch (error) {
+      if (error.response.status === 400) {
+        const errors = error.response.data.error.invalidation
+        const validData = helper.getValidFields(errors, req.body)
 
-            if (response.status >= 400) {
-                // Deny access
-                req.flash('fail', 'An error has occurred.')
-                return res.send("error")
-            }
-        } catch (error) {
-            // Server return 500 with response
-            if(error.response){
-                if (error.response.data.error.type === 'InvalidInput' || error.response.data.error.type === 'UnknownInput'){
-                    return res.render("templates/admin/profile/profile", {
-                        layout: "admin/profile.layout.hbs",
-                        user: {
-                            username: req.user.username,
-                            email: req.user.email,
-                            role: req.user.role,
-                            profile: req.user.profileId,
-                            status: req.user.status,
-                            createdAt: req.user.createdAt,
-                        },
-                        csrfToken: req.csrfToken(),
-                        tabpane: 'profile',
-                        error: error.response.data.error
-                    })
-                }
-                if (error.response.data.error.type === 'AvatarError' ){
-                    return res.render("templates/admin/profile/profile", {
-                        layout: "admin/profile.layout.hbs",
-                        user: {
-                            username: req.user.username,
-                            email: req.user.email,
-                            role: req.user.role,
-                            profile: req.user.profileId,
-                            status: req.user.status,
-                            createdAt: req.user.createdAt,
-                        },
-                        csrfToken: req.csrfToken(),
-                        tabpane: 'profile',
-                        error: error.response.data.error
-                    })
-                }
-            }else {
-                // Not receive response
-                req.flash('fail', 'An error has occurred.')
-                console.log(error)
-                return res.send("error")
-            }
+        req.flash("fail", "Failed to update.")
+        return res.render("templates/admin/profile/profile", {
+          layout: "admin/profile.layout.hbs",
+          user: await helper.getUserInstance(req),
+          csrfToken: req.csrfToken(),
+          tabpane: "profile",
+          errors: helper.handleInvalidationErrors(errors),
+          validData: validData
+        })
+      }
+      
+      return helper.handleErrors(res, error, 'admin')
+    }
+  },
+
+  // @desc:   Change password
+  // @route   GET /changePwd
+  showChangePwdPage: (req, res) => {
+    return res.redirect("/admin/profile?tabpane=changePwd")
+  },
+
+  // @desc    change password
+  // @route   POST /changePwd
+  changePwd: async (req, res) => {
+    // form inputs [password, new_password, confirm_new_password] 
+    try {
+      const passwordData = {
+        password: req.body.password,
+        new_password: req.body.new_password,
+        confirm_new_password: req.body.confirm_new_password
+      }
+
+      const response = await axiosInstance.put(
+        "/profile/change-password",
+        { ...passwordData },
+        {
+          headers: {
+            Authorization: "Bearer " + req.user.accessToken,
+          },
         }
-    },
+      )
 
-    // @desc:   Change password
-    // @route   GET /changePwd
-    showChangePwdPage: (req,res) => {
-        return res.redirect('/admin/profile?tabpane=changePwd')
-    },
+      if (response.status === 204) {
+        return res.redirect('/admin/logout')
+      }
+    } catch (error) {
+      if (error.response.status === 400) {
+        req.flash("fail", "Failed to update.")
+        return res.render("templates/admin/profile/profile", {
+          layout: "admin/profile.layout.hbs",
+          user: await helper.getUserInstance(req),
+          csrfToken: req.csrfToken(),
+          tabpane: "changePwd",
+          errors: helper.handleInvalidationErrors(error.response.data.error.invalidation),
+        })
+      }
 
-    // @desc    change password
-    // @route   POST /changePwd
-    changePwd: async (req, res) => {
-        // form inputs [currentPassword, newPassword]
-        try {
-            const formData = require('../../helper/helper').removeCSRF(req.body)
-            const response = await axiosInstance.put(
-                "/changePwd",
-                {...formData}, 
-                {
-                    responseType: "json",
-                    responseEncoding: "utf-8",
-                    headers: { 
-                        Authorization: "Bearer " + req.user.accessToken,
-                    }
-                }
-            )
-
-            if (response.status === 204) {
-                await require('../../helper/auth.helper').getUser({...req.user})
-                req.flash('success', 'Your password was changed.')
-                return res.redirect("/admin/profile?tabpane=changePwd")
-            }
-
-        } catch (error) {
-            // Server return 500 with response
-            if(error.response){
-                if (error.response.data.error.type === 'InvalidInput' || error.response.data.error.type === 'UnknownInput' || error.response.data.error.type === 'InvalidCredentials'){
-                    return res.render("templates/admin/profile/profile", {
-                        layout: "admin/profile.layout.hbs",
-                        user: {
-                            username: req.user.username,
-                            email: req.user.email,
-                            role: req.user.role,
-                            profile: req.user.profileId,
-                            status: req.user.status,
-                            createdAt: req.user.createdAt,
-                        },
-                        csrfToken: req.csrfToken(),
-                        tabpane: 'changePwd',
-                        error: error.response.data.error
-                    })
-                }
-            }else {
-                // Not receive response
-                return res.send("An error has occurred.")
-            }
-        }
-    },
+      return helper.handleErrors(res, error, 'admin')
+    }
+  },
 }

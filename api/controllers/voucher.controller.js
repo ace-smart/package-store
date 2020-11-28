@@ -1,83 +1,90 @@
-const Voucher = require("../models/VoucherModel")
-const {validate_add_inp, validate_update_inp} = require("../validation/voucher")
-const sanitize = require("../validation/sanitize")
-const { outputErrors } = require("../validation/validation")
+const VoucherObject = require("../objects/VoucherObject")
+const NotFoundError = require("../errors/not_found")
+const ErrorHandler = require("../helper/errorHandler")
 
 module.exports = {
-    // @desc:   Show vouchers
-    // @route   GET /vouchers
-    showVoucherList: async (req, res) => {
-        try {
-            const vouchers = await Voucher.find().lean()
-            return res.status(200).json({ success: true, vouchers: vouchers })
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
-        }
-    },
+  // @desc:   Show vouchers
+  // @route   GET /vouchers
+  showVoucherList: async (req, res) => {
+    try {
+      const vouchers = await VoucherObject.getVouchersBy({})
+      if (vouchers && vouchers.length > 0) {
+        return res.status(200).json(vouchers)
+      }
 
-    // @desc:   Get vouchers by Id
-    // @route   GET /vouchers/:id
-    getVoucherById: async (req, res) => {
-        try {
-            const voucher = await Voucher.findOne({ _id: req.params.id }).lean()
-            if (voucher)
-                return res.status(200).json({
-                    success: true,
-                    voucher: voucher,
-                })
-            // Not found
-            return res.status(404).json({ success: false, message: "No voucher found." })
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
-        }
-    },
+      throw new NotFoundError("No voucher found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 
-    // @desc    Add new voucher
-    // @route   POST /vouchers
-    createNewVoucher: async (req, res) => {
-        try {
-            const isValidInp = await validate_add_inp({ ...req.body })
-            if (isValidInp) {
-                const newVoucher = await Voucher.create(
-                    sanitize.voucher({ ...req.body }, "create")
-                )
-                return res.status(201).json({
-                    success: true,
-                    voucher: newVoucher,
-                })
-            }
-        } catch (error) {
-            return res.status(500).json({ success: false, error: outputErrors(error) })
-        }
-    },
+  // @desc:   Get vouchers by Id
+  // @route   GET /vouchers/:id
+  getVoucherById: async (req, res) => {
+    try {
+      const voucher = await VoucherObject.getOneVoucherBy({_id: req.params.id})
+      if (voucher){
+        return res.status(200).json(voucher)
+       } 
+      // Not found
+      throw new NotFoundError("No voucher found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 
-    // @desc    Update voucher
-    // @route   PUT /vouchers/:id
-    updateVoucherById: async (req, res) => {
-        try {
-            const voucher = await Voucher.findOne({ _id: req.params.id }).lean()
-            const isValidInp = await validate_update_inp({ ...req.body }, voucher._id)
-            if (isValidInp) {
-                await Voucher.findOneAndUpdate(
-                    { _id: req.params.id },
-                    sanitize.voucher({ ...req.body }, "update")
-                )
-                return res.sendStatus(204)
-            }
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
-        }
-    },
+  // @desc    Add new voucher
+  // @route   POST /vouchers
+  createNewVoucher: async (req, res) => {
+    try {
+      const createdVoucher = await VoucherObject.create({...req.body})
+      if (createdVoucher) {
+        return res.status(201).json(createdVoucher)
+      }
 
-    // @desc    Delete voucher
-    // @route   DELETE /vouchers/:id
-    removeVoucherById: async (req, res) => {
-        try {
-            const voucher = await Voucher.findOneAndDelete({ _id: req.params.id })
+      throw new Error("Failed to create voucher.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 
-            return res.sendStatus(204)
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
+  // @desc    Update voucher
+  // @route   PUT /vouchers/:id
+  updateVoucherById: async (req, res) => {
+    try {
+      const voucher = await VoucherObject.getOneVoucherBy({_id: req.params.id})
+      if (voucher) {
+        const isUpdated = await voucher.update({...req.body})
+        if (isUpdated){
+          return res.sendStatus(204)
         }
-    },
+
+        throw new Error("Failed to update voucher.")
+      }
+      
+      throw new NotFoundError("No voucher found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc    Delete voucher
+  // @route   DELETE /vouchers/:id
+  removeVoucherById: async (req, res) => {
+    try {
+      const voucher = await VoucherObject.getOneVoucherBy({_id: req.params.id})
+      if (voucher) {
+        const isRemoved = await voucher.remove()
+        if (isRemoved){
+          return res.sendStatus(204)
+        }
+
+        throw new Error("Failed to remove voucher.")
+      }
+      
+      throw new NotFoundError("No voucher found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 }

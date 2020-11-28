@@ -18,14 +18,6 @@ const ProviderSchema = new mongoose.Schema(
             required: true,
             unique: true
         },
-        description: {
-            type: String,
-            max: 300,
-        },
-        country: {
-            type: String,
-            max: 200
-        },
         status: {
             type: String,
             default: "deactivated",

@@ -1,0 +1,139 @@
+<div class="row">
+  {{!-- RIGHT COL --}}
+  <div class="col-sm-12 p-3 ">
+    <p class="text-lime p-2 border-bottom"><i class="fa fa-wpforms mr-2"></i>Detail</p>
+
+    {{!-- Product table --}}
+    <div class="row ">
+      <div class="col-sm-12">
+        <table id="product-table" class="table table-bordered table-striped dt-responsive nowrap mb-4" cellspacing="0"
+          width="100%">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Product</th>
+              <th>Subcategory</th>
+              <th>Price</th>
+              <th class="text-center">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{!-- Order details --}}
+              {{#each order.orderDetails}}
+              <tr>
+                <td>{{increaseIndex @index }}</td>
+                <td>{{{orderId}}}</td>
+                <td>{{{productId.subcategoryId.name}}}</td>
+                <td>{{{productId.price}}}</td>
+                <td class="text-center">{{{amount}}}</td>
+              </tr>
+              {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="order row d-flex justify-content-center">
+      <div class="col-sm-6">
+        {{!-- Total cost --}}
+        <div class="row mt-2">
+          <div class="col-sm-5 text-center bg-teal ">
+              <p class="mb-0 p-2"><i class="fa fa-sitemap mr-2"></i>Total cost</p>
+              
+          </div>
+          <div class="col-sm-7 text-center  border-bottom">
+            <p class="text-lime mb-0 p-2" style="font-size: 17px">{{{formatPrice order.totalCost}}}</p>
+          </div>
+        </div>
+
+        {{!-- Shipping fee --}}
+        <div class="row mt-2">
+         <div class="col-sm-5 text-center bg-teal ">
+              <p class="mb-0 p-2"><i class="fa fa-truck mr-2"></i>Shipping fee</p>
+              
+          </div>
+          <div class="col-sm-7 text-center  border-bottom">
+            <p class="text-lime mb-0 p-2" style="font-size: 17px">{{{formatPrice order.shippingFee}}}</p>
+          </div>
+        </div>
+
+        {{!-- Voucher --}}
+        <div class="row mt-2">
+         
+         <div class="col-sm-5 text-center bg-teal ">
+              <p class="mb-0 p-2"><i class="mdi mdi-sale mr-2"></i>Voucher</p>
+              
+          </div>
+          <div class="col-sm-7 text-center  border-bottom">
+            <p class="text-lime mb-0 p-2" style="font-size: 17px">
+              {{#if order.voucherId}}
+                {{{order.voucherId.code}}}   (<i class="fa fa-cart-arrow-down text-danger mr-1"></i> {{{order.voucherId.rate}}}%)
+              {{else}}
+              {{{order.voucherId.code}}}    (<i class="fa fa-cart-arrow-down text-danger mr-1"></i> 0%)
+              {{/if}}
+            </p>
+          </div>
+        </div>
+
+        {{!-- Final cost --}}
+        <div class="row mt-2">
+         <div class="col-sm-5 text-center bg-teal ">
+              <p class="mb-0 p-2"><i class="ion-cash mr-2"></i>Final cost</p>
+              
+          </div>
+          <div class="col-sm-7 text-center  border-bottom">
+            <p class="text-lime mb-0 p-2" style="font-size: 17px">{{{formatPrice order.finalCost}}}</p>
+          </div>
+        </div>
+
+        {{!-- Payment method --}}
+        <div class="row mt-2">
+         <div class="col-sm-5 text-center bg-teal ">
+              <p class="mb-0 p-2"><i class="fa fa-cc-mastercard mr-2"></i>Payment method</p>
+              
+          </div>
+          <div class="col-sm-7 text-center  border-bottom">
+            <p class="text-lime mb-0 p-2" style="font-size: 17px">{{{order.paymentMethod}}}</p>
+          </div>
+        </div>
+
+        {{!-- Deliver day --}}
+        <div class="row mt-2 ">
+         <div class="col-sm-5 text-center bg-teal ">
+              <p class="mb-0 p-2"><i class="fa fa-calendar-check-o mr-2"></i>Deliver day</p>
+              
+          </div>
+          <div class="col-sm-7 text-center  border-bottom">
+            <p class="text-lime mb-0 p-2" style="font-size: 17px">{{{formatDate order.deliveryDay}}}</p>
+          </div>
+        </div>
+
+        {{!-- Status --}}
+        <div class="row mt-2 ">
+         <div class="col-sm-5 text-center bg-teal ">
+              <p class="mb-0 p-2"><i class="fa fa-bullseye mr-2"></i>Status</p>
+              
+          </div>
+          <div class="col-sm-7 text-center  border-bottom">
+            <p class="text-lime mb-0 p-2" style="font-size: 17px">
+                <span class="badge badge-pill p-2 capitalized
+              {{#ifMatch order.status 'processing'}} badge-primary {{/ifMatch}}
+              {{#ifMatch order.status 'packing'}} badge-purple {{/ifMatch}}
+              {{#ifMatch order.status 'delivering'}} badge-pink {{/ifMatch}}
+              {{#ifMatch order.status 'done'}} badge-success{{/ifMatch}}
+              {{#ifMatch order.status 'cancelled'}} badge-orange{{/ifMatch}}
+                " style="font-size: 16px;">
+                {{{order.status}}}
+                </span>
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>

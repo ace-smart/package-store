@@ -1,0 +1,19 @@
+
+{{> admin/meta.partial }}
+
+<meta name="csrf-token" content="{{csrfToken}}">
+{{> admin/css.partial }}
+
+{{> admin/main/css.partial }}
+<style>
+  div.mail-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  div.mail-list ul li a:hover {
+    background-color: #6d60b0;
+    color: #ffffff;
+    transition: ease 0.5s;
+  }
+</style>
