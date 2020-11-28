@@ -1,94 +1,127 @@
-const OrderDetail = require("../models/OrderDetailModel")
-const Order = require("../models/OrderModel")
-const { validate_add_inp, validate_update_inp } = require("../validation/order_detail")
-const sanitize = require("../validation/sanitize")
-const { outputErrors, isExistent } = require("../validation/validation")
+const OrderDetailObject = require("../objects/OrderDetailObject")
+const OrderObject = require("../objects/OrderObject")
+const NotFoundError = require("../errors/not_found")
+const ErrorHandler = require("../helper/errorHandler")
 
 module.exports = {
-    isExistentOrder: async (req, res, next) => {
-        if (await isExistent(Order, { _id: req.params.id })) {
-            return next()
+  // @desc:   Show all order details
+  // @route   GET /orders/:id/details
+  showOrderDetailList: async (req, res) => {
+    try {
+      const order = await OrderObject.getOneOrderBy({ _id: req.params.id })
+      if (order) {
+        const order_details = await OrderDetailObject.getOrderDetailsBy({ orderId: order.id })
+        if (order_details && order_details.length > 0) {
+          return res.status(200).json(order_details)
         }
-        return res.status(404).json({ success: false, message: "Order is not existent." })
-    },
 
-    // @desc:   Show all order details
-    // @route   GET /orders/:id/details
-    showOrderDetailList: async (req, res) => {
-        try {
-            const order_details = await OrderDetail.find({ orderId: req.params.id }).lean()
-            return res.status(200).json({ success: true, order_details: order_details })
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
+        throw new NotFoundError("No detail found.")
+      }
+
+      throw new NotFoundError("No order found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc:   Get order details by Id
+  // @route   GET /orders/:id/details/:detailId
+  getOrderDetailById: async (req, res) => {
+    try {
+      const order = await OrderObject.getOneOrderBy({ _id: req.params.id })
+      if (order) {
+        const orderDetail = await OrderDetail.findOne({
+          _id: req.params.detailId,
+          orderId: req.params.id.toString(),
+        })
+        if (orderDetail) {
+          return res.status(200).json(orderDetail)
         }
-    },
 
-    // @desc:   Get order details by Id
-    // @route   GET /orders/:id/details/:detailId
-    getOrderDetailById: async (req, res) => {
-        try {
-            const orderDetail = await OrderDetail.findOne({ _id: req.params.detailId }).lean()
-            if (orderDetail)
-                return res.status(200).json({
-                    success: true,
-                    orderDetail: orderDetail,
-                })
-            // Not found
-            return res.status(404).json({ success: false, message: "No orderDetail found." })
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
+        // Not found
+        throw new NotFoundError("No detail found.")
+      }
+
+      throw new NotFoundError("No order found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc    Add new orderDetail
+  // @route   POST /orders/:id/details
+  createNewOrderDetail: async (req, res) => {
+    try {
+      const order = await OrderObject.getOneOrderBy({ _id: req.params.id })
+      if (order) {
+        const createdDetail = await OrderDetailObject.create({ ...req.body, orderId: order.id })
+        if (createdDetail) {
+          return res.status(201).json(createdDetail)
         }
-    },
 
-    // @desc    Add new orderDetail
-    // @route   POST /orders/:id/details
-    createNewOrderDetail: async (req, res) => {
-        try {
-            const isValidInp = await validate_add_inp({ ...req.body })
-            if (isValidInp) {
-                const orderDetail = sanitize.orderDetail({ ...req.body }, "create")
-                orderDetail.orderId = req.params.id
-                const newOrderDetail = await OrderDetail.create(orderDetail)
-                return res.status(201).json({
-                    success: true,
-                    orderDetail: newOrderDetail,
-                })
-            }
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
-        }
-    },
+        // Not found
+        throw new Error("Failed to create order detail.")
+      }
 
-    // @desc    Update orderDetail by Id
-    // @route   PUT /orders/:id/details/:detailId
-    updateOrderDetailById: async (req, res) => {
-        try {
-            const orderDetail = await OrderDetail.findOne({ _id: req.params.detailId }).lean()
-            if (orderDetail) {
-                const isValidInp = await validate_update_inp({ ...req.body }, orderDetail.detailId)
-                if (isValidInp) {
-                    await OrderDetail.findOneAndUpdate(
-                        { _id: req.params.detailId },
-                        sanitize.orderDetail({ ...req.body }, "update")
-                    )
-                    return res.sendStatus(204)
-                }
-            }
-            return res.status(404).json({ success: false, message: 'No detail found' })
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
-        }
-    },
+      throw new NotFoundError("No order found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 
-    // @desc    Delete orderDetail by Id
-    // @route   DELETE /orders/:id/details/:detailId
-    removeOrderDetailById: async (req, res) => {
-        try {
-            const orderDetail = await OrderDetail.findOneAndDelete({ _id: req.params.detailId })
-
+  // @desc    Update orderDetail by Id
+  // @route   PUT /orders/:id/details/:detailId
+  updateOrderDetailById: async (req, res) => {
+    try {
+      const order = await OrderObject.getOneOrderBy({ _id: req.params.id })
+      if (order) {
+        const orderDetail = await OrderDetailObject.getOneOrderDetailBy({
+          _id: req.params.detailId,
+          orderId: req.params.id,
+        })
+        if (orderDetail) {
+          const isUpdated = await orderDetail.update({ ...req.body })
+          if (isUpdated) {
             return res.sendStatus(204)
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
+          }
+
+          throw new Error("Failed to update order detail.")
         }
-    },
+        // Not found
+        throw new NotFoundError("No order detail found.")
+      }
+
+      throw new NotFoundError("No order found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc    Delete orderDetail by Id
+  // @route   DELETE /orders/:id/details/:detailId
+  removeOrderDetailById: async (req, res) => {
+    try {
+      const order = await OrderObject.getOneOrderBy({ _id: req.params.id })
+      if (order) {
+        const orderDetail = await OrderDetailObject.getOneOrderDetailBy({
+          _id: req.params.detailId,
+          orderId: req.params.id,
+        })
+        if (orderDetail) {
+          const isRemoved = await orderDetail.remove()
+          if (isRemoved) {
+            return res.sendStatus(204)
+          }
+
+          throw new Error("Failed to remove order detail.")
+        }
+        // Not found
+        throw new NotFoundError("No order detail found.")
+      }
+
+      throw new NotFoundError("No order found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 }

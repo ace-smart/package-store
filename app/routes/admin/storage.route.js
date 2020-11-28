@@ -2,9 +2,13 @@ const router = require("express").Router()
 
 const {
     showStorageList,
+    viewStorageById,
     showCreateStorageForm,
-    getStorageById,
+    createStorage,
+    showUpdateStorageForm,
     updateStorageById,
+    setFullStorage,
+    setAvailableStorage,
     removeStorageById,
 } = require("../../controllers/admin/storage.controller")
 
@@ -12,21 +16,33 @@ const {
 // @route   GET /storages
 router.get("/", showStorageList)
 
-// @desc    Get an storage by id
-// @route   GET /storages/:id
-// router.get("/:id", getAccountById)
+// @desc    View an storage by id
+// @route   GET /storages/view/:id
+router.get("/view/:id", viewStorageById)
 
-// @desc    Add a new storage
+// @desc    Show create storage form
 // @route   get /storages/add
 router.get("/add", showCreateStorageForm)
 
 // @desc    Add a new storage
 // @route   POST /storages/add
-// router.post("/add", createNewAccount)
+router.post("/add", createStorage)
+
+// @desc    Show update storage form
+// @route   get /storages/add
+router.get("/edit/:id", showUpdateStorageForm)
 
 // @desc    Update an storage by id
 // @route   PUT /storages/:id
-router.put("/:id", updateStorageById)
+router.post("/edit/:id", updateStorageById)
+
+// @desc    Set 'Available' status
+// @route   PUT /storages/set-available/:id
+router.put("/set-available/:id", setAvailableStorage)
+
+// @desc    Set 'Full' status
+// @route   PUT /storages/set-full/:id
+router.put("/set-full/:id", setFullStorage)
 
 // @desc    Delete an storage by id
 // @route   DELETE /storages/:id

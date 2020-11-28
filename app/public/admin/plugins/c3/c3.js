@@ -5442,7 +5442,7 @@
             })
             .on('zoomend', function () {
                 var event = d3.event.sourceEvent;
-                // if click, do nothing. otherwise, click interaction will be canceled.
+                // if click, do nothing. otherwise, click interaction will be cancelled.
                 if (event && startEvent.clientX === event.clientX && startEvent.clientY === event.clientY) {
                     return;
                 }

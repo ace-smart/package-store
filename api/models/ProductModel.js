@@ -2,9 +2,9 @@ const mongoose = require("mongoose")
 
 const ProductSchema = new mongoose.Schema(
     {
-        categoryId: {
+        subcategoryId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Category",
+            ref: "Subcategory",
         },
         name: {
             type: String,
@@ -14,15 +14,13 @@ const ProductSchema = new mongoose.Schema(
         },
         details: {
             size: {type: String},
-            color: {name: String, hexCode: String},
-            tags: [String],
-            description: {type: String},
-            madeIn: {type: String},
-            weight: {value: Number, unit: String},
+            color: {colorName: String, hexCode: String},
+            material: {type: String},
+            gender: {type: String},
+            season: {type: String}
         },
         price: {
-            value: Number,
-            currency: String
+            type: Number
         },
         status: {
             type: String,

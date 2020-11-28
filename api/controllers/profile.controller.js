@@ -1,110 +1,134 @@
-const User = require("../models/UserModel")
-const Profile = require("../models/ProfileModel")
 const bcrypt = require("bcrypt")
-const sanitize = require("../validation/sanitize")
-const { outputErrors } = require("../validation/validation")
-
+const UserObject = require("../objects/UserObject")
+const ProfileObject = require("../objects/ProfileObject")
+const ChangePwdObject = require("../objects/ChangePwdObject")
+const ErrorObject = require("../objects/ErrorObject")
+const ValidationError = require("../errors/validation")
+const NotFoundError = require('../errors/not_found')
+const ErrorHandler = require('../helper/errorHandler')
 
 module.exports = {
-    // @desc:   get profile by accessTK
-    // @route:  GET /profile
-    getProfile: async (req, res) => {
-        try {
-            const user = await User.findOne({ accessToken: req.user.accessToken })
-                .populate({
-                    path: "profileId",
-                })
-                .lean()
 
-            if (user != null)
-                return res.status(200).json({
-                    success: true,
-                    user: user,
-                })
-
-            return res.status(200).json({
-                success: false,
-                message: "No user found.",
-            })
-        } catch (error) {
-            console.error(error)
-            return res.status(500).json({ success: false, message: error.message })
+  // @desc:   get profile by accessTK
+  // @route:  GET /profile
+  getProfile: async (req, res) => {
+    try {
+      const profileId = await UserObject.getProfileIdById(req.user.id)
+      if (profileId) {
+        const profile = await ProfileObject.getOneProfileById(profileId)
+        if (profile) {
+          return res.status(200).json(profile)
         }
-    },
+      }
+      
+      throw new NotFoundError("No profile found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 
-    // @desc:   update profile by accessTK
-    // @route:  PUT /profile
-    updateProfile: async (req, res) => {
-        const { validate_add_inp, validate_update_inp } = require("../validation/profile")
-        try {
-            const user = await User.findOne({ _id: req.user.id }).select('profileId')
-            if (user.profileId != null) {
-                // update profile
-                if (validate_update_inp({ ...req.body })) {
-                    let profileData = sanitize.profile({ ...req.body }, "update")
-                    await Profile.findOneAndUpdate({ _id: user.profileId }, profileData)
-                    return res.sendStatus(204)
-                }
-            } else {
-                // create profile
-                if (validate_add_inp({ ...req.body })) {
-                    let profileData = sanitize.profile({ ...req.body }, "create")
-                    const profile = await Profile.create(profileData)
-                    await User.findOneAndUpdate(
-                        { accessToken: req.user.accessToken },
-                        { profileId: profile._id }
-                    )
-                    return res.sendStatus(204)
-                }
-            }
-        } catch (error) {
-            console.log(error)
-            return res.status(500).json({ success: false, error: outputErrors(error) })
+  // @desc:   get profile by accessTK
+  // @route:  GET /profile
+  getProfileById: async (req, res) => {
+    try {
+      const profile = await ProfileObject.getOneProfileById(req.params.id)
+      
+      if (profile) {
+        return res.status(200).json(profile)
+      }
+      
+      throw new NotFoundError("No profile found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc:   update profile by accessTK
+  // @route:  PUT /profile
+  updateProfile: async (req, res) => {
+    /* === EXAMPLE ===
+      req.body = {
+        avatar: {
+          type: 'buffer',
+          data: [1,23,3,4]
+        },
+        firstName: 'John',
+        lastName: 'Smith',
+        gender: 'male',
+        dateOfBirth: '1980/10/22',
+        phoneNumber: '+84123412345'
+      }
+    */
+    try {
+      // get profileId by accessToken
+      const profileId = await UserObject.getProfileIdById(req.user.id)
+      let profileData = JSON.parse(JSON.stringify(req.body))
+      
+      if (profileId == null) {
+        // create for the 1st time
+        const createdProfile = await ProfileObject.create(profileData)
+        if (createdProfile) {
+          return res.sendStatus(204)
         }
-    },
-
-    // @desc:   change password by accessTK
-    // @route:  PUT /changePwd
-    changePwd: async (req, res) => {
-        // req.body contains {currentPassword, newPassword, confirm_newPassword}
-        try {
-            const user = await User.findById(req.user.id).lean()
-            if (require('../validation/profile').validate_password({...req.body})){
-                if (await bcrypt.compare(req.body.currentPassword, user.password)){
-                    await User.findOneAndUpdate(
-                        { _id: req.user.id },
-                        { password: await bcrypt.hash(req.body.newPassword, await bcrypt.genSalt()) }
-                    )
-                    return res.sendStatus(204)
-                }else {
-                    return res.status(500).json({
-                        success: false,
-                        error: {
-                            messages: "Current password is not correct.",
-                            field: "currentPassword",
-                            type: "InvalidCredentials",
-                            value: req.body.currentPassword
-                        },
-                    })
-                }
-            }
-        } catch (error) {
-            console.error(error)
-            return res.status(500).json({ success: false, error: outputErrors(error) })
+      } else {
+        // update
+        const profileObject = await ProfileObject.getOneProfileById(profileId)
+        const isUpdated = await profileObject.update({...profileData})
+        if (isUpdated) {
+          return res.sendStatus(204)
         }
-    },
+      }
 
-    // @desc    Delete profile
-    // @route   DELETE /profile/:id
-    removeProfileById: async (req, res) => {
-        try {
-            const user = await Profile.findOneAndDelete({ _id: req.params.id })
+      throw new Error("Failed to update profile")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 
-            if (user) return res.sendStatus(204)
+  // @desc    Change password
+  // @route   PUT /profile/change-password
+  changePasswordByUserId: async (req, res) => {
+    // req.body = {password, new_password, confirm_new_password}
+    try {
+      const changePwdObject = new ChangePwdObject({ id: req.user.id, ...req.body })
+      const validation = await changePwdObject.validate()
+      if (validation instanceof ChangePwdObject) {
+        const newPassword = await bcrypt.hash(req.body.new_password, await bcrypt.genSalt())
+        const user = await UserObject.getOneUserBy({_id: req.user.id})
+        if (user instanceof UserObject) {
+          const isUpdated = await user.update({ password: newPassword })
+          if (isUpdated instanceof UserObject) {
+            return res.sendStatus(204)
+          }
 
-            return res.status(404).json({ success: false, message: "No user found." })
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
+          throw new Error("Failed to change password.")
         }
-    },
+
+        throw new NotFoundError("No user found.")
+      }
+
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc    Delete profile
+  // @route   DELETE /profile/:id
+  removeProfileById: async (req, res) => {
+    try {
+      const profileObject = new ProfileObject({_id: req.user.id})
+      if (profileObject) {
+        const isRemoved = await profileObject.remove()
+        if (isRemoved) {
+          return res.sendStatus(204)
+        }
+  
+        throw new Error("Failed to remove profile.")
+      }
+
+      throw new NotFoundError("No profile found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 }

@@ -1,33 +1,39 @@
 const router = require("express").Router()
 const passport = require("passport")
-const { rememberMeLogin, showLoginForm } = require("../../controllers/admin/auth.controller")
-const { _checkUnauthenticated, _redirectToIndex } = require('../../helper/auth.helper')
+const { showLoginForm, _storeTokensBySession, resetPassword } = require("../../controllers/admin/auth.controller")
+const { _checkUnauthenticatedAdmin } = require('../../helper/auth.helper')
+
 // @desc    Show login form
 // @route   GET /login
-router.get("/login", _checkUnauthenticated, showLoginForm)
+router.get("/login",
+_checkUnauthenticatedAdmin,
+showLoginForm)
 
 // @desc    Authentication
 // @route   POST /login
 router.post(
     "/login",
-    _checkUnauthenticated,
+    _checkUnauthenticatedAdmin,
     passport.authenticate("local", {
-        // successRedirect: "/admin",
         failureRedirect: "/admin/login",
         failureFlash: true,
     }),
-    rememberMeLogin,
-    _redirectToIndex
+    _storeTokensBySession,
+    (req,res, next) => {
+        return res.redirect('/admin')
+    }
 )
 
 // @desc    Logout
 // @route   GET /logout
 router.get("/logout", (req, res) => {
-    res.clearCookie('remember_me', {
-        path: '/admin'
-      })
+    if (req.cookies['tokens'] != null) {
+        res.clearCookie('tokens', {
+            path: '/admin'
+        })
+    }
     req.logout()
-    res.redirect('/admin/login')
+    return res.redirect('/admin/login')
 })
 
 module.exports = router

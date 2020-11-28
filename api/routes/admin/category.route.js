@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { showCategoryList, getCategoryById, createNewCategory, updateCategoryById, removeCategoryById } 
+const { showCategoryList, getCategoryById, createNewCategory, updateCategoryById, removeCategoryById} 
     = require('../../controllers/category.controller')
 
 // @desc    Show list of categories

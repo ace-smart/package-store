@@ -1,83 +1,91 @@
-const Restock = require("../models/RestockModel")
-const {validate_add_inp, validate_update_inp} = require("../validation/restock")
-const sanitize = require("../validation/sanitize")
-const { outputErrors } = require("../validation/validation")
+const RestockObject = require("../objects/RestockObject")
+const NotFoundError = require('../errors/not_found')
+const ErrorHandler = require('../helper/errorHandler')
 
 module.exports = {
-    // @desc:   Show restock
-    // @route   GET /restock
-    showRestockList: async (req, res) => {
-        try {
-            const restock = await Restock.find().lean()
-            return res.status(200).json({ success: true, restock: restock })
-        } catch (error) {
-            return res.status(500).json({ success: false, message: error.message })
-        }
-    },
+  // @desc:   Show restock
+  // @route   GET /restock
+  showRestockList: async (req, res) => {
+    try {
+      const restockList = await RestockObject.getRestocksBy({})
+      if (restockList && restockList.length > 0) {
+        return res.status(200).json(restockList)
+      }
+      
+      throw new NotFoundError("No restock found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 
-    // @desc:   Get restock by Id
-    // @route   GET /restock/:id
-    getRestockById: async (req, res) => {
-        try {
-            const restock = await Restock.findOne({ _id: req.params.id }).lean()
-            if (restock)
-                return res.status(200).json({
-                    success: true,
-                    restock: restock,
-                })
-            // Not found
-            return res.status(404).json({ success: false, message: "No restock found." })
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
-        }
-    },
+  // @desc:   Get restock by Id
+  // @route   GET /restock/:id
+  getRestockById: async (req, res) => {
+    try {
+      const restock = await RestockObject.getOneRestockBy({_id: req.params.id})
+      if (restock) {
+        return res.status(200).json(restock)
+      }
+        
+      // Not found
+      throw new NotFoundError("No restock found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 
-    // @desc    Add new restock
-    // @route   POST /restock
-    createNewRestock: async (req, res) => {
-        try {
-            const isValidInp = await validate_add_inp({ ...req.body })
-            if (isValidInp) {
-                const newRestock = await Restock.create(
-                    sanitize.restock({ ...req.body }, "create")
-                )
-                return res.status(201).json({
-                    success: true,
-                    restock: newRestock,
-                })
-            }
-        } catch (error) {
-            return res.status(500).json({ success: false, error: outputErrors(error) })
-        }
-    },
+  // @desc    Add new restock
+  // @route   POST /restock
+  createNewRestock: async (req, res) => {
+    try {
+      const createdRestock = await RestockObject.create({...req.body})
+      if (createdRestock) {
+        return res.status(201).json(createdRestock)
+      }
 
-    // @desc    Update restock
-    // @route   PUT /restock/:id
-    updateRestockById: async (req, res) => {
-        try {
-            const restock = await Restock.findOne({ _id: req.params.id }).lean()
-            const isValidInp = await validate_update_inp({ ...req.body }, restock._id)
-            if (isValidInp) {
-                await Restock.findOneAndUpdate(
-                    { _id: req.params.id },
-                    sanitize.restock({ ...req.body }, "update")
-                )
-                return res.sendStatus(204)
-            }
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
-        }
-    },
+      throw new Error("Failed to create restock.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 
-    // @desc    Delete restock
-    // @route   DELETE /restock/:id
-    removeRestockById: async (req, res) => {
-        try {
-            const restock = await Restock.findOneAndDelete({ _id: req.params.id })
-
-            return res.sendStatus(204)
-        } catch (error) {
-            return res.status(500).json({ success: false, message: outputErrors(error) })
+  // @desc    Update restock
+  // @route   PUT /restock/:id
+  updateRestockById: async (req, res) => {
+    try {
+      const restock = await RestockObject.getOneRestockBy({_id: req.params.id})
+      if (restock) {
+        const isUpdated = await restock.update({...req.body})
+        if (isUpdated){
+          return res.sendStatus(204)
         }
-    },
+
+        throw new Error("Failed to update restock.")
+      }
+
+      throw new NotFoundError("No restock found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc    Delete restock
+  // @route   DELETE /restock/:id
+  removeRestockById: async (req, res) => {
+    try {
+      const restock = await RestockObject.getOneRestockBy({_id: req.params.id})
+      if (restock) {
+        const isRemoved = await restock.remove()
+        if (isRemoved) {
+          return res.sendStatus(204)
+        }
+
+        throw new Error("Failed to remove restock")
+      }
+
+      throw new NotFoundError("No restock found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 }

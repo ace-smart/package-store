@@ -3,9 +3,13 @@ const router = require("express").Router()
 const {
     showProviderList,
     showCreateProviderForm,
-    getProviderById,
+    createProvider,
+    viewProviderById,
+    showUpdateProviderForm,
     updateProviderById,
-    removeProviderById,
+    deactivateProviderById,
+    activateProviderById,
+    removeProviderById
 } = require("../../controllers/admin/provider.controller")
 
 // @desc    Show list of providers
@@ -13,20 +17,32 @@ const {
 router.get("/", showProviderList)
 
 // @desc    Get an provider by id
-// @route   GET /providers/:id
-// router.get("/:id", getAccountById)
+// @route   GET /providers/view/:id
+router.get("/view/:id", viewProviderById)
 
-// @desc    Add a new provider
+// @desc    Show create from
 // @route   get /providers/add
 router.get("/add", showCreateProviderForm)
 
 // @desc    Add a new provider
 // @route   POST /providers/add
-// router.post("/add", createNewAccount)
+router.post("/add", createProvider)
+
+// @desc    Show update form
+// @route   get /providers/edit/:id
+router.get("/edit/:id", showUpdateProviderForm)
 
 // @desc    Update an provider by id
 // @route   PUT /providers/:id
-router.put("/:id", updateProviderById)
+router.post("/edit/:id", updateProviderById)
+
+// @desc    Update an provider by id
+// @route   PUT /providers/deactivate/:id
+router.put("/deactivate/:id", deactivateProviderById)
+
+// @desc    Activate an provider by id
+// @route   PUT /providers/activate/:id
+router.put("/activate/:id", activateProviderById)
 
 // @desc    Delete an provider by id
 // @route   DELETE /providers/:id
