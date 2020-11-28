@@ -63,7 +63,6 @@ module.exports = {
       }
       throw new NotFoundError("No storage found.")
     } catch (error) {
-      console.log(error)
       return ErrorHandler.sendErrors(res, error)
     }
   },

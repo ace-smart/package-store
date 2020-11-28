@@ -2,6 +2,7 @@ const express = require("express")
 const router = express.Router()
 const {
   auth,
+  getUserData,
   renewAccessToken,
   register,
   confirmEmail,
@@ -10,12 +11,17 @@ const {
   resetPassword,
   updateNewPassword,
   resetToken,
+  leaveMessage
 } = require("../controllers/auth.controller")
 const { _ensureAccessToken } = require("../helper/auth")
 
 // @desc    Generate tokens
 // @route   POST /auth
 router.post("/auth", auth)
+
+// @desc    GET User data by tokens
+// @route   GET /get-user-data
+router.get("/get-user-data", _ensureAccessToken, getUserData)
 
 // @desc    Renew access token
 // @route   GET /token
@@ -48,6 +54,10 @@ router.get("/reset-password", resetPassword)
 // @desc    Update new password
 // @route   PUT /reset-password
 router.put("/reset-password", updateNewPassword)
+
+// @desc    Leave a message to admin
+// @route   POST /leave-message
+router.post("/leave-message", leaveMessage)
 
 
 module.exports = router

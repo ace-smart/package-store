@@ -1,0 +1,107 @@
+<div class="row">
+    <div class="col-sm-4 mx-auto text-center">
+        {{!-- Modal button --}}
+        <button id="add-img" type="button" class="btn btn-primary waves-effect waves-light mx-auto" data-toggle="modal"
+            data-target="#myModal"><i class="fa fa-plus-square mr-1"></i> Add a new product image</button>
+    </div>
+</div>
+
+<hr>
+
+<div class="row">
+    {{#each gallery}} 
+    <div class="col-md-6 col-lg-3">
+        <div class="product-list-box" style="height: 96%;">
+            <a href="javascript:void(0);">
+                <img src="data:image/{{{mimeType}}};base64,{{{parseImageToString data}}}" class="img-fluid" alt="work-thumbnail" style="width: 100%; height: 77%">
+            </a>
+            <div class="detail">
+                <h4 class="font-16"><a class="text-white">{{{imageName}}}</a> </h4>
+
+                <a data-id="{{{id}}}" type="button" onclick="removeImage(this)" class="btn btn-secondary btn-sm">Delete</a>
+            </div>
+        </div>
+    </div>
+    {{/each}}
+</div>
+
+
+<form action="/admin/products/gallery/add?productId={{{productId}}}" method="POST" enctype="multipart/form-data">
+    {{> csrf }}
+    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title mt-0" id="myModalLabel">Upload new image</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+
+                <div class="modal-body">
+                    {{!-- flash --}}
+                    {{> admin/flash.partial}}
+
+                    <input type="hidden" name="productId" id="productId" value="{{{productId}}}">
+                    <div class="row p-2">
+                        <div class="col-sm-5 ">
+                            <div class="border mb-3 h-100 w-100">
+                                {{!-- Load Image --}}
+                                <img id="product-img-block" src="/static/blank-image-placeholder.png"
+                                    alt="Image placeholder" style="width: 100%; height: 100%">
+                            </div>
+                        </div>
+
+                        <div class="col-sm-7">
+                            <div class="row ">
+                                <div class="form-group col-sm-12 text-left">
+                                    <label for="" class="col-sm-4 p-0">File uploaded</label>
+                                    <input type="text" name="fileName" id="fileName" class="col-sm-7 " value=""
+                                        disabled>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-12 text-left">
+                                    <label for="" class="col-sm-4 p-0">Size (bytes)</label>
+                                    <input type="text" name="size" id="size" class="col-sm-7 " value="" disabled>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-12  text-left">
+                                    <label for="" class="col-sm-4 p-0">Type</label>
+                                    <input type="text" name="fileType" id="fileType" class="col-sm-7 " value=""
+                                        disabled>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-12  text-left">
+                                    <label for="" class="col-sm-4 p-0">Image name</label>
+                                    <input type="text" name="imageName" id="imageName" class="col-sm-7 "
+                                    placeholder="Save as name...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-5 text-center">
+                            <div class="upload-btn mx-auto">
+                                {{#if  errors.productImg}}
+                                {{#with errors.productImg}}
+                                {{> admin/error.partial}}
+                                {{/with}}
+                                {{/if}}
+                                <input type="file" name="productImg" id="productImg" accept="image/*"
+                                    onchange="loadFile(event)" style="display:  none;" required>
+                                <label for="productImg" class="btn btn-brown waves-effect waves-light active">
+                                    <i class="mdi mdi-cloud-upload mr-1"></i> Upload new image
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary waves-effect" data-dismiss="modal">Close</button>
+                    <button  type="submit" class="btn btn-primary waves-effect waves-light">Add</button>
+                </div>
+            </div>
+        </div>
+    </div><!-- /.modal-content -->
+    {{!-- </form> --}}

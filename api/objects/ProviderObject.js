@@ -3,23 +3,40 @@ const AddressModel = require('../models/AddressModel')
 const validator = require("validator")
 const { isExistent, hasSpecialChars, STATUS_VALUES } = require("../helper/validation")
 const ValidationError = require('../errors/validation')
+const AddressObject = require('./AddressObject')
 
 class ProviderObject {
-  constructor({ _id, name, addressId, email, description, status, createdAt }) {
+  constructor({ _id, name, addressId, email, status, createdAt }) {
     this.id = _id
     this.name = name
     this.addressId = addressId
     this.email = email
-    this.description = description
     this.status = status
     this.createdAt = createdAt
   }
 
+  async setAddress() {
+    if(this.addressId instanceof Object) {
+      // populated
+      this.address = new AddressObject({...this.addressId})
+      this.addressId = this.address.id.toString()
+    } else if (typeof this.addressId === 'string') {
+      // existed
+      this.address = await AddressObject.getOneAddressById(this.addressId)
+    } else {
+      this.address = null
+    }
+  }
+
   static async getOneProviderBy(criteria = {}, selectFields = null) {
     try {
-      let provider = await ProviderModel.findOne(criteria, selectFields).lean()
-      if (provider) {
-        provider = new ProviderObject({ ...provider })
+      const providerDoc = await ProviderModel.findOne(criteria, selectFields)
+      .populate({path: 'addressId'})
+      .lean()
+      
+      if (providerDoc) {
+        const provider = new ProviderObject({ ...providerDoc })
+        await provider.setAddress()
         return provider
       }
 
@@ -31,11 +48,12 @@ class ProviderObject {
 
   static async getProvidersBy(criteria = {}, selectFields = null) {
     try {
-      const providers = await ProviderModel.find(criteria, selectFields).lean()
-      if (providers.length > 0) {
+      const providerDocs = await ProviderModel.find(criteria, selectFields).lean()
+
+      if (providerDocs.length > 0) {
         let providerList = new Array()
 
-        providers.forEach((element) => {
+        providerDocs.forEach(async (element) => {
           const object = new ProviderObject({ ...element })
           providerList.push(object)
         })
@@ -53,19 +71,13 @@ class ProviderObject {
     let errors = new Array()
 
     if (type === "create") {
-      if (this.name == null || validator.isEmpty(this.name)) {
+      if (this.name == null || validator.isEmpty(this.name.toString())) {
         errors.push({
           field: "name",
           message: "Must be required.",
         })
       }
-      if (this.addressId == null || validator.isEmpty(this.addressId)) {
-        errors.push({
-          field: "addressId",
-          message: "Must be required.",
-        })
-      }
-      if (this.email == null || validator.isEmpty(this.email)) {
+      if (this.email == null || validator.isEmpty(this.email.toString())) {
         errors.push({
           field: "email",
           message: "Must be required.",
@@ -78,44 +90,41 @@ class ProviderObject {
     }
 
     // name
-    if (typeof this.name !== "undefined" && !validator.isEmpty(this.name)) {
-      if (hasSpecialChars(this.name)) {
+    if (this.name != null && !validator.isEmpty(this.name.toString())) {
+      if (hasSpecialChars(this.name.toString())) {
         errors.push({
           field: "name",
-          message: "Must contain only numbers,characters and spaces.",
+          message: "Must contain only numbers, characters and spaces.",
+          value: this.name
         })
       }
       if (!validator.isLength(this.name, { min: 4, max: 255 })) {
         errors.push({
           field: "name",
           message: "Must be from 4 to 255 characters.",
+          value: this.name
         })
       }
     }
     // addressId
-    if (typeof this.addressId !== "undefined" && !validator.isEmpty(this.addressId)) {
+    if (this.addressId != null && !validator.isEmpty(this.addressId.toString())) {
         if (!validator.isMongoId(this.addressId)) {
           errors.push({
             field: 'addressId',
-            message: "Invalid format."
+            message: "Invalid format.",
+            value: this.addressId
           })
         }
-        try {
-          if (!(await isExistent(AddressModel, { _id: this.addressId }))) {
-            errors.push({
-              field: 'addressId',
-              message: "Not existent."
-            })
-          }
-        } catch (error) {
+        if (!(await isExistent(AddressModel, { _id: this.addressId }))) {
           errors.push({
             field: 'addressId',
-            message: "Not existent."
+            message: "Not existent.",
+            value: this.addressId
           })
         }
     } 
     // email
-    if (typeof this.email !== "undefined" && !validator.isEmpty(this.email)) {
+    if (this.email != null && !validator.isEmpty(this.email.toString())) {
       const _email = this.email.toLowerCase()
       if (!validator.isEmail(_email)) {
         errors.push({
@@ -139,27 +148,13 @@ class ProviderObject {
         })
       }
     }
-    // description
-    if (typeof this.description !== "undefined" && !validator.isEmpty(this.description)) {
-        if (hasSpecialChars(validator.trim(this.description))) {
-          errors.push({
-            field: 'description',
-            message: "Must not be filled in with special characters."
-          })
-        }
-        if (!validator.isLength(validator.trim(this.description), { max: 300 })) {
-          errors.push({
-            field: 'description',
-            message: "Must be under 300 characters."
-          })
-        }
-    }
     // status
-    if (typeof this.status !== "undefined" && !validator.isEmpty(this.status)) {
+    if (this.status != null && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
         errors.push({
           field: "status",
           message: "Not valid.",
+          value: this.status
         })
       }
     }
@@ -201,14 +196,23 @@ class ProviderObject {
 
   static async create({ ...providerData }) {
     try {
+      // [Create] address
+      if (providerData.address) {
+        if (!AddressObject.hasEmptyAddressData(providerData.address)) {
+          const createdAddress = await AddressObject.create({...providerData.address})
+          providerData.addressId = createdAddress.id.toString()
+        } else {
+          delete providerData.address
+        }
+      }
+      // Add provider
       let providerObject = new ProviderObject({ ...providerData })
-      providerObject = providerObject.clean()
       const validation = await providerObject.validate("create")
       if (validation) {
-        const createdProvider = await ProviderModel.create({ ...validation })
+        providerObject = providerObject.clean()
+        const createdProvider = await ProviderModel.create({ ...providerObject })
         if (createdProvider) {
-          const provider = new ProviderObject({ ...createdProvider })
-          return provider
+          return new ProviderObject({ ...createdProvider._doc })
         }
       }
 
@@ -236,15 +240,30 @@ class ProviderObject {
     }
 
     try {
+      // [Create/Update] address
+      if (updateData.address) {
+        if (!AddressObject.hasEmptyAddressData(updateData.address)) {
+          if(updateData.address.id == null) {
+            // Create 
+            const createdAddress = await AddressObject.create({...updateData.address})
+            updateData.addressId = createdAddress.id.toString()
+          } else{
+            // Update
+            const addressObj = await AddressObject.getOneAddressById(updateData.address.id)
+            await addressObj.update({...updateData.address})
+          }
+        }
+      }
+      
+      // Update provider
       let updateObject = new ProviderObject({ ...updateData })
-      updateObject = updateObject.clean()
-      const validation = await updateObject.validate("update")
+      const validation = await updateObject.validate("update", this.id)
       if (validation) {
-        const updated = new ProviderObject(
-          await ProviderModel.findOneAndUpdate({ _id: this.id }, { ...validation }, { new: true })
-        )
+        updateObject = updateObject.clean()
+        const updated = await ProviderModel.findOneAndUpdate(
+          { _id: this.id }, { ...updateObject }, { new: true })
 
-        return updated
+        return new ProviderObject(updated)
       }
 
       throw new Error("Failed to update.")
@@ -284,6 +303,10 @@ class ProviderObject {
     }
 
     try {
+      // Remove address
+      const addressObject = new AddressObject({...this.address})
+      await addressObject.remove()
+
       const isRemoved = await ProviderModel.findOneAndDelete({ _id: this.id }).lean()
       if (isRemoved) {
         return new ProviderObject({ ...isRemoved })

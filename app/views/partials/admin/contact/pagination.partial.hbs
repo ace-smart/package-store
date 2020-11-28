@@ -1,0 +1,32 @@
+<div class="row m-t-20">
+  <div class="col-7">
+    {{#if pagination}}
+    Showing {{{showNumOfItems pagination.numOfItems pagination.itemPerPage pagination.currentPage}}} of {{pagination.numOfItems}}
+    {{/if}}
+  </div>
+  <div class="col-5">
+    <div class="btn-group pull-right">
+        {{!-- Prev --}}
+        {{#equal pagination.currentPage 1}}
+        <button type="button" class="btn btn-sm btn-blue-grey waves-effect waves-light">
+          <i class="fa fa-chevron-left"></i>
+        </button>
+        {{else}}
+        <button onclick="prevPage()" type="button" class="btn btn-sm btn-success waves-effect">
+          <i class="fa fa-chevron-left"></i>
+        </button>
+        {{/equal}}
+
+        {{!-- Next --}}
+        {{#equal pagination.currentPage pagination.numOfPages}}
+          <button type="button" class="btn btn-sm btn-blue-grey waves-effect waves-light">
+            <i class="fa fa-chevron-right"></i>
+          </button>
+        {{else}}
+        <button onclick="nextPage()" type="button" class="btn btn-sm btn-success waves-effect">
+          <i class="fa fa-chevron-right"></i>
+        </button>
+        {{/equal}}
+    </div>
+  </div>
+</div>

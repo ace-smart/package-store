@@ -3,18 +3,24 @@ const TokenObject = require("../objects/TokenObject")
 const LoginObject = require("../objects/LoginObject")
 const RegisterObject = require("../objects/RegisterObject")
 const ConfirmEmailObject = require("../objects/ConfirmEmailObject")
+const ContactObject = require("../objects/ContactObject")
 const TokenError = require("../errors/token")
 const mailer = require("../helper/mailer")
 const registerTemplate = require("../../email_templates/register")
 const ResetPwdObject = require("../objects/ResetPwdObject")
 const ErrorHandler = require("../helper/errorHandler")
+const NotFoundError = require("../errors/not_found")
 
 module.exports = {
   // @desc    Authenticate
-  // @route   POST /auth
+  // @route   POST /auth?role=user
   auth: async (req, res) => {
     try {
-      const loggedUser = await new LoginObject({ ...req.body }).authenticate()
+      if (req.query.role == null) {
+        throw new Error("No role selected.")
+      }
+
+      const loggedUser = await new LoginObject({ ...req.body }).authenticate(req.query.role)
       const isInitialized = loggedUser.initializeTokens() // regenerate tokens
       if (isInitialized) {
         await loggedUser.save()
@@ -22,6 +28,21 @@ module.exports = {
       }
 
       throw new Error("Authentication failed.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc    GET User data by tokens
+  // @route   GET /get-user-data
+  getUserData: async (req, res) => {
+    try {
+      const userObject = await UserObject.getDataByToken("access", req.user.accessToken)
+      if (userObject) {
+        return res.status(200).json(userObject)
+      }
+
+      throw new NotFoundError("No user found.")
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -199,21 +220,18 @@ module.exports = {
         user.setConfirmString = require("crypto").randomBytes(64).toString("hex")
         const isUpdated = await user.save()
         if (isUpdated) {
-          const confirmEmailURL =
-            req.protocol +
-            "://" +
-            req.get("host") +
-            `/api/reset-password?email=${isUpdated.email}&confirmString=${isUpdated.confirmString}`
+          const confirmEmailRoute =
+            `reset-password?email=${isUpdated.email}&confirmString=${isUpdated.confirmString}`
 
           const body = registerTemplate.setRegisterTemplate(
-            { btnLink: confirmEmailURL, btnText: 'Reset password' })
+            {btnText: 'Reset password' }, confirmEmailRoute)
           const mailResponse = await mailer.sendEmail([req.body.email], {
             subject: "EcommerceStore - Reset password",
             htmlBody: body,
           })
 
           if (mailResponse.accepted.length > 0) {
-            return res.sendStatus(201)
+            return res.sendStatus(200)
           } else {
             return res.status(400).json({
               error: { message: "Failed to send reset password email. Please request a new one." },
@@ -335,7 +353,8 @@ module.exports = {
   resetToken: async (req, res) => {
     try {
       const userObject = await UserObject.getDataByToken("access", req.user.accessToken)
-      const isUpdated = await userObject.update({ accessToken: null, refreshToken: null })
+      const isUpdated = await userObject.resetTokens()
+      
       if (isUpdated) {
         return res.sendStatus(204)
       }
@@ -345,4 +364,21 @@ module.exports = {
       return ErrorHandler.sendErrors(res, error)
     }
   },
+
+  // @desc:   Leave a message to admin
+  // @route:  POST /leave-message
+  leaveMessage: async (req, res) => {
+    try {
+      const createdContact = await ContactObject.create({...req.body})
+
+      if (createdContact) {
+        return res.status(201).json(createdContact)
+      }
+      
+      throw new Error("Failed to create contact.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
 }

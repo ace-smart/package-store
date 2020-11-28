@@ -1,6 +1,8 @@
 const ProductModel = require("../models/ProductModel")
 const SubcategoryModel = require("../models/SubcategoryModel")
-const CategoryModel = require("../models/CategoryModel")
+const SubcategoryObject = require('./SubcategoryObject')
+const GalleryObject = require('./GalleryObject')
+const RestockModel = require("../models/RestockModel")
 const validator = require("validator")
 const { isExistent, hasSpecialChars, STATUS_VALUES } = require("../helper/validation")
 const ValidationError = require('../errors/validation')
@@ -14,15 +16,55 @@ class ProductObject {
     this.price = price
     this.status = status
     this.createdAt = createdAt
+    this.gallery = null
+    this.remainingNumber = 0
+  }
+
+  async getRemainingNumber() {
+    try {
+      let remainingNumber = 0
+      const restockData = await RestockModel.find({$and: [{status: 'activated'}, {productId: this.id}]}).lean()
+
+      restockData.forEach(data => {
+        if (data.action === 'import') {
+          remainingNumber += parseInt(data.amount)
+        } else if (data.action === 'export') {
+          remainingNumber -= parseInt(data.amount)
+        }
+      })
+
+      this.remainingNumber = remainingNumber
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async setSubcategory() {
+    if (this.subcategoryId instanceof Object) {
+      // populated
+      this.subcategory = new SubcategoryObject({...this.subcategoryId})
+      this.subcategoryId = this.subcategory.id.toString()
+    } else if (typeof this.subcategoryId === 'string') {
+      // existed
+      this.subcategory = await SubcategoryObject.getOneSubcategoryBy({_id: this.subcategoryId})
+    } else {
+      this.subcategory = null
+    }
   }
 
   // @desc:     Get product by criteria
   // @return:   ProductObject
   static async getOneProductBy(criteria = {}, selectFields = null) {
     try {
-      const product = await ProductModel.findOne(criteria, selectFields).lean()
-      if (product) {
-        const productObject = new ProductObject({ ...product })
+      const productDoc = await ProductModel.findOne(criteria, selectFields)
+        .populate({path: 'subcategoryId'})
+        .lean()
+        
+      if (productDoc) {
+        const productObject = new ProductObject({...productDoc })
+        await productObject.setSubcategory()
+        productObject.gallery = await GalleryObject.getImagesBy({productId: productObject.id})
+        await productObject.getRemainingNumber()
         return productObject
       }
 
@@ -36,43 +78,47 @@ class ProductObject {
   // @return:   ProductObject[]
   static async getProductsBy(criteria = {}, selectFields = null) {
     try {
-      const listOfProducts = await ProductModel.find(criteria, selectFields).lean()
+      const listOfProducts = await ProductModel.find(criteria, selectFields)
+        .populate({path: 'subcategoryId'})
+        .lean()
+      
       if (listOfProducts.length > 0) {
         let productObjects = new Array()
-        listOfProducts.forEach((element) => {
-          const object = new ProductObject({ ...element })
-          object.clean()
-          productObjects.push(object)
-        })
-
+        productObjects = await Promise.all(listOfProducts.map(async (element) => {
+          const object = new ProductObject({ ...element})
+          await object.setSubcategory()
+          await object.getRemainingNumber()
+          return object
+        }))
+        
         return productObjects
       }
-
+      
       return null
     } catch (error) {
       throw error
     }
   }
 
-  // @fields:   [subcategoryId, name, price, details, status]
+  // @fields:   [subcategory, name, price, details, status]
   async validate(type = "create", exceptionId = null) {
     let errors = new Array()
 
     // === CREATE === ----------  Required fields
     if (type === "create") {
-      if (typeof this.subcategoryId === "undefined" || validator.isEmpty(this.subcategoryId)) {
+      if (this.subcategoryId == null || validator.isEmpty(this.subcategoryId.toString())) {
         errors.push({
           field: "subcategoryId",
           message: "Must be required.",
         })
       }
-      if (typeof this.name === "undefined" || validator.isEmpty(this.name)) {
+      if (this.name == null || validator.isEmpty(this.name.toString())) {
         errors.push({
           field: "name",
           message: "Must be required.",
         })
       }
-      if (typeof this.price === "undefined") {
+      if (this.price == null || validator.isEmpty(this.price.toString())) {
         errors.push({
           field: "price",
           message: "Must be required.",
@@ -85,9 +131,9 @@ class ProductObject {
       }
     }
 
-    // subcategoryId
-    if (typeof this.subcategoryId !== "undefined" && !validator.isEmpty(this.subcategoryId)) {
-      if (!validator.isMongoId(this.subcategoryId)) {
+    // subcategory
+    if (this.subcategoryId != null) {
+      if (!validator.isMongoId(this.subcategoryId.toString())) {
         errors.push({
           field: "subcategoryId",
           message: "Invalid format.",
@@ -103,30 +149,15 @@ class ProductObject {
       }
     }
     // name
-    if (typeof this.name !== "undefined" && !validator.isEmpty(this.name)) {
-      if (
-        validator.matches(
-          this.name,
-          new RegExp(
-            "[\r\n\t\f\v\\`~\\!@#\\$%\\^&\\*()_\\+\\=\\[\\]\\{\\};'\"<>\\?\\-\\/\\.\\,:]+",
-            "g"
-          )
-        )
-      ) {
+    if (this.name != null && !validator.isEmpty(this.name.toString())) {
+      if (hasSpecialChars(this.name.toString())){
         errors.push({
           field: "name",
-          message: "Must contain only numbers,characters and spaces.",
+          message: "Can not have special characters.",
           value: this.name,
         })
       }
-      if (!validator.matches(validator.trim(this.name), RegExp("\\w+|(\\w+\\s)", "g"))) {
-        errors.push({
-          field: "name",
-          message: "Must contain only numbers and characters.",
-          value: this.name,
-        })
-      }
-      if (!validator.isLength(this.name, { min: 4, max: 200 })) {
+      if (!validator.isLength(this.name.toString(), { min: 4, max: 200 })) {
         errors.push({
           field: "name",
           message: "Must be from 4 to 200 characters.",
@@ -142,163 +173,104 @@ class ProductObject {
       }
     }
     // price
-    if (typeof this.price !== "undefined") {
-      if (
-        JSON.stringify(this.price) === "{}" ||
-        typeof this.price === "string" ||
-        this.price.value == null ||
-        this.price.currency == null
-      ) {
+    if (this.price != null && !validator.isEmpty(this.price.toString())) {
+      if (!validator.isNumeric(this.price.toString())) {
         errors.push({
           field: "price",
-          message: "Must contain two properties {value, currency}",
-          value: this.price,
-        })
-      }
-      if (!validator.isNumeric(this.price.value.toString())) {
-        errors.push({
-          field: "price.value",
           message: "Must be numbers",
           value: this.price,
         })
       }
-      if (!validator.isAlpha(this.price.currency)) {
+      if (parseFloat(this.price.toString()) < 0) {
         errors.push({
-          field: "price.currency",
-          message: "Must contain only alphabetic characters. (eg. USD, AUS, CAD)",
-          value: this.price,
-        })
-      }
-      if (!validator.isLength(this.price.currency, { max: 6 })) {
-        errors.push({
-          field: "price.currency",
-          message: "Must be under 6 characters.",
+          field: "price",
+          message: "Can not be negative",
           value: this.price,
         })
       }
     }
     // details
-    if (typeof this.details !== "undefined" && !JSON.stringify(this.details) !== "{}") {
+    if (this.details != null && !JSON.stringify(this.details) !== "{}") {
       // details.size
-      if (this.details.size != null) {
-        if (!validator.isAlphanumeric(this.details.size)) {
+      if (this.details.size != null && !validator.isEmpty(this.details.size.toString())) {
+        if (!validator.isAlpha(this.details.size)) {
           errors.push({
             field: "details.size",
-            message: "Must be only numbers and characters",
-            value: this.details,
+            message: "Only alphabetic characters are accepted.",
+            value: this.details.size,
           })
         }
       }
       // details.color
-      if (this.details.color != null) {
+      if (this.details.color != null ) {
         if (
           JSON.stringify(this.details.color) === "{}" ||
-          this.details.color.name == null ||
+          this.details.color.colorName == null ||
           this.details.color.hexCode == null
         ) {
           errors.push({
-            field: "details.color",
-            message: "Must have two properties {name, hexCode}",
-            value: this.details,
+            field: "color",
+            message: "Must have two properties {colorName, hexCode}",
+            value: this.details.color,
           })
         }
-        if (!validator.isAlphanumeric(this.details.color.name)) {
-          errors.push({
-            field: "details.color.name",
-            message: "Must be only numbers and characters",
-            value: this.details,
-          })
-        }
-        if (!validator.isHexColor(this.details.color.hexCode)) {
-          errors.push({
-            field: "details.color.hexCode",
-            message: "Invalid value.",
-            value: this.details,
-          })
-        }
-      }
-      // details.tags
-      if (this.details.tags != null) {
-        if (!Array.isArray(this.details.tags)) {
-          errors.push({
-            field: "details.tags",
-            message: "Must be an array of strings",
-            value: this.details,
-          })
-        }
-        if (this.details.tags.length > 0) {
-          const invalidElements = this.details.tags.find((ele) => !validator.isAlphanumeric(ele))
-          if (invalidElements) {
+        if (!validator.isEmpty(this.details.color.colorName.toString())){
+          if (hasSpecialChars(this.details.color.colorName)) {
             errors.push({
-              field: "details.tags",
-              message: "Must only have elements which are numbers and characters",
-              value: this.details,
+              field: "colorName",
+              message: "Must be only numbers and characters",
+              value: this.details.color.colorName,
+            })
+          }
+        }
+        
+        if (!validator.isEmpty(this.details.color.hexCode.toString())){
+          if (!validator.isHexColor(this.details.color.hexCode)) {
+            errors.push({
+              field: "hexCode",
+              message: "Invalid value.",
+              value: this.details.color.hexCode,
             })
           }
         }
       }
-      // details.description
-      if (this.details.description != null) {
-        if (hasSpecialChars(this.description)) {
-          errors.push({
-            field: "details.description",
-            message: "Can not be filled in with special characters",
-            value: this.details,
-          })
+      // details.material
+      if (this.details.material != null && !validator.isEmpty(this.details.material.toString())) {
+        if (hasSpecialChars(this.details.material.toString())) {
+            errors.push({
+              field: "material",
+              message: "Can not have special characters.",
+              value: this.details.material,
+            })
         }
-        if (!validator.isLength(this.description, { max: 300 })) {
+      }
+      // details.gender
+      if (this.details.gender != null && !validator.isEmpty(this.details.gender.toString())) {
+        if (!validator.isAlpha(this.details.gender)) {
           errors.push({
-            field: "details.description",
-            message: "Must be under 300 characters.",
-            value: this.details,
+            field: "gender",
+            message: "Only alphabetic characters are accepted.",
+            value: this.details.gender,
           })
         }
       }
-      // details.madeIn
-      if (this.details.madeIn != null) {
-        if (!validator.isAlphanumeric(this.details.madeIn)) {
+      // details.season
+      if (this.details.season != null && !validator.isEmpty(this.details.season.toString())) {
+        if (!validator.isAlpha(this.details.season)) {
           errors.push({
-            field: "details.madeIn",
-            message: "Must be only numbers and characters",
-            value: this.details,
-          })
-        }
-      }
-      // details.weight
-      if (this.details.weight != null) {
-        if (
-          JSON.stringify(this.details.weight) === "{}" ||
-          this.details.weight.value == null ||
-          this.details.weight.unit == null
-        ) {
-          errors.push({
-            field: "details.weight",
-            message: "Must contain two properties {value, unit}",
-            value: this.details,
-          })
-        }
-        if (!validator.isNumeric(this.details.weight.value.toString())) {
-          errors.push({
-            field: "details.weight.value",
-            message: "Must be only numbers",
-            value: this.details,
-          })
-        }
-        if (!validator.isAlpha(this.details.weight.unit)) {
-          errors.push({
-            field: "details.weight.unit",
-            message: "Must be only alphabetic characters (eg. Kg, g, lbs)",
-            value: this.details,
+            field: "season",
+            message: "Only alphabetic characters are accepted.",
+            value: this.details.season,
           })
         }
       }
     }
     // status
-    if (typeof this.status !== "undefined" && !validator.isEmpty(this.status)) {
+    if (this.status != null && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
         errors.push({
           field: "status",
-          message: "The value of the field 'status' is not valid.",
+          message: "Value is not valid.",
           value: this.status,
         })
       }
@@ -327,26 +299,21 @@ class ProductObject {
             productObject[key] = validator.trim(value.toString().toLowerCase())
           }
           if (key === 'details') {
-            if (productObject[key].color != null && productObject[key].color.name != null) {
-              productObject[key].color.name = validator.trim(value.color.name.toString().toLowerCase())
+            if (productObject[key].color != null && productObject[key].color.colorName != null) {
+              productObject[key].color.colorName = validator.trim(value.color.colorName.toString().toLowerCase())
             }
-            if (productObject[key].tags.length > 0) {
-              for (let x = 0; x < productObject[key].tags.length; x++){
-                productObject[key].tags[x] = validator.trim(value.tags[x].toString().toLowerCase())
-              }
+            if (productObject[key].size != null) {
+              productObject[key].size = validator.trim(value.size.toUpperCase())
             }
-            if (productObject[key].weight != null) {
-              if (productObject[key].weight.value != null) {
-                productObject[key].weight.value = parseFloat(value.weight.value.toString())
-              }
-              if (productObject[key].weight.unit != null) {
-                productObject[key].weight.unit = validator.trim(value.weight.unit.toUpperCase())
-              }
+            if (productObject[key].gender != null) {
+              productObject[key].gender = validator.trim(value.gender.toString().toLowerCase())
+            }
+            if (productObject[key].season != null) {
+              productObject[key].season = validator.trim(value.season.toString().toLowerCase())
             }
           }
           if (key === 'price') {
-            productObject[key].value = parseFloat(value.value.toString())
-            productObject[key].currency = validator.trim(value.currency.toUpperCase())
+            productObject[key] = Math.abs(parseFloat(value.toString()))
           }
         }
 
@@ -363,18 +330,46 @@ class ProductObject {
     return productObject
   }
 
+  // @desc:   Empty => return true
+  static hasEmptyDetails(productData) {
+    const detailKeys = Object.keys(productData)
+    let emptyProps = []
+    for (const [key, value] of Object.entries(productData)) {
+      if (value == null) {
+        emptyProps.push(key)
+      } else if (validator.isEmpty(value.toString())) {
+        emptyProps.push(key)
+      }
+    }
+
+    if (emptyProps.length === detailKeys.length) {
+      return true
+    }
+
+    return false
+  }
+
   // @desc:     Create a product
-  // @fields:   [subcategoryId, name, price, details]
+  // @fields:   [subcategory, name, price, details]
   // @return:   ProductObject
   static async create({ ...productData } = {}) {
     try {
+      // [Update] Details
+      if (productData.details) {
+        if (!ProductObject.hasEmptyDetails(productData.details)) {
+          delete productData.details
+        }
+      }
+      
+      // Add product
       let productObject = new ProductObject({...productData})
-      productObject = productObject.clean()
-      const isValid = await productObject.validate()
-      if (isValid) {
-        const createdProduct = new ProductObject(await ProductModel.create({...isValid}))
+      const validation = await productObject.validate()
+      if (validation) {
+        productObject = productObject.clean()
+        const createdProduct = await ProductModel.create(
+          {...productObject })
         if (createdProduct) {
-          return createdProduct
+          return new ProductObject({...createdProduct._doc})
         }
       }
 
@@ -385,7 +380,7 @@ class ProductObject {
   }
 
   // @desc:     Update product
-  async update(info = {}) {
+  async update({...productData}) {
     if (this.id == null) {
       throw new ObjectError({
         objectName: "ProductObject",
@@ -403,15 +398,21 @@ class ProductObject {
     }
 
     try {
-      let productObject = new ProductObject({ ...info })
-      productObject = productObject.clean()
-      // console.log(productObject)
+      // [Update] Details
+      if (productData.details) {
+        if (ProductObject.hasEmptyDetails(productData.details)) {
+          delete productData.details
+        }
+      }
+
+      let productObject = new ProductObject({ ...productData })
       const validation = await productObject.validate("update", this.id)
       if (validation) {
-        const updatedProduct = new ProductObject(
-          await ProductModel.findOneAndUpdate({ _id: this.id }, { ...productObject }, { new: true })
-        )
-        return updatedProduct
+        productObject = productObject.clean()
+        const updatedProduct = await ProductModel.findOneAndUpdate({ _id: this.id }, 
+            {...productObject }, { new: true })
+            
+        return new ProductObject(updatedProduct)
       }
       throw new Error("Failed to update product.")
     } catch (error) {

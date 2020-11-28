@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken")
 const PayloadError = require("../errors/payload")
 const TokenError = require('../errors/token')
-// const UserObject = require("./UserObject")
 
 class TokenObject {
   constructor(token) {

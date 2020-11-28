@@ -10,9 +10,8 @@ module.exports = {
   // @return:   UserObject[]
   showUserList: async (req, res) => {
     try {
-      const selectFields = "username email status role confirmString createdAt profileId"
-      const users = await UserObject.getUsersBy({}, selectFields)
-      if (users & users.length > 0) {
+      const users = await UserObject.getUsersBy()
+      if (users && users.length > 0) {
         return res.status(200).json(users)
       }
 
@@ -28,7 +27,7 @@ module.exports = {
     try {
       const selectFields = "username email status role confirmString createdAt profileId"
       const users = await UserObject.getUsersBy({ role: "admin" }, selectFields)
-      if (users & users.length > 0) {
+      if (users && users.length > 0) {
         return res.status(200).json(users)
       }
 
@@ -45,7 +44,7 @@ module.exports = {
       const selectFields = "username email status role confirmString createdAt profileId"
       const users = await UserObject.getUsersBy({ role: "user" }, selectFields)
 
-      if (users & users.length > 0) {
+      if (users && users.length > 0) {
         return res.status(200).json(users)
       }
 
@@ -76,11 +75,11 @@ module.exports = {
   createNewUser: async (req, res) => {
     try {
       let validation = await (new RegisterObject({ ...req.body })).validate()
-      validation.setRole = (req.body.role != null) ? req.body.role : undefined
-      validation.setStatus = (req.body.status != null) ? req.body.status : undefined
-      const user = await UserObject.create({...validation})
-      if (user instanceof UserObject) {
-        return res.sendStatus(201)
+      if (validation) {
+        const user = await UserObject.create({...req.body})
+        if (user) {
+          return res.sendStatus(201)
+        }
       }
 
       throw new Error("Failed to create new user.")

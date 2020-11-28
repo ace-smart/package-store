@@ -1,40 +1,71 @@
 <div class="row p-3 m-2">
     <div class="col-12">
-        <form class="form-horizontal p-3" action="/admin/changePwd" method="POST">
+        <form class="form-horizontal p-3" action="/admin/change-password" method="POST">
             {{> csrf}}
             <div class="form-group mt-2">
-                <label for="currentPassword" class="mb-2"><i class="mdi mdi-key mr-2"></i>Current Password</label>
+                <label for="password" class="mb-2"><i class="mdi mdi-key mr-2"></i>Current Password</label>
                 <div class="input-group">
-                    <input type="password" name="currentPassword" class="form-control" placeholder="Enter CURRENT password" id="currentPassword" required>
-                    <div class="input-group-append">
-                        <span class="input-group-text"><i class="mdi mdi-key"></i></span>
+                    {{#if errors.password}}
+                    <input type="password" id="password" name="password" required class="form-control parsley-error" value="{{{errors.password.value}}}">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="mdi mdi-key"></i></span>
+                        </div>
                     </div>
-                </div>
-                {{#ifeq error.field 'currentPassword'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
+                    {{#with errors.password}}
+                    {{> admin/error.partial }}
+                    {{/with}}
+                    {{else}}
+                        {{!-- First load  --}}
+                        <input type="password" id="password" name="password" required class="form-control" placeholder="Enter CURRENT password">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="mdi mdi-key"></i></span>
+                        </div>
+                    </div>
+                    {{/if}}
             </div>
 
             <div class="form-group mt-2">
-                <label for="newPassword" class="mb-2"><i class="mdi mdi-lock-plus mr-2"></i>New password</label>
+                <label for="new_password" class="mb-2"><i class="mdi mdi-lock-plus mr-2"></i>New password</label>
                 <div class="input-group">
-                    <input type="password" class="form-control" name="newPassword" id="newPassword"
-                        placeholder="Enter NEW password" required>
-                    <div class="input-group-append">
-                        <span class="input-group-text"><i class="mdi mdi-lock-plus"></i></span>
+                    {{#if errors.new_password}}
+                    <input type="password" name="new_password" id="new_password" required class="form-control parsley-error" placeholder="Enter NEW password">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="mdi mdi-lock-plus"></i></span>
+                        </div>
                     </div>
-                </div>
-                {{#ifeq error.field 'newPassword'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
+                    {{#with errors.new_password}}
+                    {{> admin/error.partial }}
+                    {{/with}}
+                    {{else}}
+                        {{!-- First load  --}}
+                        <input type="password" name="new_password" id="new_password" required class="form-control" placeholder="Enter NEW password">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="mdi mdi-lock-plus"></i></span>
+                        </div>
+                    </div>
+                    {{/if}}
             </div>
 
             <div class="form-group mt-2">
-                <label for="confirm_newPassword" class="mb-2"><i class="mdi mdi-lock-plus mr-2"></i>Confirm new password</label>
+                <label for="confirm_new_password" class="mb-2"><i class="mdi mdi-lock-plus mr-2"></i>Confirm new password</label>
                 <div class="input-group">
-                    <input type="password" class="form-control" name="confirm_newPassword" id="confirm_newPassword"
-                        placeholder="Confirm NEW password" required>
-                    <div class="input-group-append">
-                        <span class="input-group-text"><i class="mdi mdi-lock-plus"></i></span>
+                    {{#if errors.confirm_new_password}}
+                    <input type="password" name="confirm_new_password" id="confirm_new_password" required class="form-control parsley-error"  placeholder="Confirm NEW password">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="mdi mdi-lock-plus"></i></span>
+                        </div>
                     </div>
-                </div>
-                {{#ifeq error.field 'confirm_newPassword'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
+                    {{#with errors.confirm_new_password}}
+                    {{> admin/error.partial }}
+                    {{/with}}
+                    {{else}}
+                        {{!-- First load  --}}
+                        <input type="password" name="confirm_new_password" id="confirm_new_password" required class="form-control" placeholder="Confirm NEW password">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="mdi mdi-lock-plus"></i></span>
+                        </div>
+                    </div>
+                    {{/if}}
             </div>
 
             <div class="form-group row m-t-30">

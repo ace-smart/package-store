@@ -86,5 +86,5 @@ module.exports = {
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
-  },
+  }
 }

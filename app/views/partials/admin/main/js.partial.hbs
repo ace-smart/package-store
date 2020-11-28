@@ -1,8 +1,36 @@
+{{#ifMatch route 'accounts'}}
+{{> admin/account/js.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'categories'}}
+{{> admin/category/js.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'products'}}
+{{> admin/product/js.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'providers'}}
+{{> admin/provider/js.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'storages'}}
+{{> admin/storage/js.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'restocks'}}
+{{> admin/restock/js.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'orders'}}
+{{> admin/order/js.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'vouchers'}}
+{{> admin/voucher/js.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'contacts'}}
+{{> admin/contact/js.partial}}
+{{/ifMatch}}
+
 <script>
     function toAddPage() {
         let forwardURL = document.URL.split('/');
         forwardURL = forwardURL.filter((value) => {
-            return value != 'admins' && value != 'customers' && value != 'edit' && value != "#"
+            return value != 'admins' && value != 'customers' && value != 'edit' && value != "#" 
         })
         forwardURL = forwardURL.join('/') + '/add';
         return window.location.href = forwardURL;
@@ -13,6 +41,16 @@
             return value != 'admins' && value != 'customers' && value != 'edit' && value != "#"
         })
         backwardURL.pop();
+        
+        const hasSubcateRoute = backwardURL.find((ele) => ele == 'subcategories')
+        const hasViewRoute = backwardURL.find((ele) => ele == 'view')
+        if (hasSubcateRoute) {
+            backwardURL.pop();
+        } else if (hasViewRoute) {
+            backwardURL.pop();
+        }
+
+
         return window.location.href = backwardURL.join('/');
     }
 </script>

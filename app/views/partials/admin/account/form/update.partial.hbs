@@ -1,116 +1,304 @@
-<h4 class="mt-0 header-title">Update Form</h4>
-<p class="text-muted m-b-30 font-14">Edit the fields and submit <strong>Save changes</strong> button to save them.</p>
+<p class="text-muted font-14">Fill in these fields below and submit <strong>Create</strong>
+  button to finish. Those fields with <span class="text-danger">*</span> is required.</p>
 
-<form action="/admin/accounts/edit/{{{user._id}}}" method="POST">
-    {{> csrf}}
-    <div class="row">
+
+<form action="/admin/accounts/edit/{{{account.id}}}" method="POST">
+  {{> csrf}}
+  <div class="row">
+    {{!-- LEFT COL --}}
+    <div class="col-sm-6 pr-3 add-product-left-col">
+      <p class="text-lime p-2 my-3 border-bottom"><i class="fa fa-info-circle mr-2"></i>Information</p>
+      {{!-- Username --}}
+      <div class="row">
         <div class="col-sm-12">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input id="username" name="username" type="text" 
-                {{#ifeq error.field 'username'}} 
-                    value="{{{error.value}}}" 
-                {{else}}
-                    {{#if error.formInput.username}}
-                        value="{{{error.formInput.username}}}"
-                    {{else}}
-                        value="{{{user.username}}}"
-                    {{/if}}
-                {{/ifeq}}
-                    class="form-control {{#ifeq error.field 'username'}}parsley-error{{else}} {{/ifeq}}" required>
+          <div class="form-group">
+            <label for="username">
+              <i class="mdi mdi-account-location mr-2"></i>Username
+              <span class="text-danger">*</span>
+            </label>
+            {{#if errors.username}}
+            <input id="username" name="username" type="text" required class="form-control parsley-error"
+              value="{{{errors.username.value}}}">
+            {{#with errors.username}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.username}}
+            <input id="username" name="username" type="text" required class="form-control" value="{{{validData.username}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="username" name="username" type="text" required class="form-control" value="{{{account.username}}}">
+            {{/if}}
+            {{/if}}
 
-                {{#ifeq error.field 'username'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
-            </div>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <div class="row">
+      {{!-- Email --}}
+      <div class="row">
         <div class="col-sm-12">
-            <div class="form-group">
-                <label for="email">Email</label>
-                    <input id="email" name="email" type="email" 
-                {{#ifeq error.field 'email'}} 
-                    value="{{{error.value}}}"
-                {{else}}
-                    {{#if error.formInput.email}}
-                        value="{{{error.formInput.email}}}" 
-                    {{else}}
-                        value="{{{user.email}}}"
-                    {{/if}}
-                {{/ifeq}}
-                    class="form-control {{#ifeq error.field 'email'}}parsley-error{{else}} {{/ifeq}}" required>
-                
-                {{#ifeq error.field 'email'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
-            </div>
-        </div>
-    </div>
+          <div class="form-group">
+            <label for="email">
+              <i class="ion-ios7-email mr-2"></i>Email
+              <span class="text-danger">*</span>
+            </label>
+            {{#if errors.email}}
+            <input id="email" name="email" type="email" required class="form-control parsley-error"
+              value="{{{errors.email.value}}}">
+            {{#with errors.email}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.email}}
+            <input id="email" name="email" type="email" required class="form-control" value="{{{validData.email}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input id="email" name="email" type="email" required class="form-control" value="{{{account.email}}}">
+            {{/if}}
+            {{/if}}
 
-    <div class="row">
+          </div>
+        </div>
+      </div>
+
+      {{!-- Role --}}
+      <div class="row">
         <div class="col-sm-6">
-            <div class="form-group">
-                <label class="control-label">Role</label>
-                <select class="form-control select2" name="role" id="role" required>
-                    <option value="" selected disabled>Select a role</option>
-                    <option value="admin" 
-                    {{#ifeq error.field 'role'}} 
-                        {{#ifMatch error.value 'admin'}} selected {{/ifMatch}} 
-                    {{else}}
-                        {{#if error.formInput.role}}
-                            {{#ifMatch error.formInput.role 'admin'}} selected {{/ifMatch}}
-                        {{else}}
-                            {{#ifMatch user.role 'admin'}} selected {{/ifMatch}}
-                        {{/if}}
-                    {{/ifeq}}> Admin
-                    </option>
-                    <option value="user" 
-                    {{#ifeq error.field 'role'}} 
-                        {{#ifMatch error.value 'user'}} selected {{/ifMatch}} 
-                    {{else}} 
-                        {{#if error.formInput.role}}
-                            {{#ifMatch error.formInput.role 'user'}} selected {{/ifMatch}}
-                        {{else}}
-                            {{#ifMatch user.role 'user'}} selected {{/ifMatch}}
-                        {{/if}}
-                    {{/ifeq}}> Customer
-                    </option>
-                </select>
-            </div>
-            {{#ifeq error.field 'role'}} {{> admin/form/error.partial }} {{else}} {{/ifeq}}
+          <div class="form-group">
+            <label class="control-label">
+              <i class="ion-ribbon-b mr-2"></i>Role
+              <span class="text-danger">*</span>
+            </label>
+            <select class="form-control select2" name="role" id="role" required>
+              <option value="" selected >Select a role</option>
+              {{#if validData.role}}
+              <option value="admin" {{#ifMatch validData.role 'admin'}} selected {{/ifMatch}}> Admin
+              </option>
+              <option value="user" {{#ifMatch validData.role 'user'}} selected {{/ifMatch}}> Customer
+              </option>
+              {{else}}
+              <option value="admin" {{#ifMatch account.role 'admin'}} selected {{/ifMatch}}> Admin
+              </option>
+              <option value="user" {{#ifMatch account.role 'user'}} selected {{/ifMatch}}> Customer
+              </option>
+              {{/if}}
+            </select>
+
+            {{#if errors.role}}
+            {{#with errors.role}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+
+          </div>
         </div>
+        {{!-- Status --}}
+        <div class="col-sm-6">
+          <div class="form-group text-center">
+            <label class="control-label">
+              <i class="ion-ios7-circle-filled mr-2"></i>Status
+            </label>
+            <div class="col-sm-12 text-right">
+            {{#if validData.status}}
+            <label class="btn btn-danger {{#ifMatch validData.status 'deactivated'}} active {{/ifMatch}}"
+              onclick="selectStatus(this)" for="deactivated-status">Deactivated</label>
+            <input type="radio" name="status" id="deactivated-status" value="deactivated"
+              {{#ifMatch validData.status 'deactivated'}} checked {{/ifMatch}}>
+            <label class="btn btn-success {{#ifMatch validData.status 'activated'}} active {{/ifMatch}}"
+              onclick="selectStatus(this)" for="activated-status">Activated</label>
+            <input type="radio" name="status" id="activated-status" value="activated"
+              {{#ifMatch validData.status 'activated'}} checked {{/ifMatch}}>
+
+            {{else}}
+            {{!-- First load --}}
+            <label class="btn btn-danger {{#ifMatch account.status 'deactivated'}} active {{/ifMatch}}" onclick="selectStatus(this)"
+              for="deactivated-status">Deactivated</label>
+            <input type="radio" name="status" id="deactivated-status" value="deactivated"  {{#ifMatch account.status 'deactivated'}} checked {{/ifMatch}}>
+            <label class="btn btn-success  {{#ifMatch account.status 'activated'}} active {{/ifMatch}}" onclick="selectStatus(this)" for="activated-status">Activated</label>
+            <input type="radio" name="status" id="activated-status" value="activated"  {{#ifMatch account.status 'activated'}} checked {{/ifMatch}}>
+            {{/if}}
+
+            {{#if errors.status}}
+            {{#with errors.status}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <div class="row mt-1 pt-2">
-        <div class="col-sm-2">
-            <div class="form-group">
-                <span class="control-label">Activated</span>
-            </div>
+    {{!-- RIGHT COL --}}
+    <div class="col-sm-6 pl-3 add-product-right-col">
+      <p class="text-lime p-2 my-3 border-bottom"><i class="mdi mdi-face-profile mr-2"></i>Profile</p>
+      {{!-- First Name -- Last Name --}}
+      <div class="form-group row mt-2">
+        <div class="col-6">
+          <label for="firstName" class="mb-2">
+            <i class="mdi mdi-account-card-details mr-2"></i>First Name
+          </label>
+            {{#if errors.firstName}}
+            <input type="text" id="firstName" name="firstName" class="form-control parsley-error"
+              value="{{{errors.firstName.value}}}">
+            {{#with errors.firstName}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.firstName}}
+            <input type="text" id="firstName" name="firstName"class="form-control" value="{{{validData.firstName}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input type="text" id="firstName" name="firstName" class="form-control" 
+            {{#if account.profile.firstName}} value="{{{account.profile.firstName}}}"{{else}}
+                placeholder="First Name"
+                {{/if}} 
+            >
+            {{/if}}
+            {{/if}}
         </div>
-        <div class="col-sm-2">
-            <div class="form-group">
-                <input type="checkbox" id="switch5" name="status" switch="success"
-                {{#ifeq error.field 'status'}} 
-                    {{!-- {{#ifMatch error.value 'activated'}} checked {{/ifMatch}}  --}}
-                {{else}}
-                    {{#ifeq error.formInput.status 'activated'}} checked 
-                    {{else}}
-                        {{#ifMatch user.status 'activated'}} checked {{/ifMatch}}
-                    {{/ifeq}}
-                {{/ifeq}}
-                />
-                <label id="status-lbl" for="switch5" data-on-label="Yes" data-off-label="No"></label>
-            </div>
-        </div>
-        {{#ifeq error.field 'status'}}
-        <div class="col-sm-12">
-            {{> admin/form/error.partial }}
-        </div>
-        {{else}} {{/ifeq}}
-    </div>
 
-    <div class="row">
-        <div class="col-sm-12 mr-0 text-right">
-            <button type="submit" class="btn btn-success waves-effect waves-light">Save Changes</button>
-            <button type="submit" class="btn btn-secondary waves-effect">Cancel</button>
+        <div class="col-6">
+          <label for="lastName" class="mb-2">
+            <i class="mdi mdi-account-card-details mr-2"></i>Last Name</label>
+            {{#if errors.lastName}}
+            <input type="text" id="lastName" name="lastName" class="form-control parsley-error"
+              value="{{{errors.lastName.value}}}">
+            {{#with errors.lastName}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{#if validData.lastName}}
+            <input type="text" id="lastName" name="lastName" class="form-control" value="{{{validData.lastName}}}">
+            {{else}}
+            {{!-- First load  --}}
+            <input type="text" id="lastName" name="lastName" class="form-control" 
+            {{#if account.profile.lastName}} value="{{{account.profile.lastName}}}"{{else}}
+                placeholder="Last Name"
+                {{/if}} 
+            >
+            {{/if}}
+            {{/if}}
         </div>
+      </div>
+      {{!-- Gender - DateOfBirth - Phone Number --}}
+      <div class="form-group row mt-2">
+        {{!-- Date of birth --}}
+        <div class="col-sm-6">
+          <label for="dateOfBirth" class="mb-2"><i class="mdi mdi-cake-variant mr-2"></i>Date of birth</label>
+          <div class="input-group">
+            {{#if errors.dateOfBirth}}
+            <input type="text" name="dateOfBirth" placeholder="mm/dd/yyyy" id="datepicker-autoclose"
+            class="form-control parsley-error"
+              value="{{{formatDate errors.dateOfBirth.value}}}">
+              <div class="input-group-append">
+                <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+              </div>
+            </div>
+            {{#with errors.dateOfBirth}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+
+              {{#if validData.dateOfBirth}}
+              <input type="text" name="dateOfBirth" placeholder="mm/dd/yyyy" id="datepicker-autoclose"
+              class="form-control" value="{{{formatDate validData.dateOfBirth}}}">
+              {{else}}
+              {{!-- First load  --}}
+              <input type="text" name="dateOfBirth" placeholder="mm/dd/yyyy" id="datepicker-autoclose"
+              class="form-control" 
+                {{#if account.profile.dateOfBirth}} value="{{{formatDate account.profile.dateOfBirth}}}" {{else}}
+                    placeholder="Last Name"
+                    {{/if}} 
+                >
+              {{/if}}
+            <div class="input-group-append">
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+            </div>
+          </div>
+          {{/if}}
+        </div>
+        {{!-- Phone number --}}
+        <div class="col-sm-6">
+          <label for="phoneNumber" class="mb-2"><i class="mdi mdi-cellphone-basic mr-2"></i>Phone number</label>
+          <div class="input-group">
+            {{#if errors.phoneNumber}}
+            <input type="text" name="phoneNumber" id="phoneNumber" class="form-control parsley-error"
+              value="{{{errors.phoneNumber.value}}}">
+              <div class="input-group-append">
+                <span class="input-group-text"><i class="ion-ios7-telephone"></i></span>
+              </div>
+            </div>
+            {{#with errors.phoneNumber}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+              {{#if validData.phoneNumber}}
+              <input type="text" id="phoneNumber" name="phoneNumber" class="form-control" value="{{{validData.phoneNumber}}}">
+              {{else}}
+              {{!-- First load  --}}
+              <input type="text" id="phoneNumber" name="phoneNumber" class="form-control" 
+                {{#if account.profile.phoneNumber}} value="{{{account.profile.phoneNumber}}}" {{else}}
+                    placeholder="Last Name"
+                    {{/if}} 
+                >
+              {{/if}}
+              <div class="input-group-append">
+                <span class="input-group-text"><i class="ion-ios7-telephone"></i></span>
+              </div>
+            </div>
+            {{/if}}
+        </div>
+      </div>
+      
+      <div class="form-group row mt-2">
+        <div class="col-sm-6">
+          {{!-- Gender --}}
+          <label class="mb-2">
+            <i class="mdi mdi-gender-transgender mr-2"></i>Gender
+          </label>
+          <select class="form-control select2" name="gender" id="gender" >
+            {{#if validData.gender}}
+            <option value="male" {{#ifMatch validData.gender 'male'}} selected {{/ifMatch}}> 
+             Male
+            </option>
+            <option value="female" {{#ifMatch validData.gender 'female'}} selected {{/ifMatch}}> 
+             <span>
+             Female
+             </span>
+            </option>
+            {{else}}
+                <option value="male" {{#ifMatch account.profile.gender 'male'}} selected {{/ifMatch}}> 
+                Male
+                </option>
+                <option value="female" {{#ifMatch account.profile.gender 'female'}} selected {{/ifMatch}}> 
+                <span>
+                Female
+                </span>
+                </option>
+            {{/if}}
+          </select>
+
+            {{#if errors.gender}}
+            {{#with errors.gender}}
+            {{> admin/error.partial }}
+            {{/with}}
+            {{else}}
+            {{/if}}
+        </div>
+      </div>
     </div>
+  </div>
+  <hr>
+
+  {{!-- Buttons --}}
+  <div class="col-sm-12 mr-0 text-right">
+    <button type="submit" class="btn btn-success waves-effect waves-light">Save changes</button>
+    <button type="button" onclick="backward()" class="btn btn-secondary waves-effect">Cancel</button>
+  </div>
 </form>

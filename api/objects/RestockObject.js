@@ -1,5 +1,7 @@
 const RestockModel = require('../models/RestockModel')
 const ProductModel = require('../models/ProductModel')
+const ProductObject = require('./ProductObject')
+const SubcategoryObject = require('./SubcategoryObject')
 const validator = require('validator')
 const ValidationError = require('../errors/validation')
 const {isExistent, STATUS_VALUES} = require('../helper/validation')
@@ -16,29 +18,54 @@ class RestockObject {
     this.updatedAt = updatedAt
   }
 
-  
+  async setProduct() {
+    if(this.productId instanceof Object) {
+      // populated
+      const product = new ProductObject({...this.productId})
+      this.product = product
+
+      if(product.subcategoryId) {
+        const subcategory = new SubcategoryObject({...product.subcategoryId})
+        this.product.subcategory = subcategory
+        this.product.subcategoryId = product.subcategoryId._id
+      }
+      this.productId = this.product.id.toString()
+    } else if (typeof this.productId === 'string') {
+      // existed
+      this.product = await ProductObject.getOneAddressById(this.productId)
+    } else {
+      this.product = null
+    }
+  }
+
   static async getOneRestockBy(criteria = {}, selectFields = null) {
     try {
-      let restock = await RestockModel.findOne(criteria, selectFields).lean()
+      let restock =  await RestockModel.findOne(criteria, selectFields)
+      .populate({path: 'productId', populate: {path:'subcategoryId'}}).lean()
+      
       if (restock) {
         restock = new RestockObject({ ...restock })
+        await restock.setProduct()
         return restock
       }
 
       return null
     } catch (error) {
+      console.log(error)
       throw error
     }
   }
 
   static async getRestocksBy(criteria = {}, selectFields = null) {
     try {
-      const restocks = await RestockModel.find(criteria, selectFields).lean()
+      const restocks = await RestockModel.find(criteria, selectFields)
+      .populate({path: 'productId'}).lean()
       if (restocks.length > 0) {
         let restockList = new Array()
 
-        restocks.forEach((element) => {
+        restocks.forEach(async (element) => {
           const object = new RestockObject({ ...element })
+          await object.setProduct()
           restockList.push(object)
         })
 
@@ -80,50 +107,63 @@ class RestockObject {
     }
 
     // productId
-    if (typeof this.productId !== "undefined" && !validator.isEmpty(this.productId.toString())) {
+    if (this.productId != null && !validator.isEmpty(this.productId.toString())) {
       if (!validator.isMongoId(this.productId)) {
         errors.push({
           field: "productId",
           message: "Invalid format.",
+          value: this.productId
         })
       }
       if (! await (isExistent(ProductModel,{ _id: this.productId }))) {
         errors.push({
           field: "productId",
           message: "Not existent.",
+          value: this.productId
         })
       }
     }
     // amount
-    if (typeof this.amount !== "undefined" && !validator.isEmpty(this.amount.toString())) {
+    if (this.amount != null) {
+      if (validator.isEmpty(this.amount.toString())) {
+        errors.push({
+          field: "amount",
+          message: "Must be required.",
+          value: this.amount
+        })
+      }
       if (!validator.isNumeric(this.amount.toString())) {
         errors.push({
           field: "amount",
           message: "Must contain only numbers.",
+          value: this.amount
         })
-    }
-    if (parseInt(this.amount.toString()) <= 0) {
-      errors.push({
-        field: "amount",
-        message: "Must greater than 0.",
-      })
-    }
+      }
+      if (parseInt(this.amount.toString()) <= 0) {
+        errors.push({
+          field: "amount",
+          message: "Must greater than 0.",
+          value: this.amount
+        })
+      }
     }
     // action
-    if (typeof this.action !== "undefined" && !validator.isEmpty(this.action.toString())) {
+    if (this.action != null && !validator.isEmpty(this.action.toString())) {
       if (!validator.isIn(this.action.toLowerCase(), RESTOCK_ACTION_VALUES)) {
         errors.push({
           field: "action",
-          message: "Not valid.",
+          message: "Value is not valid.",
+          value: this.action
         })
       }
     }
     // status
-    if (typeof this.status !== "undefined" && !validator.isEmpty(this.status.toString())) {
+    if (this.status != null && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
         errors.push({
           field: "status",
-          message: "Not valid.",
+          message: "Value is not valid.",
+          value: this.status
         })
       }
     }
@@ -166,13 +206,12 @@ class RestockObject {
   static async create({ ...restockData }) {
     try {
       let restockObject = new RestockObject({ ...restockData })
-      restockObject = restockObject.clean()
       const validation = await restockObject.validate("create")
       if (validation) {
-        const createdRestock = await RestockModel.create({ ...validation })
+        restockObject = restockObject.clean()
+        const createdRestock = await RestockModel.create({ ...restockObject })
         if (createdRestock) {
-          const restock = new RestockObject({ ...createdRestock })
-          return restock
+          return new RestockObject({ ...createdRestock._doc })
         }
       }
 
@@ -201,18 +240,15 @@ class RestockObject {
 
     try {
       let updateObject = new RestockObject({ ...updateData })
-      updateObject = updateObject.clean()
-      const validation = await updateObject.validate("update", this.id)
+      const validation = await updateObject.validate("update")
       if (validation) {
-        const updated = new RestockObject(
-          await RestockModel.findOneAndUpdate(
+        updateObject = updateObject.clean()
+        const updated =  await RestockModel.findOneAndUpdate(
             { _id: this.id },
-            { ...validation },
-            { new: true }
-          )
-        )
+            { ...updateObject },
+            { new: true } )
 
-        return updated
+        return new RestockObject(updated)
       }
 
       throw new Error("Failed to update restock.")

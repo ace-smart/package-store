@@ -1,4 +1,3 @@
-const { text } = require('body-parser')
 const mongoose = require('mongoose')
 
 const ContactSchema = new mongoose.Schema({
@@ -17,8 +16,8 @@ const ContactSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['deactivated', 'activated'],
-    default: "deactivated"
+    enum: ['seen', 'unread', 'starred', 'removed'],
+    default: "unread"
   }
 }, {timestamps: true})
 

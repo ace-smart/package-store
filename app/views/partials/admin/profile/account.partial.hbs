@@ -38,6 +38,9 @@
             <div class="col-9 text-center border-bottom">
                 <p class="text-info my-auto font-20 p-2 text-capitalize">
                     <strong>
+                        {{#ifMatch user.role 'admin'}}
+                        <i class="text-lime ion-ribbon-b mr-1"></i> 
+                        {{/ifMatch}}
                         {{{user.role}}}
                     </strong>
                 </p>

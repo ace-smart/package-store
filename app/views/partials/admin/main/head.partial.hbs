@@ -1,0 +1,27 @@
+{{#ifMatch route 'accounts'}}
+  {{> admin/account/head.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'categories'}}
+  {{> admin/category/head.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'products'}}
+  {{> admin/product/head.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'storages'}}
+  {{> admin/storage/head.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'orders'}}
+  {{> admin/order/head.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'vouchers'}}
+  {{> admin/voucher/head.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'providers'}}
+  {{> admin/provider/head.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'restocks'}}
+  {{> admin/restock/head.partial}}
+{{/ifMatch}}
+{{#ifMatch route 'contacts'}}
+  {{> admin/contact/head.partial}}
+{{/ifMatch}}

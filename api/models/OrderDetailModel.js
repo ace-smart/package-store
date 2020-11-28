@@ -16,10 +16,6 @@ const OrderDetailSchema = new mongoose.Schema({
         min: 0,
         default: 1,
     },
-    totalCost: {
-        type: Number,
-        required: true,
-    },
     status: {
         type: String,
         default: 'deactivated'

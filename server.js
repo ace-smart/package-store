@@ -1,6 +1,5 @@
 // Load environment variable
 require("dotenv").config({ path: "./config/config.env" })
-const mongoose = require("mongoose")
 const express = require("express")
 const app = express()
 const connectDB = require("./config/db")
@@ -36,14 +35,13 @@ app.use(morgan("dev"))
 // session
 app.use(
     session({
-        name: "userSession",
+        name: "user_session",
         secret: process.env.SESSION_SECRET,
-        cookie: { path: "/", httpOnly: true, secure: false, maxAge: 1000 * 3600 * 24 * 7 },
         resave: true,
         saveUninitialized: false,
-        store: new MongoStore({
-            mongooseConnection: mongoose.connection,
-        }),
+        // store: new MongoStore({
+        //     mongooseConnection: mongoose.connection,
+        // }),
     })
 )
 //  helmet, cors, csurf
@@ -53,33 +51,38 @@ app.use(
     })
 )
 // multer setup
-app.use(
-// require('./config/multer').fields([
-//     { name: 'avatar', maxCount: 1 },
-// ]), 
-(req, res, next) => {
-    const multer = require("multer")
+app.use((req, res, next) => {
     const upload = require("./config/multer").fields([
-        { name: 'avatar', maxCount: 1 },
+        { name: "avatar", maxCount: 1 },
+        { name: "productImg", maxCount: 1 },
     ])
+    // const galleryUpload = require("./config/multer").fields([
+    //     { name: "productImg", maxCount: 1 },
+    // ])
+    // console.log(req.files)
+    
     upload(req, res, (err) => {
-        if (err instanceof multer.MulterError) {
-            return res.status(500).json({
-                success: false,
-                error: {
-                    message: err.message,
-                    field: err.field,
-                },
-            })
-        } else if (err) {
-            return res.status(500).json({ success: false, error: err })
+        if (err) {
+            res.locals.file = {
+                error: err,
+            }
         }
-        
+
         return next()
     })
+
+    // galleryUpload(req, res, (err) => {
+    //     if (err) {
+    //         res.locals.file = {
+    //             error: err,
+    //         }
+    //     }
+
+    //     return next()
+    // })
 })
 // bodyParser
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.urlencoded({ extended: false }))
 // cookieParser
 app.use(cookieParser())
 // csrfProtection
@@ -91,8 +94,8 @@ adminPassport(passport)
 app.use(passport.initialize())
 app.use(passport.session())
 // routes
+app.use(require("./app/routes/client/client.js"))
 app.use("/admin", require("./app/routes/admin/admin.js"))
-
 
 // Port
 const PORT = process.env.PORT || 5000

@@ -1,18 +1,12 @@
 const OrderModel = require("../models/OrderModel")
-const UserModel = require('../models/UserModel')
+const UserModel = require("../models/UserModel")
 const VoucherModel = require("../models/VoucherModel")
 const { isExistent } = require("../helper/validation")
 const validator = require("validator")
 const ValidationError = require("../errors/validation")
-const ORDER_STATUS_VALUES = [
-  "processing",
-  "received",
-  "racking",
-  "delivering",
-  "done",
-  "refunded",
-  "canceled",
-]
+const OrderDetailObject = require("./OrderDetailObject")
+const OrderDetailModel = require("../models/OrderDetailModel")
+const ORDER_STATUS_VALUES = ["processing", "packing", "delivering", "done", "cancelled"]
 
 class OrderObject {
   constructor({
@@ -20,11 +14,11 @@ class OrderObject {
     totalCost,
     shippingFee,
     finalCost,
-    currency,
     paymentMethod,
     userId,
-    voucherCode,
+    voucherId,
     deliveryDay,
+    orderDetails = [],
     status,
     createdAt,
   }) {
@@ -32,21 +26,33 @@ class OrderObject {
     this.totalCost = totalCost
     this.shippingFee = shippingFee
     this.finalCost = finalCost
-    this.currency = currency
     this.paymentMethod = paymentMethod
     this.userId = userId
-    this.voucherCode = voucherCode
+    this.voucherId = voucherId != "" ? voucherId : undefined
     this.deliveryDay = deliveryDay
+    this.orderDetails = orderDetails
     this.status = status
     this.createdAt = createdAt
   }
 
   static async getOneOrderBy(criteria = {}, selectFields = null) {
     try {
-      let order = await OrderModel.findOne(criteria, selectFields).lean()
+      let order = await OrderModel.findOne(criteria, selectFields)
+        .populate({ path: "userId", select: "username role email profileId" })
+        .populate({
+          path: "voucherId",
+          select: "name code rate status minValue maxValue validUntil",
+        })
+        .lean()
+
       if (order) {
-        order = new OrderObject({ ...order })
-        return order
+        order.orderDetails = []
+        const details = await OrderDetailObject.getOrderDetailsBy({ orderId: order._id })
+        if (details && details.length > 0) {
+          details.forEach((detail) => order.orderDetails.push(detail))
+        }
+
+        return new OrderObject({ ...order })
       }
 
       return null
@@ -57,7 +63,15 @@ class OrderObject {
 
   static async getOrdersBy(criteria = {}, selectFields = null) {
     try {
-      const orders = await OrderModel.find(criteria, selectFields).lean()
+      const orders = await OrderModel.find(criteria, selectFields)
+        .populate({ path: "userId", select: "username role email profileId" })
+        .populate({
+          path: "voucherId",
+          select: "name code rate status minValue maxValue validUntil",
+        })
+        .sort({ createdAt: -1 })
+        .lean()
+
       if (orders.length > 0) {
         let orderList = new Array()
 
@@ -103,12 +117,6 @@ class OrderObject {
           message: "Must be required.",
         })
       }
-      if (this.userId == null || validator.isEmpty(this.userId.toString())) {
-        errors.push({
-          field: "userId",
-          message: "Must be required.",
-        })
-      }
       if (this.deliveryDay == null || validator.isEmpty(this.deliveryDay.toString())) {
         errors.push({
           field: "deliverDay",
@@ -122,124 +130,110 @@ class OrderObject {
     }
 
     // totalCost
-    if (typeof this.totalCost !== "undefined" && !validator.isEmpty(this.totalCost.toString())) {
+    if (this.totalCost != null && !validator.isEmpty(this.totalCost.toString())) {
       if (!validator.isNumeric(this.totalCost.toString())) {
         errors.push({
           field: "totalCost",
           message: "Must contain only numbers.",
+          value: this.totalCost,
         })
       }
     }
     // shippingFee
-    if (
-      typeof this.shippingFee !== "undefined" &&
-      !validator.isEmpty(this.shippingFee.toString())
-    ) {
+    if (this.shippingFee != null && !validator.isEmpty(this.shippingFee.toString())) {
       if (!validator.isNumeric(this.shippingFee.toString())) {
         errors.push({
           field: "shippingFee",
           message: "Must contain only numbers.",
+          value: this.shippingFee,
         })
       }
     }
     // finalCost
-    if (typeof this.finalCost !== "undefined" && !validator.isEmpty(this.finalCost.toString())) {
+    if (this.finalCost != null && !validator.isEmpty(this.finalCost.toString())) {
       if (!validator.isNumeric(this.finalCost.toString())) {
         errors.push({
           field: "finalCost",
           message: "Must contain only numbers.",
-        })
-      }
-    }
-    // currency
-    if (typeof this.currency !== "undefined" && !validator.isEmpty(this.currency.toString())) {
-      if (!validator.isAlpha(this.currency)) {
-        errors.push({
-          field: "currency",
-          message: "Must contain only alphabetic characters. (eg. USD, CADm EUR)",
-        })
-      }
-      if (!validator.isLength(this.currency, { max: 6 })) {
-        errors.push({
-          field: "currency",
-          message: "Must be under 6 characters.",
+          value: this.finalCost,
         })
       }
     }
     // paymentMethod
-    if (typeof this.paymentMethod !== "undefined" && !validator.isEmpty(this.paymentMethod.toString())) {
+    if (this.paymentMethod != null && !validator.isEmpty(this.paymentMethod.toString())) {
       if (!validator.isAlpha(this.paymentMethod)) {
         errors.push({
           field: "paymentMethod",
           message: "Must contain only alphabetic characters.",
+          value: this.paymentMethod,
         })
       }
       if (!validator.isLength(this.paymentMethod, { max: 30 })) {
         errors.push({
           field: "paymentMethod",
           message: "Must be under 30 characters.",
+          value: this.paymentMethod,
         })
       }
     }
-
     // userId
-    if (typeof this.userId !== "undefined" && !validator.isEmpty(this.userId.toString())) {
+    if (this.userId != null && !validator.isEmpty(this.userId.toString())) {
       if (!validator.isMongoId(this.userId)) {
         errors.push({
           field: "userId",
           message: "Invalid format.",
+          value: this.userId,
         })
       }
       if (!isExistent(UserModel, { _id: this.userId })) {
         errors.push({
           field: "userId",
           message: "Invalid value.",
+          value: this.userId,
         })
       }
     }
     // voucherCode
-    if (
-      typeof this.voucherCode !== "undefined" &&
-      !validator.isEmpty(this.voucherCode.toString())
-    ) {
-      if (!validator.isAlphanumeric(this.voucherCode.toString())) {
+    if (this.voucherCode != null && !validator.isEmpty(this.voucherCode.toString())) {
+      if (!validator.isMongoId(this.voucherCode)) {
         errors.push({
           field: "voucherCode",
-          message: "Must be only alphabetic characters.",
+          message: "Invalid format.",
+          value: this.voucherCode,
         })
       }
-      if (
-        !(await isExistent(VoucherModel, {
-          code: this.voucherCode.toString(),
-        }))
-      ) {
+      if (!isExistent(VoucherModel, { _id: this.voucherCode })) {
         errors.push({
           field: "voucherCode",
           message: "Invalid value.",
+          value: this.voucherCode,
         })
       }
     }
     // deliverDay
-    if (typeof this.deliveryDay !== "undefined" && !validator.isEmpty(this.deliveryDay.toString())) {
+    if (this.deliveryDay != null && !validator.isEmpty(this.deliveryDay.toString())) {
       if (!validator.isDate(this.deliveryDay)) {
         errors.push({
           field: "deliveryDay",
           message: "Invalid format [YYYY/MM/DD]",
+          value: this.deliveryDay,
         })
       }
       if (!validator.isAfter(this.deliveryDay.toString(), new Date().toString())) {
         errors.push({
           field: "deliveryDay",
           message: "Invalid value.",
+          value: this.deliveryDay,
         })
       }
     }
     // status
-    if (typeof this.status !== "undefined" && !validator.isEmpty(this.status.toString())) {
+    if (this.status != null && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), ORDER_STATUS_VALUES)) {
         errors.push({
           field: "status",
-          message: "Not valid.",
+          message: "Value is not valid.",
+          value: this.status,
         })
       }
     }
@@ -253,15 +247,15 @@ class OrderObject {
 
   clean() {
     let orderObject = this
-    const fieldsToClean = ["totalCost", "shippingFee", "finalCost", "currency","paymentMethod","voucherCode", "status"]
+    const fieldsToClean = ["totalCost", "shippingFee", "finalCost", "paymentMethod", "status"]
     for (const [key, value] of Object.entries(orderObject)) {
       if (value != null) {
         const isFound = fieldsToClean.find((field) => key === field)
         if (isFound) {
-          if (key === "totalCost" ||key === "shippingFee" || key === "finalCost") {
+          if (key === "totalCost" || key === "shippingFee" || key === "finalCost") {
             orderObject[key] = parseFloat(validator.trim(value.toString()))
           }
-          if (key === "currency" || key === "paymentMethod" || key === 'voucherCode') {
+          if (key === "paymentMethod") {
             orderObject[key] = validator.trim(value.toString().toUpperCase())
           }
           if (key === "status") {
@@ -285,15 +279,25 @@ class OrderObject {
   static async create({ ...orderData }) {
     try {
       let orderObject = new OrderObject({ ...orderData })
-      console.log(orderObject)
-      orderObject = orderObject.clean()
-      console.log(orderObject)
       const validation = await orderObject.validate("create")
       if (validation) {
-        const createdOrder = await OrderModel.create({ ...validation })
+        orderObject = orderObject.clean()
+        const createdOrder = await OrderModel.create({ ...orderObject })
         if (createdOrder) {
-          const order = new OrderObject({ ...createdOrder })
-          return order
+          // Create order details
+          if (orderData.orderDetails.length < 1) {
+            await OrderModel.findOneAndDelete({ _id: createdOrder._id })
+            throw new Error("Failed to create order with no detail.")
+          } else {
+            orderData.orderDetails.forEach(async (element) => {
+              await OrderDetailObject.create({
+                ...element,
+                orderId: createdOrder._id,
+              })
+            })
+
+            return new OrderObject({ ...createdOrder._doc })
+          }
         }
       }
 
@@ -303,7 +307,7 @@ class OrderObject {
     }
   }
 
-  async update(updateData = {}) {
+  async update({ ...updateData }) {
     if (this.id == null) {
       throw new ObjectError({
         objectName: "OrderObject",
@@ -322,14 +326,40 @@ class OrderObject {
 
     try {
       let updateObject = new OrderObject({ ...updateData })
-      updateObject = updateObject.clean()
       const validation = await updateObject.validate("update")
       if (validation) {
-        const updated = new OrderObject(
-          await OrderModel.findOneAndUpdate({ _id: this.id }, { ...validation }, { new: true })
-        )
+        updateObject = updateObject.clean()
+        const updated = await OrderModel.findOneAndUpdate(
+          { _id: this.id },
+          { ...updateObject },
+          { new: true }
+        ).lean()
 
-        return updated
+        if (updated) {
+          // Update order details
+          updateObject.orderDetails.forEach(async (element) => {
+            if (element.id != null) {
+              // Remove
+              const detailsFromDb = await OrderDetailModel.find({ orderId: updated._id }).lean()
+              detailsFromDb.forEach(async (detail) => {
+                if (detail._id != element.id) {
+                  await OrderDetailModel.findOneAndDelete({ _id: detail._id })
+                } else {
+                  // Update
+                  const orderDetail = await OrderDetailObject.getOneOrderDetailBy({
+                    _id: element.id,
+                  })
+                  await orderDetail.update({ ...element })
+                }
+              })
+            } else {
+              // Add
+              await OrderDetailObject.create({ ...element, orderId: updated._id.toString() })
+            }
+          })
+
+          return new OrderObject({ ...updated })
+        }
       }
 
       throw new Error("Failed to update.")

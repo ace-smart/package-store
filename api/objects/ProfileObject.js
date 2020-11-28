@@ -1,13 +1,12 @@
 const validator = require("validator")
 const ProfileModel = require("../models/ProfileModel")
 const ValidationError = require("../errors/validation")
-const {toFormatDateStr} = require('../helper/format')
-const UserObject = require("./UserObject")
+const { toFormatDateStr, toCapitalize } = require("../helper/format")
 const ObjectError = require("../errors/object")
-const NotFoundError = require("../errors/not_found")
 const PROFILE_GENDER_VALUES = ["male", "female", "lgbt"]
 const STATUS_VALUES = ["deactivated", "activated"]
-const {toCapitalize} = require('../helper/format')
+const AVATAR_MIMETYPE = ["image/jpeg", "image/png"]
+const { isExistent, hasSpecialChars } = require("../helper/validation")
 
 class ProfileObject {
   constructor({ _id, firstName, lastName, gender, dateOfBirth, phoneNumber, avatar } = {}) {
@@ -20,69 +19,79 @@ class ProfileObject {
     this.avatar = avatar
   }
 
-  // === GET & SET ===
-  set setAvatar(base64Str) {
-    this.avatar = base64Str
-  }
+  static hasEmptyProfileData(profileData) {
+    const profileKeys = Object.keys(profileData)
+    let emptyProps = []
+    for (const [key, value] of Object.entries(profileData)) {
+      if (value == null) {
+        emptyProps.push(key)
+      } else if (validator.isEmpty(value.toString())) {
+        emptyProps.push(key)
+      }
+    }
 
-  get getAvatar() {
-    return this.avatar
+    if (emptyProps.length === profileKeys.length) {
+      return true
+    }
+
+    return false
   }
 
   // @desc:       Get profile
   // Existed:     => return ProfileObject
   // Not Existed  => return null
-  static async getProfile(profileId = null) {
-      try {
-        if (profileId != null) {
-          const profile = await ProfileModel.findOne({ _id: profileId }).lean()
-          if (profile) {
-            return new ProfileObject({ ...profile })
-          }
+  static async getOneProfileById(profileId = null) {
+    try {
+      if (profileId != null) {
+        const profile = await ProfileModel.findOne({
+          _id: profileId,
+        }).lean()
+        if (profile) {
+          return new ProfileObject({ ...profile })
         }
-
-        return null
-      } catch (error) {
-        throw error
       }
 
+      return null
+    } catch (error) {
+      throw error
+    }
   }
 
   validate(type = "create") {
     let errors = new Array()
 
     if (type === "create") {
-      if (this.firstName == null) {
-        errors.push({
-          field: "firstName",
-          message: "firstName must be required",
-        })
-      }
-      if (this.lastName == null) {
-        errors.push({
-          field: "lastName",
-          message: "lastName must be required",
-        })
-      }
-      if (this.gender == null) {
-        errors.push({
-          field: "gender",
-          message: "gender must be required",
-        })
-      }
-      if (this.dateOfBirth == null) {
-        errors.push({
-          field: "dateOfBirth",
-          message: "dateOfBirth must be required",
-        })
-      }
-      if (this.phoneNumber == null) {
-        errors.push({
-          field: "phoneNumber",
-          message: "phoneNumber must be required",
-        })
-      }
-      
+      // if (this.firstName == null || validator.isEmpty(this.firstName.toString())) {
+      //   errors.push({
+      //     field: "firstName",
+      //     message: "firstName must be required",
+      //   })
+      // }
+      // if (this.lastName == null  || validator.isEmpty(this.lastName.toString())) {
+      //   errors.push({
+      //     field: "lastName",
+      //     message: "lastName must be required",
+      //   })
+      // }
+      // if (this.gender == null || validator.isEmpty(this.gender.toString())) {
+      //   errors.push({
+      //     field: "gender",
+      //     message: "gender must be required",
+      //   })
+      // }
+      // if (this.dateOfBirth == null || validator.isEmpty(this.dateOfBirth.toString())) {
+      //   errors.push({
+      //     field: "dateOfBirth",
+      //     message: "dateOfBirth must be required",
+      //   })
+      // }
+      // if (this.phoneNumber == null || validator.isEmpty(this.phoneNumber.toString())) {
+      //   errors.push({
+      //     field: "phoneNumber",
+      //     message: "phoneNumber must be required",
+      //   })
+      // }
+
       // has errors
       if (errors.length > 0) {
         throw new ValidationError(errors)
@@ -91,11 +100,11 @@ class ProfileObject {
 
     // Validate after being filled
     // === firsName ===
-    if (this.firstName != null && !validator.isEmpty(this.firstName)) {
-      if (!validator.isAlpha(this.firstName)) {
+    if (this.firstName != null && !validator.isEmpty(this.firstName.toString())) {
+      if (hasSpecialChars(this.firstName)) {
         errors.push({
           field: "firstName",
-          message: "Must be alphabetic characters.",
+          message: "Can not have special characters.",
           value: this.firstName,
         })
       }
@@ -108,11 +117,11 @@ class ProfileObject {
       }
     }
     // === lastName ===
-    if (this.lastName != null && !validator.isEmpty(this.lastName)) {
-      if (!validator.isAlpha(this.lastName)) {
+    if (this.lastName != null && !validator.isEmpty(this.lastName.toString())) {
+      if (hasSpecialChars(this.lastName)) {
         errors.push({
           field: "lastName",
-          message: "Must be alphabetic characters.",
+          message: "Can not have special characters.",
           value: this.lastName,
         })
       }
@@ -125,7 +134,7 @@ class ProfileObject {
       }
     }
     // === gender ===
-    if (this.gender != null && !validator.isEmpty(this.gender)) {
+    if (this.gender != null && !validator.isEmpty(this.gender.toString())) {
       if (!validator.isAlpha(this.gender)) {
         errors.push({
           field: "gender",
@@ -142,11 +151,11 @@ class ProfileObject {
       }
     }
     // === dateOfBirth ===
-    if (this.dateOfBirth != null && !validator.isEmpty(this.dateOfBirth)) {
+    if (this.dateOfBirth != null && !validator.isEmpty(this.dateOfBirth.toString())) {
       if (!validator.isDate(this.dateOfBirth)) {
         errors.push({
           field: "dateOfBirth",
-          message: "Must be in format [YYYY/MM/DD]",
+          message: "Invalid format",
           value: this.dateOfBirth,
         })
       }
@@ -158,13 +167,13 @@ class ProfileObject {
       ) {
         errors.push({
           field: "dateOfBirth",
-          message: "Must be over 16 years old",
+          message: "Must be older 16 years old",
           value: this.dateOfBirth,
         })
       }
     }
     // === phoneNumber ===
-    if (this.phoneNumber != null && !validator.isEmpty(this.phoneNumber)) {
+    if (this.phoneNumber != null && !validator.isEmpty(this.phoneNumber.toString())) {
       if (!validator.isNumeric(this.phoneNumber)) {
         errors.push({
           field: "phoneNumber",
@@ -173,8 +182,20 @@ class ProfileObject {
         })
       }
     }
+    // mimeType
+    if (this.avatar != null && !validator.isEmpty(this.avatar.toString())) {
+      if (!validator.isIn(this.avatar.mimeType.toString(), AVATAR_MIMETYPE)) {
+        errors.push({
+          field: "mimeType",
+          message: "Invalid value.",
+          value: this.avatar,
+          mimeType,
+        })
+      }
+    }
+
     // === status ===
-    if (this.status != null && !validator.isEmpty(this.status)) {
+    if (this.status != null && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
         errors.push({
           field: "status",
@@ -183,7 +204,7 @@ class ProfileObject {
         })
       }
     }
-    
+
     if (errors.length > 0) {
       throw new ValidationError(errors)
     } else {
@@ -199,14 +220,14 @@ class ProfileObject {
       if (value != null) {
         const isFound = fieldsToClean.find((field) => key === field)
         if (isFound) {
-          if(key === 'firstName' || key === 'lastName') {
+          if (key === "firstName" || key === "lastName") {
             profileObject[key] = toCapitalize(validator.trim(value.toString().toLowerCase()))
           }
-          if(key === 'gender' || key === 'status') {
+          if (key === "gender" || key === "status") {
             profileObject[key] = validator.trim(value.toString().toLowerCase())
           }
         }
-        if (key === 'updatedAt') {
+        if (key === "updatedAt") {
           profileObject[key] = Date.now()
         }
       }
@@ -219,20 +240,16 @@ class ProfileObject {
     return profileObject
   }
 
-  static async create(userId = null, profileData = {}) {
-    if (!userId) {
-      throw new TypeError('userId can not be undefined or null')
-    }
-    
+  static async create({ ...profileData }) {
     try {
-      profileData = profileData.validate('create')
-      profileData = profileData.clean()
-      const profile = await ProfileModel.create({...profileData})
-      const userObject = new UserObject({_id: userId})
-      userObject.setProfileId = profile._id
-      const isUpdated = await userObject.save()
-      if (isUpdated) {
-        return new ProfileObject({...profile})
+      let profileObject = new ProfileObject({ ...profileData })
+      const validation = profileObject.validate("create")
+      if (validation) {
+        profileObject = profileObject.clean()
+        const profile = await ProfileModel.create({ ...profileObject })
+        if (profile) {
+          return new ProfileObject({ ...profile._doc })
+        }
       }
 
       throw new Error("Failed to create profile.")
@@ -241,30 +258,30 @@ class ProfileObject {
     }
   }
 
-  async update(userId = null, profileData = {}) {
-    if (!userId) {
-      throw new TypeError('userId can not be undefined or null')
-    }
-
-    if (!(await isExistent(ProfileModel, {_id: this.id}))){
+  async update(updateData = {}) {
+    if (!(await isExistent(ProfileModel, { _id: this.id }))) {
       throw new ObjectError({
-        objectName: 'ProfileObject',
-        errorProperty: 'Id',
-        message: "Id is not valid"
+        objectName: "ProfileObject",
+        errorProperty: "Id",
+        message: "Id is not valid",
       })
     }
-    
-    try {
-      profileData = profileData.validate('create')
-      profileData = profileData.clean()
-      const profile = await ProfileModel.findOneAndUpdate({_id: this.id}, {...profileData}, {new: true})
-      const userObject = new UserObject({_id: userId})
-      userObject.setProfileId = profile._id
-      const isUpdated = await userObject.save()
-      if (isUpdated) {
-        return new ProfileObject({...profile})
-      }
 
+    try {
+      let profileData = new ProfileObject({ ...updateData })
+      const validation = profileData.validate("update")
+      if (validation) {
+        profileData = profileData.clean()
+        const profile = await ProfileModel.findOneAndUpdate(
+          { _id: this.id },
+          { ...profileData },
+          { new: true }
+        )
+
+        if (profile) {
+          return new ProfileObject({ ...profile })
+        }
+      }
       throw new Error("Failed to update profile.")
     } catch (error) {
       throw error
@@ -275,14 +292,18 @@ class ProfileObject {
     const profileToSave = this.clean()
     if (this.id == null) {
       throw new ObjectError({
-        objectName: 'ProfileObject',
-        errorProperty: 'Id',
-        message: "Id is not valid"
+        objectName: "ProfileObject",
+        errorProperty: "Id",
+        message: "Id is not valid",
       })
     }
 
     try {
-      const profileObject = await ProfileModel.findOneAndUpdate({ _id: this.id }, {...profileToSave}, {new: true})
+      const profileObject = await ProfileModel.findOneAndUpdate(
+        { _id: this.id },
+        { ...profileToSave },
+        { new: true }
+      )
       return profileObject
     } catch (error) {
       throw error
@@ -292,14 +313,14 @@ class ProfileObject {
   async remove() {
     if (this.id == null) {
       throw new ObjectError({
-        objectName: 'ProfileObject',
-        errorProperty: 'Id',
-        message: "Id is not valid"
+        objectName: "ProfileObject",
+        errorProperty: "Id",
+        message: "Id is not valid",
       })
     }
 
     try {
-      const profileObject = await ProfileModel.findOneAndDelete({_id: this.id})
+      const profileObject = await ProfileModel.findOneAndDelete({ _id: this.id })
       return profileObject
     } catch (error) {
       throw error

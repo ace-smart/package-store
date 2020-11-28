@@ -26,8 +26,14 @@ const ProfileSchema = new mongoose.Schema({
         required: true
     },
     avatar: {
-        type: String,
-        default: 'default'
+        fileName: {
+            type: String,
+            default: 'default'
+        },
+        mimeType: {
+            type: String,
+            enum: ['image/jpeg', 'image/png']
+        }
     },
     status: {
       type: String,

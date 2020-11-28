@@ -3,66 +3,54 @@ const ValidationError = require("../errors/validation")
 const CategoryModel = require("../models/CategoryModel")
 const { isExistent, STATUS_VALUES } = require("../helper/validation")
 const ObjectError = require("../errors/object")
-const SubcategoryModel = require("../models/SubcategoryModel")
+const SubcategoryObject = require("./SubcategoryObject")
+const mongoose = require('mongoose')
+const castToObjectId = mongoose.Types.ObjectId
 
 class CategoryObject {
   constructor({ _id, name, subcategories, status, createdAt }) {
     this.id = _id
     this.name = name
-    this.subcategories = subcategories
     this.status = status
     this.createdAt = createdAt
-  }
-
-  set addOneSubcategory (subcategoryId) {
-    if (subcategoryId == null) {
-      throw new TypeError("Can not add subcategory with null or undefined value.")
-    }else {
-      this.subcategories.push(subcategoryId)
+    if (subcategories){
+      this.subcategories = this.parseSubcategories(subcategories)
     }
   }
 
-  set setSubcategories (subcategories) {
+
+  parseSubcategories (subcategories) {
     if (subcategories instanceof Array) {
-      this.subcategories = subcategories
+      if (subcategories.length > 0) {
+        const listOfSubcates = subcategories.map(element => new SubcategoryObject({...element})) 
+        
+        return listOfSubcates
+      }
+
+      return []
     } else {
       throw new TypeError("subcategories must be an array.")
     }
   }
 
-  get getSubcategories () {
-    return this.subcategories
-  }
-
-  async removeSubcategory(subcategoryId = null) {
-    if (subcategoryId = null){
-      throw new TypeError("Can not remove with null or undefined subcategoryId.")
-    }
-    if (!(await isExistent(SubcategoryModel, {_id: subcategoryId}))){
-      throw new ObjectError({
-        objectName: 'SubcategoryObject',
-        errorProperty: 'Id',
-        message: 'Id is not valid.'
-      })
+  static async getCategoriesBy(criteria = {}) {
+    if (criteria._id) {
+      criteria._id = castToObjectId(criteria._id)
     }
 
     try {
-      const subcategoryList = this.subcategories.filter((value) => value != subcategoryId)
-      this.subcategories = subcategoryList
-      let isSaved = await this.save()
-      if (isSaved) {
-        return isSaved
-      }
+      const categoryList = await CategoryModel.aggregate([
+        {$match: criteria},
+        {$lookup: 
+          {
+            from: 'subcategories',
+            localField: '_id',
+            foreignField: 'categoryId',
+            as: 'subcategories'
+          } 
+        }
+      ])
 
-      throw new Error("Failed to remove subcategory.")
-    } catch (error) {
-      throw error
-    }
-  }
-
-  static async getCategoriesBy(criteria = {}, selectFields = null) {
-    try {
-      const categoryList = await CategoryModel.find(criteria, selectFields).lean()
       if (categoryList.length > 0) {
         let categoryObjects = new Array()
         categoryList.forEach((element) => {
@@ -79,12 +67,27 @@ class CategoryObject {
     }
   }
 
-  static async getOneCategoryBy(criteria = {}, selectFields = null) {
+  static async getOneCategoryBy(criteria = {}) {
+    if (criteria._id) {
+      criteria._id = castToObjectId(criteria._id)
+    }
+
     try {
-      let category = await CategoryModel.findOne(criteria, selectFields).lean()
+      let category = (await CategoryModel.aggregate([
+          {$match: criteria},
+          {$lookup: 
+            {
+              from: 'subcategories',
+              localField: '_id',
+              foreignField: 'categoryId',
+              as: 'subcategories'
+            } 
+          }
+        ]).limit(1))[0]
+      
+        
       if (category) {
-        category = new CategoryObject({ ...category })
-        return category
+        return new CategoryObject({...category})
       }
 
       return null
@@ -97,7 +100,7 @@ class CategoryObject {
     let errors = new Array()
 
     if (type === "create") {
-      if (typeof this.name === "undefined" || validator.isEmpty(this.name)) {
+      if (this.name == null || validator.isEmpty(this.name.toString())) {
         errors.push({
           field: "name",
           message: "Must be required.",
@@ -109,32 +112,36 @@ class CategoryObject {
       }
     }
 
-    if (this.name != null && !validator.isEmpty(this.name)) {
+    if (this.name != null && !validator.isEmpty(this.name.toString())) {
       if (!validator.isAlphanumeric(this.name)) {
         errors.push({
           field: "name",
           message: "Must contain only numbers and characters.",
+          value: this.name
         })
       }
       if (!validator.isLength(this.name, { min: 4, max: 40 })) {
         errors.push({
           field: "name",
           message: "Must be from 4 to 40 characters.",
+          value: this.name
         })
       }
       if (await isExistent(CategoryModel, { name: this.name }, exceptionId)) {
         errors.push({
           field: "name",
           message: "Already existent.",
+          value: this.name
         })
       }
     }
 
-    if (this.status != null && !validator.isEmpty(this.status)) {
+    if (this.status != null && !validator.isEmpty(this.status.toString())) {
       if (!validator.isIn(this.status.toLowerCase(), STATUS_VALUES)) {
         errors.push({
           field: "status",
           message: "Not valid.",
+          value: this.status.toLowerCase()
         })
       }
     }
@@ -177,10 +184,10 @@ class CategoryObject {
   static async create(categoryData = {}) {
     try {
       let categoryObject = new CategoryObject({ ...categoryData })
-      categoryObject = categoryObject.clean()
       const validation = await categoryObject.validate("create")
       if (validation) {
-        const isCreated = new CategoryObject(await CategoryModel.create({ ...validation }))
+        categoryObject = categoryObject.clean()
+        const isCreated = new CategoryObject(await CategoryModel.create({ ...categoryObject }))
         if (isCreated) {
           return isCreated
         }
@@ -188,7 +195,6 @@ class CategoryObject {
 
       throw new Error("Failed to create category.")
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -212,11 +218,11 @@ class CategoryObject {
 
     try {
       let updateObject = new CategoryObject({ ...info })
-      updateObject = updateObject.clean()
       const validation = await updateObject.validate("update", this.id)
       if (validation) {
+        updateObject = updateObject.clean()
         const updatedCategory = new CategoryObject(
-          await CategoryModel.findOneAndUpdate({ _id: this.id }, { ...validation }, { new: true })
+          await CategoryModel.findOneAndUpdate({ _id: this.id }, { ...updateObject }, { new: true })
         )
         return updatedCategory
       }

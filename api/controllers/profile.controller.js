@@ -15,10 +15,26 @@ module.exports = {
     try {
       const profileId = await UserObject.getProfileIdById(req.user.id)
       if (profileId) {
-        const profile = await ProfileObject.getProfile(profileId)
+        const profile = await ProfileObject.getOneProfileById(profileId)
         if (profile) {
           return res.status(200).json(profile)
         }
+      }
+      
+      throw new NotFoundError("No profile found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc:   get profile by accessTK
+  // @route:  GET /profile
+  getProfileById: async (req, res) => {
+    try {
+      const profile = await ProfileObject.getOneProfileById(req.params.id)
+      
+      if (profile) {
+        return res.status(200).json(profile)
       }
       
       throw new NotFoundError("No profile found.")
@@ -32,7 +48,10 @@ module.exports = {
   updateProfile: async (req, res) => {
     /* === EXAMPLE ===
       req.body = {
-        avatar: <File>,
+        avatar: {
+          type: 'buffer',
+          data: [1,23,3,4]
+        },
         firstName: 'John',
         lastName: 'Smith',
         gender: 'male',
@@ -43,21 +62,19 @@ module.exports = {
     try {
       // get profileId by accessToken
       const profileId = await UserObject.getProfileIdById(req.user.id)
-      const profileObject = new ProfileObject({...req.body})
-      if (req.file != null) {
-        profileObject.setAvatar = req.file.buffer.toString('base64')
-      }
+      let profileData = JSON.parse(JSON.stringify(req.body))
+      
       if (profileId == null) {
-        // create as the 1st time
-        const createdProfile = await ProfileObject.create(req.user.id, profileObject)
+        // create for the 1st time
+        const createdProfile = await ProfileObject.create(profileData)
         if (createdProfile) {
           return res.sendStatus(204)
         }
       } else {
         // update
-        profileObject.id = profileId
-        const updatedProfile = await profileObject.update(req.user.id, profileObject)
-        if (updatedProfile) {
+        const profileObject = await ProfileObject.getOneProfileById(profileId)
+        const isUpdated = await profileObject.update({...profileData})
+        if (isUpdated) {
           return res.sendStatus(204)
         }
       }

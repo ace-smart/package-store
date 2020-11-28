@@ -7,7 +7,7 @@ module.exports = {
   // @route   GET /contacts
   showContactList: async (req, res) => {
     try {
-      const contactList = await ContactObject.getContactsBy({})
+      const contactList = await ContactObject.getContactsBy()
       if (contactList && contactList.length > 0) {
         return res.status(200).json(contactList)
       }
@@ -29,22 +29,6 @@ module.exports = {
       // Not found
       throw new NotFoundError("No contact found.")
     } catch (error) {
-      return ErrorHandler.sendErrors(res, error)
-    }
-  },
-
-  // @desc    Add new contact
-  // @route   POST /contacts
-  createNewContact: async (req, res) => {
-    try {
-      const createdContact = await ContactObject.create({...req.body})
-      if (createdContact) {
-        return res.status(201).json(createdContact)
-      }
-      
-      throw new Error("Failed to create contact.")
-    } catch (error) {
-      console.log(error)
       return ErrorHandler.sendErrors(res, error)
     }
   },

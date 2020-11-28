@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const {  showContactList, getContactById, createNewContact, updateContactById, removeContactById } 
+const {  showContactList, getContactById, updateContactById, removeContactById } 
     = require('../../controllers/contact.controller')
 
 // @desc    Show list of contacts
@@ -10,10 +10,6 @@ router.get('/', showContactList)
 // @desc    Get contact by Id
 // @route   GET /contacts/:id
 router.get('/:id', getContactById)
-
-// @desc    Add new contact
-// @route   POST /contacts
-router.post('/', createNewContact)
 
 // @desc    Update contact
 // @route   PUT /contacts/:id

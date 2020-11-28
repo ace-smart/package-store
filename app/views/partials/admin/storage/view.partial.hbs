@@ -1,0 +1,136 @@
+<div class="row">
+  {{!-- Information --}}
+  <div class="col-sm-6 p-4">
+    <p class="text-lime p-2 my-3 border-bottom"><i class="ion-information-circled mr-1"></i> Information</p>
+      {{!-- Name --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="name">
+              <i class="mdi mdi-tag-text-outline mr-2"></i>Name
+            </label>
+            <input id="name" name="name" type="text" disabled class="form-control" value="{{{storage.name}}}">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+      {{!-- Property type --}}
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="propertyType">
+              <i class="fa fa-transgender-alt mr-2"></i>Property type
+            </label>
+
+            <input id="name" name="name" type="text" disabled class="form-control" value="{{{storage.propertyType}}}">
+          </div>
+        </div>
+      {{!-- Capacity --}}
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="capacity">
+              <i class="fa fa-cloud mr-2"></i>Capacity
+            </label>
+            <div class="input-group">
+            <input id="name" name="name" type="text" disabled class="form-control" value="{{{storage.capacity}}}">
+              <div class="input-group-append">
+                <span class="input-group-text">kg</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{!-- Created at --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="name">
+              <i class="fa fa-calendar mr-2"></i>Created at
+            </label>
+            <input id="createdAt" name="createdAt" type="text" disabled class="form-control"
+              value="{{{formatDate storage.createdAt}}}">
+          </div>
+        </div>
+      </div>
+
+      {{!-- Status --}}
+      <div class="row mt-1 pt-2">
+        <div class="col-sm-12">
+          <label class="control-label">
+            <i class="ion-ios7-circle-filled mr-2"></i>Status
+          </label>
+        </div>
+        <div class="col-sm-12">
+          <div class="form-group">
+            {{#ifMatch storage.status 'full'}}
+            <label class="btn btn-danger" for="deactivated-status">Deactivated</label>
+            {{/ifMatch}}
+
+            {{#ifMatch storage.status 'available'}}
+            <label class="btn btn-success">Activated</label>
+            {{/ifMatch}}
+
+          </div>
+        </div>
+      </div>
+
+    
+  </div>
+
+  {{!-- Address --}}
+  <div class="col-sm-6 p-4">
+    <p class="text-lime p-2 my-3 border-bottom"><i class="ion-location mr-1"></i> Address</p>
+      {{!-- Street --}}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+            <label for="street">
+              <i class="fa fa-road mr-2"></i>Street
+            </label>
+            <input id="street" name="street" type="text" disabled class="form-control" value="{{{storage.address.street}}}">
+          </div>
+        </div>
+      </div>
+
+      {{!-- District - City --}}
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="district">
+              <i class="fa fa-dot-circle-o mr-2"></i>District
+            </label>
+            <input id="district" name="district" type="text" disabled class="form-control" value="{{{storage.address.district}}}">
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="city">
+              <i class="fa fa-bank mr-2"></i>City
+            </label>
+            <input id="city" name="city" type="text" disabled class="form-control" value="{{{storage.address.city}}}">
+          </div>
+        </div>
+      </div>
+
+      {{!-- Country - Postal code --}}
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="country">
+              <i class="fa fa-flag mr-2"></i>Country
+            </label>
+            <input id="country" name="country" type="text" disabled class="form-control" value="{{{storage.address.country}}}">
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label for="postalCode">
+              <i class="fa fa-barcode mr-2"></i>Postal code
+            </label>
+            <input id="postalCode" name="postalCode" type="text" disabled class="form-control" value="{{{storage.address.postalCode}}}">
+          </div>
+        </div>
+      </div>
+  </div>
+</div>

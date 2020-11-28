@@ -1,2 +1,56 @@
 <!-- App js -->
 <script src="/admin/static/assets/js/app.js"></script>
+
+<script>
+  const routes = location.href.split("/")
+  const hasRoute = function(routeName = '') {
+    const isFound = routes.find((element) => element == routeName)
+    if (isFound) {
+      return true
+    }
+    
+    return false
+  }
+
+  const setActiveClass = function(elementId = '') {
+    const elementLiTag = document.getElementById(elementId)
+    if (!elementLiTag.classList.contains('active') ) {
+      elementLiTag.classList.add('active')
+    }
+    if (elementLiTag.classList.contains('has_sub')) {
+      elementLiTag.classList.add('nav-active')
+    }
+  }
+  
+  
+  if (hasRoute('') || hasRoute('index') || hasRoute('home')) {
+    setActiveClass('menu-dashboard')
+  }
+  if (hasRoute('accounts')) {
+    setActiveClass('menu-account')
+  }
+  if (hasRoute('categories')) {
+    setActiveClass('menu-category')
+  }
+  if (hasRoute('products')) {
+    setActiveClass('menu-product')
+  }
+  if (hasRoute('vouchers')) {
+    setActiveClass('menu-voucher')
+  }
+  if (hasRoute('orders')) {
+    setActiveClass('menu-order')
+  }
+  if (hasRoute('restocks')) {
+    setActiveClass('menu-restock')
+  }
+  if (hasRoute('providers')) {
+    setActiveClass('menu-provider')
+  }
+  if (hasRoute('storages')) {
+    setActiveClass('menu-storage')
+  }
+  if (hasRoute('contacts')) {
+    setActiveClass('menu-contact')
+  }
+</script>
