@@ -21,7 +21,11 @@
       elementLiTag.classList.add('nav-active')
     }
   }
-
+  
+  
+  if (hasRoute('') || hasRoute('index') || hasRoute('home')) {
+    setActiveClass('menu-dashboard')
+  }
   if (hasRoute('accounts')) {
     setActiveClass('menu-account')
   }

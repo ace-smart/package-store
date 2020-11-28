@@ -138,10 +138,10 @@
       const _csrf = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
       let toStage = stageType
       if (stageType === 'final') {
-        if (stage === 'canceled'){
+        if (stage === 'cancelled'){
           toStage = 'done'
         }else if (stage === 'done') {
-          toStage = 'canceled'
+          toStage = 'cancelled'
         }
       }
       Swal.fire({

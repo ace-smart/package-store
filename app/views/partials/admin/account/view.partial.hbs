@@ -4,11 +4,10 @@
     {{!-- Avatar --}}
     <div class="my-3 ">
       {{#ifeq account.profile.avatar 'default'}}
-      <img src="/static/default-user.png" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
-        data-holder-rendered="true" class="img-thumbnail">
+      <img src="/static/default-user.png" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;" data-holder-rendered="true" class="img-thumbnail">
       {{else}}
       <img class="img-thumbnail" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
-        src="data:image/jpeg;base64,{{{account.profile.avatar}}}" data-holder-rendered="true">
+        src="data:{{{account.profile.avatar.mimeType}}};base64,{{{parseImageToString account.profile.avatar.data}}}" data-holder-rendered="true">
       {{/ifeq}}
     </div>
 

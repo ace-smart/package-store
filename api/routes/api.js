@@ -14,6 +14,7 @@ const storageRouter = require('./admin/storage.route')
 const restockRouter = require('./admin/restock.route')
 const contactRouter = require('./admin/contact.route')
 const galleryRouter = require('./admin/gallery.route')
+const statisticsRouter = require('./admin/statistics.route')
 
 router.use(authRouter)
 router.use(_ensureAccessToken)
@@ -33,6 +34,7 @@ router.use('/admin/orders', orderRouter)
 router.use('/admin/storages', storageRouter)
 router.use('/admin/restocks', restockRouter)
 router.use('/admin/contacts', contactRouter)
-router.use('/admin/gallery/', galleryRouter)
+router.use('/admin/gallery', galleryRouter)
+router.use('/admin/statistics', statisticsRouter)
 
 module.exports = router

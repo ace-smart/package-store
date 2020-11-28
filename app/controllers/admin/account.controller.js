@@ -1,5 +1,6 @@
 const axiosInstance = require("../../helper/axios.helper")
 const helper = require("../../helper/helper")
+const fs = require('fs')
 const getAccountById = async function (accessToken, userId) {
   try {
     const response = await axiosInstance.get(`/admin/users/${userId}`, {
@@ -117,6 +118,9 @@ module.exports = {
   viewUserById: async (req, res) => {
     try {
       const account = await getAccountById(req.user.accessToken, req.params.id)
+      if(account.profile.avatar.fileName != 'default') {
+        account.profile.avatar.data = fs.readFileSync(`tmp\\avatar\\${account.profile.avatar.fileName}`)
+      }
 
       if (account) {
         return res.render("templates/admin/account/account.hbs", {

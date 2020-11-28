@@ -84,8 +84,8 @@ const setStage = function (currentStage = "processing", toStage = "next") {
         })
     } else if (toStage === "final") {
         if (currentStage === "done") {
-            resultStage = "canceled"
-        } else if (currentStage === "canceled") {
+            resultStage = "cancelled"
+        } else if (currentStage === "cancelled") {
             resultStage = "done"
         }
     }

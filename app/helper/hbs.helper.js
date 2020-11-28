@@ -49,6 +49,9 @@ module.exports = {
     formatPrice: function(price) {
         return new Intl.NumberFormat('en-US', {style: "currency", currency: "USD"}).format(parseFloat(price))
     },
+    formatNumber: function(number) {
+        return new Intl.NumberFormat('en-US').format(parseFloat(number))
+    },
     parseImageToString(imageBuffer) {
         return imageBuffer.toString('base64')
     },
@@ -56,5 +59,16 @@ module.exports = {
         const path = `tmp\\productImg\\${fileName}.${extension}`
         const fs = require('fs')
         return fs.readFileSync(path).toString('base64')
+    },
+    lessThan(a,b, options) {
+        a = parseFloat(a.toString())
+        b = parseFloat(b.toString())
+        if (a < b) {
+            return options.fn(this)
+        } 
+        return options.inverse(this)
+    },
+    formatPercentage(percentage) {
+        return parseFloat(percentage).toFixed(2)
     }
 }

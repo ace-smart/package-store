@@ -123,7 +123,7 @@
               {{#ifMatch order.status 'packing'}} badge-purple {{/ifMatch}}
               {{#ifMatch order.status 'delivering'}} badge-pink {{/ifMatch}}
               {{#ifMatch order.status 'done'}} badge-success{{/ifMatch}}
-              {{#ifMatch order.status 'canceled'}} badge-orange{{/ifMatch}}
+              {{#ifMatch order.status 'cancelled'}} badge-orange{{/ifMatch}}
                 " style="font-size: 16px;">
                 {{{order.status}}}
                 </span>

@@ -6,7 +6,7 @@
   <span class="badge badge-pill badge-purple">Packing</span>
   <span class="badge badge-pill badge-pink">Delivering</span>
   <span class="badge badge-pill badge-success">Done</span>
-  <span class="badge badge-pill badge-orange">Canceled</span>
+  <span class="badge badge-pill badge-orange">Cancelled</span>
 </p>
 
 <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0"
@@ -55,7 +55,7 @@
         {{#ifMatch this.status 'done'}}
       <td class="bg-success text-white capitalized text-center">
         {{/ifMatch}}
-        {{#ifMatch this.status 'canceled'}}
+        {{#ifMatch this.status 'cancelled'}}
       <td class="bg-orange text-white capitalized text-center">
         {{/ifMatch}}
         {{{this.status}}}
@@ -78,13 +78,13 @@
             {{!-- Done --}}
             <a class="dropdown-item sa-set-stage" href="javascript:void(0);" data-uid="{{{this.id}}}" data-stage="done"
               data-stage_type="final">
-              <i class="fa fa-arrow-right mr-2"></i> Set to <span class="text-orange">'Canceled'</span>
+              <i class="fa fa-arrow-right mr-2"></i> Set to <span class="text-orange">'Cancelled'</span>
             </a>
             {{else}}
-            {{#ifeq this.status 'canceled'}}
-            {{!-- Canceled --}}
+            {{#ifeq this.status 'cancelled'}}
+            {{!-- Cancelled --}}
             <a class="dropdown-item sa-set-stage" href="javascript:void(0);" data-uid="{{{this.id}}}"
-              data-stage="canceled" data-stage_type="final">
+              data-stage="cancelled" data-stage_type="final">
               <i class="fa fa-arrow-right mr-2"></i> Set to <span class="text-success">'Done'</span>
             </a>
 

@@ -7,6 +7,7 @@ const orderDetailRouter = require('./order_detail.route')
 // @route   GET /orders
 router.get('/', showOrderList)
 
+
 // @desc    Get order by Id
 // @route   GET /orders/:id
 router.get('/:id', getOrderById)
