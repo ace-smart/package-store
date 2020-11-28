@@ -1,0 +1,10 @@
+<!-- PAGE-CONTENT START -->
+{{!-- {{> client/page-title.partial}} --}}
+{{#if login}}
+  {{> client/auth/login.partial}}
+{{else}}
+  {{#if register}}
+  {{> client/auth/register.partial}}
+  {{/if}}
+{{/if}}
+<!-- PAGE-CONTENT END -->

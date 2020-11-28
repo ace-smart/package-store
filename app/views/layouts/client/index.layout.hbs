@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+  {{> client/meta.partial}}
+
+  {{> client/css.partial}}
+  {{#if login}}
+  {{> client/auth/css.partial}}
+  {{else}}
+    {{#if register}}
+    {{> client/auth/css.partial}}
+    {{/if}}
+  {{/if}}
+</head>
+
+<body class="header_sticky header-style-1 topbar-style-1 has-menu-extra">
+
+  {{> client/loader.partial}}
+
+  <!-- Boxed -->
+  <div class="boxed">
+    {{> client/header.partial}}
+
+    {{{body}}}
+
+    {{> client/subscribe-email.partial}}
+
+    {{> client/footer.partial}}
+  </div>
+
+  {{> client/js/assets.partial}}
+
+  {{> client/index/js.partial}}
+</body>
+
+</html>

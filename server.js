@@ -27,8 +27,8 @@ app.engine(
 )
 app.set("view engine", ".hbs")
 // static folders
-app.use("/static", express.static(path.join(__dirname, "app/public")))
-// app.use("/static", express.static(path.join(__dirname, "app/public/client")))
+app.use("/public", express.static(path.join(__dirname, "app/public")))
+app.use("/static", express.static(path.join(__dirname, "app/public/client")))
 app.use("/admin/static", express.static(path.join(__dirname, "app/public/admin")))
 app.use("/admin/plugins", express.static(path.join(__dirname, "app/public/admin/plugins")))
 // logger
@@ -37,7 +37,7 @@ app.use(morgan("dev"))
 app.use(
     session({
         name: "userSession",
-        secret: process.env.SESSION_SECRET,
+        secret: process.env.SESSION_SECRET || 'aaaaaa',
         cookie: { path: "/", httpOnly: true, secure: false, maxAge: 1000 * 3600 * 24 * 7 },
         resave: true,
         saveUninitialized: false,
@@ -92,6 +92,7 @@ app.use(passport.initialize())
 app.use(passport.session())
 // routes
 app.use("/admin", require("./app/routes/admin/admin.js"))
+app.use(require("./app/routes/client/client.js"))
 
 
 // Port
