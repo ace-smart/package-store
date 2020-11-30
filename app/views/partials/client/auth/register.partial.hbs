@@ -5,36 +5,87 @@
       <div class="col-md-12">
         <div class="title-section margin_bottom_17">
           <h2 class="title">
-            Login
+            Register
           </h2>
         </div><!-- /.title-section -->
       </div><!-- /.col-md-12 -->
     </div><!-- /.row -->
     <div class="row">
       <div class="col-8 d-flex flex-column mx-auto px-4 ">
-        <form novalidate="" class="contact-form" id="login-form" method="post" action="/login">
+        {{> flash}}
+        <form  class="contact-form" id="register-form" method="post" action="/register">
+        {{> csrf}}
           <div class="row form-group my-3">
             <div class="col-12 form-input">
               <label for="username" class="form-label">Username</label>
-              <input type="text" name="username" id="username" placeholder="Enter username" required>
+              {{#if errors.username}}
+              <input type="text" name="username" id="username" class="parsley-error"
+              placeholder="Enter username" value="{{{errors.username.value}}}" required>
+              {{#with errors.username}}
+                {{> client/error.partial}}
+              {{/with}}
+              {{else}}
+                {{#if validData.username}}
+                <input type="text" name="username" id="username" placeholder="Enter username" value="{{{validData.username}}}" required>
+                {{else}}
+                <input type="text" name="username" id="username" placeholder="Enter username" required>
+                {{/if}}
+              {{/if}}
             </div>
           </div>
           <div class="row form-group my-3">
             <div class="col-12 form-input">
               <label for="email" class="form-label">Email</label>
+
+              {{#if errors.email}}
+              <input type="email" name="email" id="email" class="not-valid"
+              placeholder="Enter email" required>
+              {{#with errors.email}}
+                {{> client/error.partial}}
+              {{/with}}
+              {{else}}
+                {{#if validData.email}}
+                <input type="email" name="email" id="email" placeholder="Enter email" value="{{{validData.email}}}" required>
+                {{else}}
               <input type="email" name="email" id="email" placeholder="Enter email" required>
+                {{/if}}
+              {{/if}}
             </div>
           </div>
           <div class="row form-group my-3">
             <div class="col-12 form-input">
               <label for="password" class="form-label">Password</label>
+              {{#if errors.password}}
+              <input type="password" name="password" id="password" class="not-valid"
+              placeholder="Enter password" value="{{{errors.password.value.password}}}" required>
+              {{#with errors.password}}
+                {{> client/error.partial}}
+              {{/with}}
+              {{else}}
+                {{#if validData.password}}
+                <input type="password" name="password" id="password" placeholder="Enter password" value="{{{validData.password}}}" required>
+                {{else}}
               <input type="password" name="password" id="password" placeholder="Enter password" required>
+                {{/if}}
+              {{/if}}
             </div>
           </div>
           <div class="row form-group my-3">
             <div class="col-12 form-input">
               <label for="confirm_password" class="form-label">Confirm password</label>
-              <input type="password" name="confirm_password" id="confirm_password" placeholder="Enter password" required>
+              {{#if errors.confirm_password}}
+              <input type="password" name="confirm_password" id="confirm_password" class="not-valid"
+              placeholder="Enter password" value="{{{errors.confirm_password.value.confirm_password}}}" required>
+              {{#with errors.confirm_password}}
+                {{> client/error.partial}}
+              {{/with}}
+              {{else}}
+                {{#if validData.confirm_password}}
+                <input type="password" name="confirm_password" id="confirm_password" placeholder="Enter password" value="{{{validData.confirm_password}}}" required>
+                {{else}}
+                <input type="password" name="confirm_password" id="confirm_password" placeholder="Enter password" required>
+                {{/if}}
+              {{/if}}
             </div>
           </div>
 
@@ -46,26 +97,13 @@
           </div>
         </form>
         
-        <div class="dropdown-divider my-4 " style="background-color: #333"></div>
-
-        <div class="row mt-3">
-          <div class="col pr-1">
-            <a id="facebook-login" class="btn btn-primary w-100 my-1" style="text-transform: none;">
-              <i class="fa fa-facebook-square mr-2"></i> Register with Facebook
-            </a>
+        <div class="row d-flex justify-content-end">
+          <div class="col-sm-6">
+            <p class="mb-0 font-italic">Already have an account? <a href="/login" class="text-info">Login</a></p>
           </div>
-          <div class="col p-0">
-            <a id="google-login" class="btn btn-danger w-100 my-1" style="text-transform: none;">
-              <i class="fa fa-google-plus-square mr-2"></i> Register with Google
-            </a>
+          <div class="col-sm-6 text-right">
+            <p class="mb-0 font-italic">Not activated? <a href="/resend-activation" class="text-info">Resend activation</a></p>
           </div>
-          <div class="col pl-1">
-            <a id="github-login" class="btn btn-dark w-100 my-1" style="text-transform: none;">
-              <i class="fa fa-github mr-2"></i>Register with Github
-            </a>
-          </div>
-
-
         </div>
       </div>
     </div><!-- /.row -->

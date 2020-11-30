@@ -9,20 +9,20 @@
 				<div class="top-bar-nav">
 					<div class="inner">
 						<div class="language-wrap">
-							<ul class="language">
-								<li>
-									<a href="#">English</a>
-									<ul class="sub-language">
-										<li><a href="#">English</a></li>
-										<li><a href="#">France</a></li>
-									</ul>
-								</li>
-							</ul>
+							<a href="#">English</a>
 						</div>
 						<div class="money">USD <i class="fa fa-usd"></i></div>
-						<div class="account">
+						<div class="account ">
 							{{#if user}}
-							<a href="#">My Account <i class="fa fa-user"></i></a>
+							<div class="dropdown account-dropdown">
+								<button class="btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									{{{user.username}}} <i class="fa fa-user ml-1"></i>
+								</button>
+								<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+									<a class="dropdown-item" href="/my-account" style="color: #343a40">My account</a>
+									<a class="dropdown-item" href="/logout" style="color: #343a40">Logout</a>
+								</div>
+							</div>
 							{{ else }}
 							<ul class="d-flex flex-row">
 								<li><a href="/login">Login </a></li>
@@ -54,9 +54,6 @@
 						<input type="text" value="" name="s" class="header-search-field" placeholder="Search...">
 						<button type="submit" class="header-search-submit" title="Search">Search</button>
 					</form>
-				</li>
-				<li class="box-login">
-					<a class="icon_login" href="#"></a>
 				</li>
 				<li class="box-cart nav-top-cart-wrapper">
 					<a class="icon_cart nav-cart-trigger active" href="#"><span>3</span></a>

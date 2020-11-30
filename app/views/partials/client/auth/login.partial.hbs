@@ -12,7 +12,9 @@
     </div><!-- /.row -->
     <div class="row"> 
       <div class="col-8 d-flex flex-column px-5">
-        <form novalidate="" class="contact-form" id="login-form" method="post" action="/login">
+        {{> flash}}
+        <form class="contact-form" id="login-form" method="post" action="/login">
+        {{> csrf}}
           <div class="row form-group my-3">
             <div class="col-12 form-input">
               <label for="username" class="form-label">Username</label>
@@ -33,12 +35,15 @@
                 style="font-size: 0.9rem; line-height:normal">Remember me</label>
             </div>
             <div class="col-6 d-flex flex-row justify-content-end">
-              <a id="forgot-pwd" class="mr-0" href="#" style="color: #3480eb; font-size: 0.8rem; line-height: normal;">
+              <a id="forgot-pwd" class="mr-0" href="/forget-password" style="color: #3480eb; font-size: 0.8rem; line-height: normal;">
                 Forgot password?
               </a>
             </div>
           </div>
 
+          <div class="dropdown-divider my-4 " style="background-color: #333"></div>
+          
+          {{> client/auth/error.partial}}
           <div class="row form-group my-3">
             <div class="col-12">
             <button class="w-100 form-input contact-submit my-2">Login</button>
@@ -46,14 +51,11 @@
           </div>
         </form>
         
-        <div class="dropdown-divider my-4 " style="background-color: #333">
-        </div>
 
       </div>
 
       <div class="social-login col-4 border border-primary d-flex flex-column justify-content-start pt-5 pl-5">
           <span id ="divider-label">OR</span>
-        {{!-- <div class="social-login row mt-3"> --}}
           <div class="mb-2">
             <a id="facebook-login" class="btn btn-primary w-100 my-1" style="text-transform: none;">
               <i class="fa fa-facebook-square mr-2"></i> Login with Facebook
@@ -69,9 +71,6 @@
               <i class="fa fa-github mr-2"></i>Login with Github
             </a>
           </div>
-
-
-          {{!-- </div> --}}
         </div>
 
     </div><!-- /.row -->
@@ -79,62 +78,3 @@
 </section><!-- /.flat-row -->
 
 <!-- End Login Form -->
-
-
-      {{!-- <div class="col-8 d-flex flex-column mx-auto px-4 ">
-        <form novalidate="" class="contact-form" id="login-form" method="post" action="/login">
-          <div class="row form-group my-3">
-            <div class="col-12 form-input">
-              <label for="username" class="form-label">Username</label>
-              <input type="text" name="username" id="username" placeholder="Enter username" required>
-            </div>
-          </div>
-          <div class="row form-group my-3">
-            <div class="col-12 form-input">
-              <label for="password" class="form-label">Password</label>
-              <input type="password" name="password" id="password" placeholder="Enter password" required>
-            </div>
-          </div>
-
-          <div class="row form-group my-3">
-            <div class="col-6 d-flex flex-row ">
-              <input type="checkbox" class="mt-1" name="remember_me" id="remember_me" style="display: inline-block;">
-              <label for="remember_me" class="text-dark mb-0 ml-1"
-                style="font-size: 0.9rem; line-height:normal">Remember me</label>
-            </div>
-            <div class="col-6 d-flex flex-row justify-content-end">
-              <a id="forgot-pwd" class="mr-0" href="#" style="color: #3480eb; font-size: 0.8rem; line-height: normal;">
-                Forgot password?
-              </a>
-            </div>
-          </div>
-
-          <div class="row form-group my-3">
-            <div class="col-12">
-            <button class="w-100 form-input contact-submit my-2">Login</button>
-            </div>
-          </div>
-        </form>
-        
-        <div class="dropdown-divider my-4 " style="background-color: #333"></div>
-
-        <div class="social-login row mt-3">
-          <div class="col pr-1">
-            <a id="facebook-login" class="btn btn-primary w-100 my-1" style="text-transform: none;">
-              <i class="fa fa-facebook-square mr-2"></i> Login with Facebook
-            </a>
-          </div>
-          <div class="col p-0">
-            <a id="google-login" class="btn btn-danger w-100 my-1" style="text-transform: none;">
-              <i class="fa fa-google-plus-square mr-2"></i> Login with Google
-            </a>
-          </div>
-          <div class="col pl-1">
-            <a id="github-login" class="btn btn-dark w-100 my-1" style="text-transform: none;">
-              <i class="fa fa-github mr-2"></i>Login with Github
-            </a>
-          </div>
-
-
-        </div>
-      </div> --}}

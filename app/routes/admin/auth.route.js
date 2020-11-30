@@ -14,6 +14,10 @@ showLoginForm)
 router.post(
     "/login",
     _checkUnauthenticatedAdmin,
+    (req, res, next) => {
+      req.role = "admin"
+      return next()
+    },
     passport.authenticate("local", {
         failureRedirect: "/admin/login",
         failureFlash: true,

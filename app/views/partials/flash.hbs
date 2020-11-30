@@ -1,0 +1,21 @@
+{{#if messages.success}}
+<div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">×</span>
+    </button>
+    <p class="mb-0">
+        <strong>Successfully!</strong> {{{messages.success}}}
+    </p>
+</div>
+{{else}}
+    {{#if messages.fail}}
+    <div class="alert alert-danger alert-dismissible fade show mb-0" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+        <p class="mb-0">
+            <strong>Failed!</strong> {{{messages.fail}}}
+        </p>
+    </div>
+    {{/if}}
+{{/if}}
