@@ -1,6 +1,6 @@
 const router = require("express").Router()
 const {
-    showIndexPage, showContactPage, showAboutPage
+    showIndexPage, showContactPage, showAboutPage, contact
 } = require("../../controllers/client/index.controller")
 
 // @desc:   show index page
@@ -11,8 +11,12 @@ router.get(['/','/index','/home'], showIndexPage)
 // @route:  GET /about
 router.get('/about', showAboutPage)
 
-// @desc:   show index page
+// @desc:   show contact page
 // @route:  GET /contact
 router.get('/contact', showContactPage)
+
+// @desc:   leave messages
+// @route:  GET /contact
+router.post('/contact', contact)
 
 module.exports = router

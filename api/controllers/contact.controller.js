@@ -48,7 +48,6 @@ module.exports = {
       }
       throw new NotFoundError("No contact found.")
     } catch (error) {
-      console.log(error)
       return ErrorHandler.sendErrors(res, error)
     }
   },
