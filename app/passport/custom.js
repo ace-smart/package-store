@@ -3,20 +3,18 @@ const RememberStrategy = require("passport-remember-me").Strategy
 const authHelper = require("../helper/auth.helper")
 
 module.exports = async function (passport) {
-  const validate = async function (username, password, done) {
+  const validate = async function (req, username, password, done) {
     try {
-      const validation = await authHelper.validateUser(username, password, "admin")
-      if (validation.error != null) {
-        if (validation.error.name === "ValidationError") {
-          return done(null, false, { message: validation.error.invalidation[0].message })
-        } else {
-          throw new Error(validation.error.message)
-        }
-      }
+      const validation = await authHelper.validateUser(username, password, req.role)
 
       return done(null, validation.user)
     } catch (error) {
-      return done(error)
+      if (error.response.status === 400) {
+        return done(null, false, { message: error.response.data.error.invalidation[0].message })
+      } else {
+        return done(error.response.data.error)
+      }
+
     }
   }
 
@@ -64,6 +62,7 @@ module.exports = async function (passport) {
       {
         usernameField: "username",
         passwordField: "password",
+        passReqToCallback: true,
       },
       validate
     )

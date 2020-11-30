@@ -5,7 +5,7 @@ module.exports = {
       "To complete the register process. Please confirm your email address by clicking the link below.",
   },
   _btnText: "Confirm email address",
-  _btnLink: `${process.env.EMAIL_HTTP_PROTOCOL}${process.env.EMAIL_HTTP_DOMAIN_NAME}:${process.env.EMAIL_HTTP_PORT}`,
+  _btnLink: `${process.env.SERVER_PROTOCOL}${process.env.SERVER_DOMAIN_NAME}:${process.env.SERVER_PORT}`,
   setRegisterTemplate: function({body = this._body, btnText = this._btnText, btnLink = this._btnLink} = {}, route = '') {
     return `<table class="body-wrap" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; color: #333333; margin: 0;">
     <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">

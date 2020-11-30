@@ -103,7 +103,7 @@ module.exports = helper = {
   renderServerErrorPage: function (res, forRole = "user") {
     if (forRole === "user") {
       return res.render("templates/client/error/500", {
-        layout: "admin/error.layout.hbs",
+        layout: "client/index.layout.hbs",
       })
     } else if (forRole === "admin") {
       return res.render("templates/admin/error/500", {
@@ -115,7 +115,7 @@ module.exports = helper = {
   renderNotFoundPage: function (res, forRole = "user") {
     if (forRole === "user") {
       return res.render("templates/client/error/404", {
-        layout: "admin/error.layout.hbs",
+        layout: "client/index.layout.hbs",
       })
     } else if (forRole === "admin") {
       return res.render("templates/admin/error/404", {
@@ -127,7 +127,7 @@ module.exports = helper = {
   renderForbiddenPage: function (res, forRole = "user") {
     if (forRole === "user") {
       return res.render("templates/client/error/403", {
-        layout: "admin/error.layout.hbs",
+        layout: "client/index.layout.hbs",
       })
     } else if (forRole === "admin") {
       return res.render("templates/admin/error/403", {
@@ -139,7 +139,7 @@ module.exports = helper = {
   renderUnauthorizedPage: function (res, forRole = "user") {
     if (forRole === "user") {
       return res.render("templates/client/error/401", {
-        layout: "admin/error.layout.hbs",
+        layout: "client/index.layout.hbs",
       })
     } else if (forRole === "admin") {
       return res.render("templates/admin/error/401", {
@@ -155,7 +155,7 @@ module.exports = helper = {
       username: req.user.username,
       email: req.user.email,
       role: req.user.role,
-      profile: await authHelper.getProfile({ ...req.user }),
+      profile: (req.user.profileId != null) ? await authHelper.getProfile({ ...req.user }) : null,
       status: req.user.status,
       createdAt: req.user.createdAt,
     }

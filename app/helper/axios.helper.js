@@ -1,7 +1,7 @@
 const axios = require("axios")
 const axiosInstance = axios.create({
   baseURL: `${process.env.BASE_URL}:${process.env.API_SERVER_PORT}/api`,
-  timeout: 10000,
+  timeout: 60000,
   validateStatus: function (status) {
     return status < 400 // Resolve only if the status code is less than 400
   },

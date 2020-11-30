@@ -88,17 +88,17 @@ module.exports = {
   // @desc    Register
   // @route   POST /register
   register: async (req, res) => {
-    /*  req.body = {username, password, email}
+    /*  req.body = {username, password, email, confirm_password}
         default: role => "user", status => "deactivated"
     */
     try {
       const validation = await new RegisterObject({ ...req.body }).validate()
       const confirmString = require('crypto').randomBytes(64).toString('hex')
       const confirmEmailURL =
-        req.protocol +
-        "://" +
-        req.get("host") +
-        `/api/confirm-email?email=${validation.email}&confirmString=${confirmString}`
+        process.env.SERVER_PROTOCOL +
+        process.env.SEVER_DOMAIN_NAME + ':' +
+        process.env.SERVER_PORT +
+        `/activate?email=${validation.email}&confirmString=${confirmString}`
       const body = registerTemplate.setRegisterTemplate(
         { btnLink: confirmEmailURL, btnText: 'Confirm email address' })
       const mailResponse = await mailer.sendEmail([req.body.email], {
@@ -131,11 +131,11 @@ module.exports = {
       const user = await UserObject.getOneUserBy({ email: req.body.email })
       if (user && user.getStatus === "pending") {
         const confirmEmailURL =
-          req.protocol +
-          "://" +
-          req.get("host") +
-          `/api/confirm-email?email=${user.email}&confirmString=${user.confirmString}`
-
+        process.env.SERVER_PROTOCOL +
+        process.env.SERVER_DOMAIN_NAME + ':' +
+        process.env.SERVER_PORT.toString() +
+          `/activate?email=${user.email}&confirmString=${user.confirmString}`
+        
         const body = registerTemplate.setRegisterTemplate(
           { btnLink: confirmEmailURL, btnText: 'Confirm email address' } )
         const mailResponse = await mailer.sendEmail([req.body.email], {
@@ -154,7 +154,7 @@ module.exports = {
         }
       }
       
-      // already requested
+      // already activated
       if (user.getStatus === "activated") {
         return res
           .status(400)
@@ -163,6 +163,16 @@ module.exports = {
               message: "The email was already confirmed. Can not request to confirm again.",
             },
           })
+      }
+
+      // already request for resetting password
+      if (user.getStatus === "reset password") {
+        return res.status(400).json({
+          error: {
+            email: req.body.email,
+            message: "Your account is already requesting for password reset. Can not request for activation.",
+          },
+        })
       }
 
       // deactivated
@@ -188,8 +198,14 @@ module.exports = {
       email: 'email@exmaple.com',
       confirmString: '12345qwerty'
     } */
+    const queryData = {
+      email: req.query.email, 
+      confirmString: (req.query.confirmString.toString().includes("/")) 
+       ? req.query.confirmString.replace("/", "") 
+       : req.query.confirmString
+    }
     try {
-      const validation = await new ConfirmEmailObject({ ...req.query }).validate()
+      const validation = await new ConfirmEmailObject({ ...queryData }).validate()
       let user = await UserObject.getOneUserBy({
         email: validation.email,
         confirmString: validation.confirmString,

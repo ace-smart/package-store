@@ -11,7 +11,7 @@ const bodyParser = require("body-parser")
 const cookieParser = require("cookie-parser")
 const csrf = require("csurf")
 const passport = require("passport")
-const adminPassport = require("./app/passport/admin")
+const customPassport = require("./app/passport/custom")
 const flash = require("express-flash")
 const exphbs = require("express-handlebars")
 const MongoStore = require("connect-mongo")(session)
@@ -57,10 +57,6 @@ app.use((req, res, next) => {
         { name: "avatar", maxCount: 1 },
         { name: "productImg", maxCount: 1 },
     ])
-    // const galleryUpload = require("./config/multer").fields([
-    //     { name: "productImg", maxCount: 1 },
-    // ])
-    // console.log(req.files)
     
     upload(req, res, (err) => {
         if (err) {
@@ -71,16 +67,6 @@ app.use((req, res, next) => {
 
         return next()
     })
-
-    // galleryUpload(req, res, (err) => {
-    //     if (err) {
-    //         res.locals.file = {
-    //             error: err,
-    //         }
-    //     }
-
-    //     return next()
-    // })
 })
 // bodyParser
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -91,7 +77,7 @@ app.use(csrf({ cookie: true }))
 // flash
 app.use(flash())
 // passport
-adminPassport(passport)
+customPassport(passport)
 app.use(passport.initialize())
 app.use(passport.session())
 // routes

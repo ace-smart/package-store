@@ -1,10 +1,22 @@
 <!-- PAGE-CONTENT START -->
 {{!-- {{> client/page-title.partial}} --}}
-{{#if login}}
+{{#ifMatch auth 'login'}}
   {{> client/auth/login.partial}}
-{{else}}
-  {{#if register}}
+{{/ifMatch}}
+
+{{#ifMatch auth 'register'}}
   {{> client/auth/register.partial}}
-  {{/if}}
-{{/if}}
+{{/ifMatch}}
+
+{{#ifMatch auth 'resend-activation'}}
+{{> client/auth/resend-activation.partial}}
+{{/ifMatch}}
+
+{{#ifMatch auth 'forget-password'}}
+{{> client/auth/forget-password.partial}}
+{{/ifMatch}}
+
+{{#ifMatch auth 'reset-password'}}
+{{> client/auth/reset-password.partial}}
+{{/ifMatch}}
 <!-- PAGE-CONTENT END -->

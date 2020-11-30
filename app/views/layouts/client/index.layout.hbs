@@ -5,12 +5,8 @@
   {{> client/meta.partial}}
 
   {{> client/css.partial}}
-  {{#if login}}
+  {{#if auth}}
   {{> client/auth/css.partial}}
-  {{else}}
-    {{#if register}}
-    {{> client/auth/css.partial}}
-    {{/if}}
   {{/if}}
 </head>
 

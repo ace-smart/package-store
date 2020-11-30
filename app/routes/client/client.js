@@ -1,8 +1,13 @@
 const router = require('express').Router()
+const {_autoRenewAccessToken, _loginWithCookie, _checkAuthenticatedCustomer} = require('../../helper/auth.helper')
+
 const indexRouter = require('./index.route')
 const authRouter = require('./auth.route')
 
-router.use(indexRouter)
+router.use(_autoRenewAccessToken)
+router.use(_loginWithCookie)
 router.use(authRouter)
+router.use(indexRouter)
+router.use(_checkAuthenticatedCustomer)
 
 module.exports = router
