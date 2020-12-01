@@ -22,7 +22,7 @@ module.exports = {
     }
 
     res.cookie(
-      "tokens",
+      "adminTokens",
       tokens,
       {
         path: "/admin",

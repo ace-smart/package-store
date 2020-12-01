@@ -70,7 +70,6 @@ router.post(
   }),
   _storeTokensBySession,
   (req, res, next) => {
-    
     return res.redirect("/")
   }
 )

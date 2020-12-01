@@ -5,7 +5,8 @@ module.exports = {
   // @route:  GET ['/','/index','/home']
   showIndexPage: async (req, res) => {
     let user = null
-    if (req.isAuthenticated()) {
+
+    if (req.isAuthenticated() && req.user.role === 'user') {
         try {
             user = await getUserInstance(req)
         } catch (error) {

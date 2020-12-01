@@ -83,7 +83,6 @@ app.use(passport.session())
 // routes
 app.use(require("./app/routes/client/client.js"))
 app.use("/admin", require("./app/routes/admin/admin.js"))
-app.use(require("./app/routes/client/client.js"))
 
 // Port
 const PORT = process.env.PORT || 5000

@@ -388,7 +388,7 @@ module.exports = {
       const createdContact = await ContactObject.create({...req.body})
 
       if (createdContact) {
-        return res.status(201).json(createdContact)
+        return res.sendStatus(201)
       }
       
       throw new Error("Failed to create contact.")

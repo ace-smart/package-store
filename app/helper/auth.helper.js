@@ -113,20 +113,15 @@ module.exports = authHelper = {
   _checkUnauthenticatedAdmin: (req, res, next) => {
     if (req.isUnauthenticated()) {
       return next()
-    } else if (req.user.status !== "activated" || req.user.role !== "admin") {
-      console.log(1)
-      req.logout()
-      return res.render("templates/admin/auth/login", {
-        layout: "admin/auth.layout.hbs",
-        csrfToken: req.csrfToken(),
-      })
-    }
-
+    } 
+    
     return authHelper._redirectToIndex(req, res, next)
   },
 
   _checkUnauthenticatedCustomer: (req, res, next) => {
-    if (req.isUnauthenticated()) return next()
+    if (req.isUnauthenticated()) {
+      return next()
+    }
 
     return authHelper._redirectToIndex(req, res, next)
   },
@@ -150,17 +145,17 @@ module.exports = authHelper = {
   },
 
   _loginWithCookie: async (req, res, next) => {
-    if (req.isUnauthenticated() && req.cookies["tokens"] != null) {
-      const { refreshToken } = req.cookies["tokens"]
-      let resData = await authHelper.getLoggedUser({ ...req.cookies["tokens"] })
+    if (req.isUnauthenticated() && req.cookies["adminTokens"] != null) {
+      const { refreshToken } = req.cookies["adminTokens"]
+      let resData = await authHelper.getLoggedUser({ ...req.cookies["adminTokens"] })
 
       if (resData.data && resData.data.error) {
         if (resData.status === 401 && resData.data.error.name === "TokenExpiredError") {
           try {
             const newAccessTK = await authHelper.renewAccessToken(refreshToken)
-            res.clearCookie("tokens", { path: "/admin" })
+            res.clearCookie("adminTokens", { path: "/admin" })
             res.cookie(
-              "tokens",
+              "adminTokens",
               {
                 accessToken: newAccessTK,
                 refreshToken: refreshToken,
@@ -199,10 +194,9 @@ module.exports = authHelper = {
   },
 
   _autoRenewAccessToken: async (req, res, next) => {
-    if (req.isAuthenticated()) {
-      const { refreshToken, rememberMe } = req.cookies["tokens"]
-
-      const resData = await authHelper.getLoggedUser({ ...req.cookies["tokens"] })
+    if (req.isAuthenticated() && req.cookies["adminTokens"] != null) {
+      const { refreshToken, rememberMe } = req.cookies["adminTokens"]
+      const resData = await authHelper.getLoggedUser({ ...req.cookies["adminTokens"] })
 
       if (resData.data && resData.data.error) {
         if (resData.status === 401 && resData.data.error.name === "TokenExpiredError") {
@@ -210,11 +204,11 @@ module.exports = authHelper = {
             const newAccessTK = await authHelper.renewAccessToken(refreshToken)
             const expires = rememberMe ? new Date(Date.now() + 1000 * 3600 * 24 * 7) : 0
             if (newAccessTK) {
-              res.clearCookie("tokens", {
+              res.clearCookie("adminTokens", {
                 path: "/admin",
               })
               res.cookie(
-                "tokens",
+                "adminTokens",
                 {
                   accessToken: newAccessTK,
                   refreshToken: refreshToken,

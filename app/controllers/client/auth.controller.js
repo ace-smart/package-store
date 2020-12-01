@@ -1,3 +1,4 @@
+const { get } = require("mongoose")
 const axiosInstance = require("../../helper/axios.helper")
 const {
   handleErrors,
@@ -205,7 +206,7 @@ module.exports = {
       expires = new Date(Date.now() + 1000 * 3600 * 24 * 7)  // 7 days
       tokens.rememberMe = true
     }
-
+		// Tokens
     res.cookie(
       "tokens",
       tokens,
@@ -215,8 +216,7 @@ module.exports = {
         secure: false,
         expires
       }
-    )
-    
+		)
     return next()
 	},
 	

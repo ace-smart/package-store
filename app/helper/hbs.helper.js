@@ -52,7 +52,7 @@ module.exports = {
     formatNumber: function(number) {
         return new Intl.NumberFormat('en-US').format(parseFloat(number))
     },
-    parseImageToString(imageBuffer) {
+    parseImageToString(imageBuffer = null) {
         return imageBuffer.toString('base64')
     },
     print64baseProductImg(fileName, extension) {

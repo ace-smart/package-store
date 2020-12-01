@@ -8,7 +8,7 @@ module.exports = helper = {
     return formInput
   },
 
-  isSameDate: function(dateObject1, dateObject2) {
+  isSameDate: function (dateObject1, dateObject2) {
     dateObject1 = new Date(dateObject1)
     dateObject2 = new Date(dateObject2)
     const date1 = dateObject1.getDate()
@@ -26,17 +26,16 @@ module.exports = helper = {
   },
 
   getFilledFields: function (body, data) {
-    // return only fields that are filled 
+    // return only fields that are filled
     const bodyKeys = Object.keys(body)
     const dataKeys = Object.keys(data)
     const filledFields = {}
     let newFieldsFromBody = []
     // Check inserted data has the same property as data object
     if (JSON.stringify(bodyKeys) === JSON.stringify(dataKeys)) {
-      
     } else {
       bodyKeys.forEach((element) => {
-        if(!dataKeys.includes(element)) {
+        if (!dataKeys.includes(element)) {
           newFieldsFromBody.push(element)
         }
       })
@@ -53,30 +52,30 @@ module.exports = helper = {
     for (let [key, value] of Object.entries(data)) {
       for (let i = 0; i < bodyKeys.length; i++) {
         if (body[bodyKeys[i]] != null) {
-            if (key === 'validUntil' || key === 'dateOfBirth') {
-              if (!helper.isSameDate(value, body[key])){
-                filledFields[key] = body[key]
-              }
-            } else if (key === bodyKeys[i]) {
-              // Type: Object
-              if (value instanceof Object && body[key] instanceof Object){
-                if(JSON.stringify(value) !== JSON.stringify(body[key])) {
-                  filledFields[key] = body[key]
-                }
-              } else if (value != body[key]) {
-                filledFields[key] = body[key]
-              }
+          if (key === "validUntil" || key === "dateOfBirth") {
+            if (!helper.isSameDate(value, body[key])) {
+              filledFields[key] = body[key]
             }
+          } else if (key === bodyKeys[i]) {
+            // Type: Object
+            if (value instanceof Object && body[key] instanceof Object) {
+              if (JSON.stringify(value) !== JSON.stringify(body[key])) {
+                filledFields[key] = body[key]
+              }
+            } else if (value != body[key]) {
+              filledFields[key] = body[key]
+            }
+          }
         }
       }
     }
-    
+
     return filledFields
   },
 
   getValidFields: function (errors, data) {
     let dataObject = JSON.parse(JSON.stringify(data))
-    let inputFields =  Object.keys(data)
+    let inputFields = Object.keys(data)
 
     for (let i = 0; i < inputFields.length; i++) {
       const isFound = errors.find((ele) => ele.field === inputFields[i])
@@ -155,7 +154,7 @@ module.exports = helper = {
       username: req.user.username,
       email: req.user.email,
       role: req.user.role,
-      profile: (req.user.profileId != null) ? await authHelper.getProfile({ ...req.user }) : null,
+      profile: req.user.profileId != null ? await authHelper.getProfile({ ...req.user }) : null,
       status: req.user.status,
       createdAt: req.user.createdAt,
     }

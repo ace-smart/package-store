@@ -14,7 +14,6 @@ module.exports = async function (passport) {
       } else {
         return done(error.response.data.error)
       }
-
     }
   }
 
@@ -70,26 +69,27 @@ module.exports = async function (passport) {
 
   passport.use(new RememberStrategy(consumeRememberTK, issueRememberTK))
 
-  passport.serializeUser(function (admin, done) {
+  passport.serializeUser(function (account, done) {
     return done(null, {
-      accessToken: admin.accessToken,
-      refreshToken: admin.refreshToken,
+      accessToken: account.accessToken,
+      refreshToken: account.refreshToken,
     })
   })
 
-  passport.deserializeUser(async function (adminData, done) {
-    const resData = await authHelper.getLoggedUser({ ...adminData })
+  passport.deserializeUser(async function (accountData, done) {
+    const resData = await authHelper.getLoggedUser({ ...accountData })
     if (resData.user) {
       return done(null, resData.user)
     }
 
     if (resData.status >= 400 && resData.data.error) {
+      // Renew accessToken and then get data
       if (resData.status === 401 && resData.data.error.name === "TokenExpiredError") {
         try {
-          const newAccessTK = await authHelper.renewAccessToken(adminData.refreshToken)
+          const newAccessTK = await authHelper.renewAccessToken(accountData.refreshToken)
           const userData = await authHelper.getLoggedUser({
             accessToken: newAccessTK,
-            refreshToken: adminData.refreshToken,
+            refreshToken: accountData.refreshToken,
           })
           
           return done(null, userData.user)
