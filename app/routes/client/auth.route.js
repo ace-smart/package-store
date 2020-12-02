@@ -93,12 +93,28 @@ _storeTokensBySession,
 // @desc:   authenticate with facebook account
 // @route:  GET /auth/facebook
 router.get('/auth/facebook', 
-passport.authenticate('facebook', {scope: ['email', 'user_birthday', 'user_gender']}))
+passport.authenticate('facebook', {scope: 'email'}))
 
 // @desc:   authenticate with facebook account
 // @route:  GET /auth/facebook
 router.get('/auth/facebook/callback', 
 passport.authenticate('facebook', { 
+  failureRedirect: "/login"
+}), 
+_storeTokensBySession,
+(req, res, next) => {
+  return res.redirect('/')
+})
+
+// @desc:   authenticate with github account
+// @route:  GET /auth/github
+router.get('/auth/github', 
+passport.authenticate('github', {scope: ['user.email', 'read:user']}))
+
+// @desc:   authenticate with github account
+// @route:  GET /auth/github
+router.get('/auth/github/callback', 
+passport.authenticate('github', { 
   failureRedirect: "/login"
 }), 
 _storeTokensBySession,
