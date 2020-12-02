@@ -74,6 +74,22 @@ router.post(
   }
 )
 
+// @desc:   authenticate with google account
+// @route:  GET /auth/google
+router.get('/auth/google', 
+passport.authenticate('google', {scope: ['profile', 'email']}))
+
+// @desc:   authenticate with google account
+// @route:  GET /auth/google
+router.get('/auth/google/callback', 
+passport.authenticate('google', { 
+  failureRedirect: "/login"
+}), 
+_storeTokensBySession,
+(req, res, next) => {
+  return res.redirect('/')
+})
+
 // @desc:   logout
 // @route:  GET /logout
 router.get("/logout", (req, res, next) => {
@@ -85,5 +101,4 @@ router.get("/logout", (req, res, next) => {
   req.logout()
   return res.redirect("/login")
 })
-
 module.exports = router

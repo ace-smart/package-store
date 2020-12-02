@@ -22,8 +22,7 @@ const ProfileSchema = new mongoose.Schema({
         type: Date
     },
     phoneNumber: {
-        type: String,
-        required: true
+        type: String
     },
     avatar: {
         fileName: {
@@ -33,6 +32,10 @@ const ProfileSchema = new mongoose.Schema({
         mimeType: {
             type: String,
             enum: ['image/jpeg', 'image/png']
+        },
+        urlLink: {
+            type: String,
+            default: null
         }
     },
     status: {

@@ -11,12 +11,19 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     max: 255,
-    required: true,
+    // required: true,
     unique: true,
   },
   password: {
     type: String,
-    required: true,
+  },
+  clientId: {
+    type: String,
+    default: null
+  },
+  provider: {
+    type: String,
+    default: null
   },
   profileId: {
     type: mongoose.Schema.Types.ObjectId,

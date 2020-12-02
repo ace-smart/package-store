@@ -101,4 +101,5 @@ module.exports = async function (passport) {
       return done(resData.data.error)
     }
   })
+
 }
