@@ -10,6 +10,7 @@ const registerTemplate = require("../../email_templates/register")
 const ResetPwdObject = require("../objects/ResetPwdObject")
 const ErrorHandler = require("../helper/errorHandler")
 const NotFoundError = require("../errors/not_found")
+const UserModel = require("../models/UserModel")
 
 module.exports = {
   // @desc    Authenticate
@@ -28,6 +29,52 @@ module.exports = {
       }
 
       throw new Error("Authentication failed.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc    Authenticate
+  // @route   POST /oauth?providerName='google'&clientId='12345'
+  authWith3rdParty: async (req, res) => {
+    try {
+      const validator = require('validator')
+      const providers = ['google', 'facebook', 'github']
+      if (req.query.providerName == null || !validator.isIn(req.query.providerName, providers)) {
+        throw new NotFoundError("Unknown given provider.")
+      }
+      if (req.query.clientId == null) {
+        throw new NotFoundError('No user found.')
+      }
+
+      const user = await UserModel.findOne({clientId: req.query.clientId.toString()}).lean()
+      if (user) {
+        const loggedUser = new UserObject({...user})
+        loggedUser.setRefreshSecret = user.refresh_secret
+        const isInitialized = loggedUser.initializeTokens() // regenerate tokens
+        if (isInitialized) {
+          await loggedUser.save()
+          return res.status(200).json(loggedUser)
+        }
+
+        throw new Error("Authentication failed.")
+      } else {
+        // New account
+        const userData = {
+          username: req.body.profile.firstName + req.body.profile.lastName,
+          email: req.body.email,
+          profile: {...req.body.profile},
+          clientId: req.body.clientId,
+          provider: req.body.provider
+        }
+
+        const isCreated = await UserObject.createWith3rdPartyAcc({...userData}) 
+        if (isCreated) {
+          return res.status(200).json(isCreated)
+        }
+      }
+
+
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }

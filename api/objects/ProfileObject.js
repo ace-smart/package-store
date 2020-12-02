@@ -184,13 +184,15 @@ class ProfileObject {
     }
     // mimeType
     if (this.avatar != null && !validator.isEmpty(this.avatar.toString())) {
-      if (!validator.isIn(this.avatar.mimeType.toString(), AVATAR_MIMETYPE)) {
-        errors.push({
-          field: "mimeType",
-          message: "Invalid value.",
-          value: this.avatar,
-          mimeType,
-        })
+      if (this.avatar.mimeType != null) {
+        if (!validator.isIn(this.avatar.mimeType.toString(), AVATAR_MIMETYPE)) {
+          errors.push({
+            field: "mimeType",
+            message: "Invalid value.",
+            value: this.avatar,
+            mimeType,
+          })
+        }
       }
     }
 

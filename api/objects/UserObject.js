@@ -9,7 +9,6 @@ const ObjectError = require("../errors/object")
 const ValidationError = require("../errors/validation")
 const NotFoundError = require("../errors/not_found")
 const ProfileObject = require("./ProfileObject")
-const e = require("express")
 const USER_ROLES = ["user", "admin"]
 const STATUS_VALUES = ["deactivated", "activated", "pending", "reset password"]
 
@@ -385,6 +384,37 @@ class UserObject {
       }
 
       throw new Error("Failed to create user.")
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // @desc:     Create user with 3rd party account
+  static async createWith3rdPartyAcc ({...userData}) {
+    try {
+      // Create profile
+      const createdProfile = await ProfileObject.create({...userData.profile})
+      userData.profileId = createdProfile.id.toString()
+      // Set properties
+      let userObject = new UserObject({ ...userData }) 
+      userObject = userObject.clean()
+      userObject.setStatus = "activated"
+      userObject.clientId = userData.clientId
+      userObject.provider = userData.provider
+      // Create user
+      const createdUser = await UserModel.create({...userObject})
+      if (createdUser){
+        const newUser = new UserObject({...createdUser._doc})
+        newUser.setRefreshSecret = createdUser._doc.refresh_secret
+        const isInitialized = newUser.initializeTokens()
+        if (isInitialized) {
+          await newUser.save()
+          return newUser
+        }
+      } else {
+        throw new Error("Failed to create user.")
+      }
+
     } catch (error) {
       throw error
     }

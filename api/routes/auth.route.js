@@ -2,6 +2,7 @@ const express = require("express")
 const router = express.Router()
 const {
   auth,
+  authWith3rdParty,
   getUserData,
   renewAccessToken,
   register,
@@ -16,8 +17,12 @@ const {
 const { _ensureAccessToken } = require("../helper/auth")
 
 // @desc    Generate tokens
-// @route   POST /auth
+// @route   POST /auth?role='user'
 router.post("/auth", auth)
+
+// @desc    Generate tokens
+// @route   POST /oauth?providerName='google'&clientId='1234'
+router.post("/oauth", authWith3rdParty)
 
 // @desc    GET User data by tokens
 // @route   GET /get-user-data
