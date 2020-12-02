@@ -90,6 +90,22 @@ _storeTokensBySession,
   return res.redirect('/')
 })
 
+// @desc:   authenticate with facebook account
+// @route:  GET /auth/facebook
+router.get('/auth/facebook', 
+passport.authenticate('facebook', {scope: ['email', 'user_birthday', 'user_gender']}))
+
+// @desc:   authenticate with facebook account
+// @route:  GET /auth/facebook
+router.get('/auth/facebook/callback', 
+passport.authenticate('facebook', { 
+  failureRedirect: "/login"
+}), 
+_storeTokensBySession,
+(req, res, next) => {
+  return res.redirect('/')
+})
+
 // @desc:   logout
 // @route:  GET /logout
 router.get("/logout", (req, res, next) => {

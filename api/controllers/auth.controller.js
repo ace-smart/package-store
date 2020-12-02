@@ -61,7 +61,7 @@ module.exports = {
       } else {
         // New account
         const userData = {
-          username: req.body.profile.firstName + req.body.profile.lastName,
+          username: req.body.displayName,
           email: req.body.email,
           profile: {...req.body.profile},
           clientId: req.body.clientId,
@@ -76,6 +76,7 @@ module.exports = {
 
 
     } catch (error) {
+      console.log(error)
       return ErrorHandler.sendErrors(res, error)
     }
   },

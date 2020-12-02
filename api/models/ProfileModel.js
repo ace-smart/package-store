@@ -5,13 +5,11 @@ const ProfileSchema = new mongoose.Schema({
         type: String,
         min: 3,
         max: 30,
-        required: true
     },
     lastName: {
         type: String,
         min: 3,
         max: 30,
-        required: true
     },
     gender: {
         type: String,
@@ -40,7 +38,7 @@ const ProfileSchema = new mongoose.Schema({
     },
     status: {
       type: String,
-      default: 'deactivated',
+      default: 'activated',
     },
 }, {
     timestamps: true
