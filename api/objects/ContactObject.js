@@ -31,7 +31,7 @@ class ContactObject {
 
   static async getContactsBy (criteria = {}, selectFields = null) {
     try {
-      const contacts = await ContactModel.find(criteria, selectFields).lean()
+      const contacts = await ContactModel.find(criteria, selectFields).sort({'createdAt': -1}).lean()
       if (contacts.length > 0) {
         let contactList = new Array()
         
@@ -45,6 +45,7 @@ class ContactObject {
 
       return null
     } catch (error) {
+      console.log(error)
       throw error
     }
   }
