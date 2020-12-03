@@ -12,7 +12,8 @@ const {
   resetPassword,
   updateNewPassword,
   resetToken,
-  leaveMessage
+  leaveMessage,
+  getMenu
 } = require("../controllers/auth.controller")
 const { _ensureAccessToken } = require("../helper/auth")
 
@@ -63,6 +64,10 @@ router.put("/reset-password", updateNewPassword)
 // @desc    Leave a message to admin
 // @route   POST /leave-message
 router.post("/leave-message", leaveMessage)
+
+// @desc    Get menu
+// @route   GET /get-menu
+router.get("/get-menu", getMenu)
 
 
 module.exports = router
