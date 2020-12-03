@@ -1,5 +1,16 @@
 const axiosInstance = require("../../helper/axios.helper")
 const { getUserInstance, handleErrors, handleInvalidationErrors } = require("../../helper/helper")
+const getMenu = async () => {
+  try {
+    const response = await axiosInstance.get(`/get-menu`)
+    
+    if (response.status === 200) {
+      return response.data
+    }
+  } catch (error) {
+    throw error
+  }
+}
 module.exports = {
   // @desc:   show index page
   // @route:  GET ['/','/index','/home']
@@ -14,9 +25,12 @@ module.exports = {
         }
     }
 
+
     return res.render("templates/client/index/index.hbs", {
       layout: "client/index.layout.hbs",
-      user: user
+      user: user,
+      categories: await getMenu()
+
     })
   },
 

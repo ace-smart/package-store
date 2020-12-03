@@ -4,6 +4,7 @@ const LoginObject = require("../objects/LoginObject")
 const RegisterObject = require("../objects/RegisterObject")
 const ConfirmEmailObject = require("../objects/ConfirmEmailObject")
 const ContactObject = require("../objects/ContactObject")
+const CategoryObject = require("../objects/CategoryObject")
 const TokenError = require("../errors/token")
 const mailer = require("../helper/mailer")
 const registerTemplate = require("../../email_templates/register")
@@ -445,4 +446,19 @@ module.exports = {
     }
   },
 
+  // @desc:   Get menu list 
+  // @route:  GET /get-menu
+  getMenu: async(req, res) => {
+    try {
+      const categories = await CategoryObject.getCategoriesBy({status: 'activated'})
+      if (categories) {
+        return res.status(200).json(categories)
+      }
+
+      throw new Error("Failed to get menu.")
+    } catch (error) {
+      console.log(error)
+      return ErrorHandler.sendErrors(res, error)
+    }
+  }
 }

@@ -48,7 +48,8 @@ class CategoryObject {
             foreignField: 'categoryId',
             as: 'subcategories'
           } 
-        }
+        },
+        {$sort: {'createdAt': 1}}
       ])
 
       if (categoryList.length > 0) {
