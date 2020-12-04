@@ -20,3 +20,15 @@
 
 <script src="/static/javascript/jquery.cookie.js"></script>
 <script src="/static/javascript/main.js"></script>
+<script>
+  $('#myList a').on('click', function (e) {
+  e.preventDefault()
+  // remove previous active tab
+  const prevActiveEle = document.querySelector('a.list-group-item.active')
+  const prevActiveTab = document.querySelector('div.tab-pane.active')
+  prevActiveEle.classList.remove('active')
+  prevActiveTab.classList.remove('active')
+  // show tab
+  $(this).tab('show')
+})
+</script>

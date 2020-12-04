@@ -29,7 +29,7 @@ module.exports = {
     return res.render("templates/client/index/index.hbs", {
       layout: "client/index.layout.hbs",
       user: user,
-      categories: await getMenu()
+      // categories: await getMenu()
 
     })
   },
@@ -39,7 +39,6 @@ module.exports = {
   showContactPage: (req, res) => {
     return res.render("templates/client/contact/contact.hbs", {
       layout: "client/index.layout.hbs",
-      template: "contact",
       csrfToken: req.csrfToken(),
       pageTitle: "Contact",
       breadcrumb: [
@@ -63,7 +62,6 @@ module.exports = {
         req.flash('fail', 'Your input is not valid.')
         return res.render('templates/client/contact/contact.hbs', {
           layout: 'client/index.layout.hbs',
-          template: "contact",
           csrfToken: req.csrfToken(),
           errors: handleInvalidationErrors(error.response.data.error.invalidation)
         })
