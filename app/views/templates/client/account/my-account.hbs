@@ -1,0 +1,46 @@
+{{!-- Mm account --}}
+<section class="flat-row main-shop shop-detail style-1">
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <div class="card">
+          <div class="card-header">
+            <h5>
+              My account
+            </h5>
+          </div>
+          <div class="card-body p-3">
+            <div class="row">
+              <div class="col-sm-3 border-right">
+
+                <div class="list-group" id="myList" role="tablist">
+                  <a class="list-group-item list-group-item-action active" data-toggle="list" href="#profile"
+                    role="tab"><i class="fa fa-user mr-2"></i> Profile</a>
+                  <a class="list-group-item list-group-item-action" data-toggle="list" href="#address"
+                    role="tab"><i class="fa fa-home mr-2"></i> Address</a>
+                  <a class="list-group-item list-group-item-action" data-toggle="list" href="#change-pwd"
+                    role="tab"><i class="fa fa-key mr-2"></i>Change password</a>
+                </div>
+              </div>
+              <div class="col-sm-9">
+
+                <div class="tab-content">
+                  <div class="tab-pane active p-2" id="profile" role="tabpanel">
+                    {{> client/account/profile.partial}}
+                    </div>
+                  <div class="tab-pane p-2" id="address" role="tabpanel">
+                    {{> client/account/address.partial}}</div>
+                  <div class="tab-pane p-2" id="change-pwd" role="tabpanel">
+                    {{> client/account/change-pwd.partial}}</div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /.row -->
+  </div>
+  <!-- /.container -->
+</section>

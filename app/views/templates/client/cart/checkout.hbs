@@ -1,0 +1,117 @@
+{{!-- Cart --}}
+<section class="flat-row main-shop shop-detail style-1">
+  <div class="container">
+    <div class="row p-4">
+      <div class="col-sm-12 table-responsive">
+        <form action="#" method="POST">
+          {{!-- Customer info --}}
+          <div class="card">
+            <div class="card-header">
+              <i class="fa fa-mail mr-2"></i>
+              Contact Information
+            </div>
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="col-sm-6 form-group">
+                  <label for="fistName">First Name</label>
+                  <input type="text" name="firstName" id="firstName" placeholder="First name">
+                </div>
+                <div class="col-sm-6 form-group">
+                  <label for="fistName">Last Name</label>
+                  <input type="text" name="lastName" id="lastName" placeholder="Last name">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-6 form-group">
+                  <label for="fistName">Phone Number</label>
+                  <input type="text" name="city" id="city" placeholder="City">
+                </div>
+                <div class="col-sm-6 form-group">
+                  <label for="fistName">Email</label>
+                  <input type="text" name="city" id="city" placeholder="Email">
+                </div>
+              </div>
+            </div>
+          </div>
+          {{!-- Address --}}
+          <div class="card">
+            <div class="card-header">
+              <i class="fa fa-truck mr-2"></i>
+              Delivery to address
+            </div>
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="col-sm-12 form-group">
+                  <input type="text" name="street" id="street" placeholder="Street">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-6 form-group">
+                  <input type="text" name="district" id="district" placeholder="District">
+                </div>
+                <div class="col-sm-6 form-group">
+                  <input type="text" name="city" id="city" placeholder="City">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-6 form-group">
+                  <input type="text" name="country" id="country" placeholder="Country">
+                </div>
+                <div class="col-sm-6 form-group">
+                  <input type="text" name="postalCode" id="postalCode" placeholder="Postal code">
+                </div>
+              </div>
+            </div>
+          </div>
+          {{!-- Payment --}}
+          <div class="col-sm-6 p-0 mt-2">
+            <div class="card">
+              <div class="card-header">
+                <i class="fa fa-credit-card mr-2"></i>
+                Payment
+              </div>
+
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="col-sm-12">
+                    <p>
+                    Total cost
+                    </p>
+
+                    <select name="paymentMethod" id="paymentMethod">
+                      <option value="">Choose a payment method</option>
+                      <option value="COD">Cash On Delivery (COD)</option>
+                      <option value="CREDITCARD">VISA/MASTER</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-sm-12">
+                    <p>
+                    Payment method
+                    </span>
+
+                    <select name="paymentMethod" id="paymentMethod">
+                      <option value="">Choose a payment method</option>
+                      <option value="COD">Cash On Delivery (COD)</option>
+                      <option value="CREDITCARD">VISA/MASTER</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="col-sm-12 mt-3 d-flex justify-content-end">
+        <div class="add-to-cart mr-0">
+          <a id="checkout-btn" href="#">Create order</a>
+        </div>
+      </div>
+
+    </div>
+    <!-- /.row -->
+  </div>
+  <!-- /.container -->
+</section>

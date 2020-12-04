@@ -15,16 +15,19 @@
 						<div class="account ">
 							{{#if user}}
 							<div class="dropdown account-dropdown">
-								<button class="btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-									{{{user.username}}} 
+								<button class="btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+									aria-haspopup="true" aria-expanded="false">
+									{{{user.username}}}
 									{{#if user.profile.avatar.urlLink}}
-									<img class="ml-1" src="{{{user.profile.avatar.urlLink}}}" alt="avatar" style="height: 100%; width: 25px;  border-radius: 50%">
+									<img class="ml-1" src="{{{user.profile.avatar.urlLink}}}" alt="avatar"
+										style="height: 100%; width: 25px;  border-radius: 50%">
 									{{else}}
 									<i class="fa fa-user ml-1"></i>
 									{{/if}}
 								</button>
 								<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
 									<a class="dropdown-item" href="/my-account" style="color: #343a40">My account</a>
+									<a class="dropdown-item" href="/my-orders" style="color: #343a40">My orders</a>
 									<a class="dropdown-item" href="/logout" style="color: #343a40">Logout</a>
 								</div>
 							</div>
@@ -63,14 +66,47 @@
 				<li class="box-cart nav-top-cart-wrapper">
 					<a class="icon_cart nav-cart-trigger active" href="#"><span>3</span></a>
 					<div class="nav-shop-cart">
-						<div class="widget_shopping_cart_content">
-							<div class="woocommerce-min-cart-wrap">
+						<div class="widget_shopping_cart_content ">
+							<div class="woocommerce-min-cart-wrap p-2">
 								<ul class="woocommerce-mini-cart cart_list product_list_widget ">
-									<li class="woocommerce-mini-cart-item mini_cart_item">
-										<span>No Items in Shopping Cart</span>
+									<li class="woocommerce-mini-cart-item mini_cart_item shopping-cart d-flex justify-content-between">
+										{{!-- <span>No Items in Shopping Cart</span> --}}
+										{{!-- Cart items --}}
+										<span class="product-image p-1">
+											<img src="/static/images/shop/sh-detail/thumb-pexels-bogdan-glisik-1661471.jpg" alt="">
+										</span>
+										<span class="product-name p-1">Adidas Hoodie</span>
+										<span class="product-amount p-1">x1</span>
+										<span class="product-price p-1">$1,000</span>
+										{{!-- END Cart items --}}
+									</li>
+									<li class="woocommerce-mini-cart-item mini_cart_item shopping-cart d-flex justify-content-between">
+										{{!-- <span>No Items in Shopping Cart</span> --}}
+										{{!-- Cart items --}}
+										<span class="product-image p-1">
+											<img src="/static/images/shop/sh-detail/thumb-pexels-bogdan-glisik-1661471.jpg" alt="">
+										</span>
+										<span class="product-name p-1">Adidas Hoodie</span>
+										<span class="product-amount p-1">x1</span>
+										<span class="product-price p-1">$1,000</span>
+										{{!-- END Cart items --}}
+									</li>
+									<li class="woocommerce-mini-cart-item mini_cart_item shopping-cart d-flex justify-content-between">
+										{{!-- <span>No Items in Shopping Cart</span> --}}
+										{{!-- Cart items --}}
+										<span class="product-image p-1">
+											<img src="/static/images/shop/sh-detail/thumb-pexels-bogdan-glisik-1661471.jpg" alt="">
+										</span>
+										<span class="product-name p-1">Adidas hoddi... (13chars)</span>
+										<span class="product-amount p-1">x1</span>
+										<span class="product-price p-1">$1,000</span>
+										{{!-- END Cart items --}}
 									</li>
 								</ul>
+								<button class="pull-right my-2 py-1 px-2 rounded" type="button" style="font-size: 13px; text-transform: capitalize;">Checkout</button>
 							</div><!-- /.widget_shopping_cart_content -->
+							{{!-- <p class="mb-0 text-right">
+							</p> --}}
 						</div>
 					</div><!-- /.nav-shop-cart -->
 				</li>
