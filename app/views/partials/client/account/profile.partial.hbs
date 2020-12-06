@@ -1,30 +1,111 @@
-<form action="">
+<form action="/my-account" method="POST" enctype="multipart/form-data">
+  {{> csrf}}
+  <input type="hidden" name="userId" id="userId" value="{{{user.id}}}">
+  <input type="file" name="avatar" id="avatar" accept="image/*" onchange="loadFile(event)">
   <div class="form-group">
     <label for="username">Username</label>
-    <input type="text" name="" id="" placeholder="Username">
+      <input type="text" name="username" id="username" class="bg-secondary" placeholder="Username" value="{{{user.username}}}" readonly>
   </div>
   <div class="form-group row">
     <div class="col-sm-6">
-      <label for="username">First Name</label>
-      <input type="text" name="" id="" placeholder="Username">
+      <label for="firstName">First Name</label>
+      {{#if errors.firstName}}
+      <input type="text" name="firstName" id="firstName" placeholder="First Name" value="{{{errors.firstName.value}}}">
+        {{#with errors.firstName}}
+        {{> client/error.partial}}
+        {{/with}}
+      {{else}}
+        {{#if validData.firstName}}
+      <input type="text" name="firstName" id="firstName" placeholder="First Name" value="{{{validData.firstName}}}">
+        {{else}}
+      <input type="text" name="firstName" id="firstName" placeholder="First Name" value="{{{user.profile.firstName}}}">
+        {{/if}}
+      {{/if}}
     </div>
     <div class="col-sm-6">
-      <label for="username">Last Name</label>
-      <input type="text" name="" id="" placeholder="Username">
+      <label for="lastName">Last Name</label>
+      {{#if errors.lastName}}
+        <input type="text" name="lastName" id="lastName" placeholder="Last Name" value="{{{errors.lastName.value}}}">
+        {{#with errors.lastName}}
+        {{> client/error.partial}}
+        {{/with}}
+      {{else}}
+        {{#if validData.lastName}}
+        <input type="text" name="lastName" id="lastName" placeholder="Last Name" value="{{{validData.lastName}}}">
+        {{else}}
+        <input type="text" name="lastName" id="lastName" placeholder="Last Name" value="{{{user.profile.lastName}}}">
+        {{/if}}
+      {{/if}}
     </div>
   </div>
   <div class="form-group">
-    <label for="username">Email</label>
-    <input type="text" name="" id="" placeholder="Username">
+    <label for="email">Email</label>
+    {{#if errors.email}}
+      <input type="email" name="email" id="email" placeholder="Email" value="{{{errors.email.value}}}">
+      {{#with}}
+      {{> client/error.partial}}
+      {{/with}}
+    {{else}}
+      {{#if validData.email}}
+      <input type="email" name="email" id="email" placeholder="Email" value="{{{validData.email}}}">
+      {{else}}
+      <input type="email" name="email" id="email" placeholder="Email" value="{{{user.email}}}">
+      {{/if}}
+    {{/if}}
   </div>
   <div class="form-group row">
-    <div class="col-sm-6">
-      <label for="username">Gender</label>
-      <input type="text" name="" id="" placeholder="Username">
+    <div class="col-sm-4">
+      <label for="gender">Gender</label>
+      <select name="gender">
+        {{#if validData.gender}}
+        <option {{#ifeq validData.gender 'male'}} selected {{/ifeq}} value="male">
+        Male
+        </option>
+        <option {{#ifeq validData.gender 'female'}} selected {{/ifeq}} value="female">
+        Female
+        </option>
+      {{else}}
+        <option {{#ifeq user.profile.gender 'male'}} selected {{/ifeq}} value="male">
+        Male
+        </option>
+        <option {{#ifeq user.profile.gender 'female'}} selected {{/ifeq}} value="female">
+        Female
+        </option>
+      {{/if}}
+      </select>
     </div>
-    <div class="col-sm-6">
-      <label for="username">Date of Birth</label>
-      <input type="text" name="" id="" placeholder="Username">
+    <div class="col-sm-4">
+      <label for="dateOfBirth">Date of Birth</label>
+      {{#if errors.dateOfBirth}}
+        <input type="text" class="form-control" name="dateOfBirth" placeholder="mm/dd/yyyy" id="datepicker-autoclose" value="{{{formatDate errors.dateOfBirth.value}}}">
+        {{#with errors.dateOfBirth}}
+        {{> client/error.partial}}
+        {{/with}}
+      {{else}}
+        {{#if validData.dateOfBirth}}
+        <input type="text" class="form-control" name="dateOfBirth" placeholder="mm/dd/yyyy" id="datepicker-autoclose" value="{{{formatDate validData.dateOfBirth}}}">
+        {{else}}
+        <input type="text" class="form-control" name="dateOfBirth" placeholder="mm/dd/yyyy" id="datepicker-autoclose" value="{{{formatDate user.profile.dateOfBirth}}}">
+        {{/if}}
+      {{/if}}
+    </div>
+    <div class="col-sm-4">
+      <label for="phoneNumber">Phone</label>
+      {{#if errors.phoneNumber}}
+        <input type="text" name="phoneNumber" id="phoneNumber" placeholder="Phone number"
+        value="{{{errors.phoneNumber.value}}}">
+        {{#with errors.phoneNumber}}
+        {{> client/error.partial}}
+        {{/with}}
+      {{else}}
+        {{#if validData.phoneNumber}}
+        <input type="text" name="phoneNumber" id="phoneNumber" placeholder="Phone number"
+        value="{{{validData.phoneNumber}}}">
+        {{else}}
+        <input type="text" name="phoneNumber" id="phoneNumber" placeholder="Phone number"
+        value="{{{user.profile.phoneNumber}}}">
+        {{/if}}
+      {{/if}}
     </div>
   </div>
   <div class="form-group text-right">

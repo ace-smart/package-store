@@ -13,7 +13,7 @@ const upload = multer({
         filename: function (req, file, cb) {
             const fileExtension = file.originalname.split(".")[1]
             if(file.fieldname === 'avatar'){
-                cb(null, req.body.userId + '.' + fileExtension)
+                cb(null, 'temp-' + req.body.userId + '.' + fileExtension)
             }else if (file.fieldname === 'productImg') {
                 if(req.body.imageName) {
                     cb(null, req.body.imageName + '.' + fileExtension)

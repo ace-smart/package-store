@@ -18,7 +18,7 @@ class UserObject {
     username,
     email,
     password,
-    addresses,
+    addressId,
     status,
     role,
     confirmString,
@@ -29,7 +29,7 @@ class UserObject {
     this.username = username
     this.email = email
     this.password = password
-    this.addresses = addresses
+    this.addressId = addressId
     this.role = role
     this.confirmString = confirmString
     this.status = status
@@ -99,22 +99,19 @@ class UserObject {
     return this.confirmString
   }
 
-  set setAddress(addressId = null){
-    // create array
-    if (this.addressId == null) {
-      this.addressId = new Array()
-      this.addressId.push(addressId)
-    }
-    // push 
-    if (this.addressId instanceof Array) {
-      this.addressId.push(addressId)
+  async setAddress() {
+    if (this.addressId instanceof Object) {
+      // populated
+      this.address = new AddressObject({...this.addressId})
+      this.addressId = this.address.id.toString()
+    } else if (typeof this.addressId === 'string') {
+      // existed
+      this.address = await AddressObject.getOneAddressById(this.addressId)
+    } else {
+      this.address = null
     }
   }
-
-  get getAddress() {
-    return this.addressId
-  }
-
+  
   // @desc:     Get profileId by Id
   static async getProfileIdById(userId = null) {
     if (!userId) {
@@ -171,10 +168,12 @@ class UserObject {
     try {
       const user = await UserModel.findOne(criteria, selectFields)
       .populate({path: 'profileId'})
-      .populate({path: 'addressId.address'}).lean()
+      .populate({path: 'addressId'}).lean()
+      
       if (user) {
         const userObject = new UserObject({ ...user })
         await userObject.setProfile()
+        await userObject.setAddress()
         // Avoid showing tokens
         delete userObject.accessToken
         delete userObject.refreshToken
@@ -546,12 +545,17 @@ class UserObject {
 
     if (condition != null && token != null) {
       try {
-        const user = await UserModel.findOne({ ...condition }).lean()
+        const user = await UserModel.findOne({ ...condition })
+        .populate({path: 'profileId'})
+        .populate({path: 'addressId'}).lean()
         if (user != null) {
           const userObject = new UserObject({ ...user })
           userObject.setRefreshSecret = user.refresh_secret
           userObject.setAccessToken = user.accessToken
           userObject.setRefreshToken = user.refreshToken
+          await userObject.setProfile()
+          await userObject.setAddress()
+          
           return userObject
         }
         // No user found => token is not valid

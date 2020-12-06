@@ -3,12 +3,21 @@
   <div class="p-0 col-3 d-flex flex-column justify-content-start align-items-center">
     {{!-- Avatar --}}
     <div class="my-3 ">
-      {{#ifeq account.profile.avatar 'default'}}
-      <img src="/static/default-user.png" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;" data-holder-rendered="true" class="img-thumbnail">
+      {{#if account.profile}}
+        {{#if account.profile.avatar.urlLink}}
+          <img class="img-thumbnail" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
+            src="{{{account.profile.avatar.urlLink}}}" data-holder-rendered="true">
+        {{else}}
+          {{#ifeq account.profile.avatar.fileName 'default'}}
+          <img src="/public/default-user.png" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;" data-holder-rendered="true" class="img-thumbnail">
+          {{else}}
+          <img class="img-thumbnail" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
+            src="data:{{{account.profile.avatar.mimeType}}};base64,{{{parseImageToString account.profile.avatar.data}}}" data-holder-rendered="true">
+          {{/ifeq}}
+        {{/if}}
       {{else}}
-      <img class="img-thumbnail" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
-        src="data:{{{account.profile.avatar.mimeType}}};base64,{{{parseImageToString account.profile.avatar.data}}}" data-holder-rendered="true">
-      {{/ifeq}}
+        <img src="/public/default-user.png" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;" data-holder-rendered="true" class="img-thumbnail">
+      {{/if}}
     </div>
 
     {{!-- Info --}}

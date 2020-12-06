@@ -1,50 +1,20 @@
 const AddressObject = require("../objects/AddressObject")
+const UserObject = require("../objects/UserObject")
+const UserModel = require('../models/UserModel')
 const NotFoundError = require('../errors/not_found')
 const ErrorHandler = require('../helper/errorHandler')
 
 module.exports = {
-  // @desc:   Show address
-  // @route   GET /profile/address/
-  showAddressList: async (req, res) => {
-    try {
-      const addressList = await AddressObject.getAddressListByUserId(req.user.id)
-      if (addressList.length > 0) {
-        return res.status(200).json({ addresses: addressList })
-      }
-
-      throw new NotFoundError("No address found.")
-    } catch (error) {
-      return ErrorHandler.sendErrors(res, error)
-    }
-  },
-
   // @desc:   Get addresses by Id
-  // @route   GET /profile/address/:id
-  getAddressById: async (req, res) => {
+  // @route   GET /profile/address
+  getAddress: async (req, res) => {
     try {
-      const address = await AddressObject.getOneAddressById(req.user.id, req.params.id)
-      if (address instanceof AddressObject){
-        return res.status(200).json({
-          address: address,
-        })
+      const address = await AddressObject.getOneAddressById(req.user.id)
+      if (address){
+        return res.status(200).json(address)
       }
       
       throw new NotFoundError("No address found.")
-    } catch (error) {
-      return ErrorHandler.sendErrors(res, error)
-    }
-  },
-
-  // @desc    Add new address
-  // @route   POST /profile/address
-  createNewAddress: async (req, res) => {
-    try {
-      const address = await AddressObject.create(req.user.id, {...req.body})
-      if (address instanceof AddressObject) {
-        return res.sendStatus(201)
-      }
-      
-      throw new Error("Failed to create address")
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -53,33 +23,44 @@ module.exports = {
   // @desc    Update address
   // @route   PUT /profile/address/:id
   updateAddressById: async (req, res) => {
+    /* === EXAMPLE ===
+      req.body = {
+        street: '123/12 John qw',
+        district: 'Smith',
+        city: 'LA',
+        country: 'USA',
+        postalCode: '123456'
+      }
+    */
     try {
-      const address = await AddressObject.getOneAddressById(req.user.id, req.params.id)
-      const isUpdated = await address.update(req.user.id, {...req.body})
-      if (isUpdated) {
-        return res.sendStatus(204)
+      // Get addressId by userId
+      const addressId = await UserObject.getAddressById(req.user.id)
+      let addressData = JSON.parse(JSON.stringify(req.body))
+      
+      // create for the 1st time
+      if (addressId == null) {
+        const createdAddress = await AddressObject.create(addressData)
+        console.log(createdAddress)
+        if (createdAddress) {
+          const user = await UserModel.findOneAndUpdate({_id: addressData.userId}, {addressId: createdAddress.id}).lean()
+          if (user){
+            return res.sendStatus(204)
+          }
+        }
+      } else {
+        // update
+        const addressObject = await AddressObject.getOneAddressById(addressId)
+        const isUpdated = await addressObject.update({...addressData})
+        if (isUpdated) {
+          return res.sendStatus(204)
+        }
       }
       
-      throw new Error("Failed to create address")
+      throw new Error("Failed to update address")
     } catch (error) {
       console.log(error)
       return ErrorHandler.sendErrors(res, error)
     }
   },
 
-  // @desc    Delete address
-  // @route   DELETE /profile/address/:id
-  removeAddressById: async (req, res) => {
-    try {
-      const address = new AddressObject({_id: req.params.id})
-      const isRemoved= await address.remove(req.user.id)
-      if (isRemoved) {
-        return res.sendStatus(204)
-      }
-      throw new Error("Failed to remove address")
-    } catch (error) {
-      console.log(error)  
-      return ErrorHandler.sendErrors(res, error)
-    }
-  },
 }

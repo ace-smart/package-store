@@ -18,9 +18,18 @@
 								<button class="btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
 									aria-haspopup="true" aria-expanded="false">
 									{{{user.username}}}
-									{{#if user.profile.avatar.urlLink}}
-									<img class="ml-1" src="{{{user.profile.avatar.urlLink}}}" alt="avatar"
-										style="height: 100%; width: 25px;  border-radius: 50%">
+									{{#if user.profile}}
+										{{#if user.profile.avatar.urlLink}}
+										<img class="ml-1" src="{{{user.profile.avatar.urlLink}}}" alt="avatar"
+											style="height: 100%; width: 25px;  border-radius: 50%">
+										{{else}}
+											{{#ifeq user.profile.avatar.fileName 'default' }}
+											<i class="fa fa-user ml-1"></i>
+											{{else}}
+											<img class="ml-1" alt="avatar" style="height: 100%; width: 30px;  border-radius: 50%"
+												src="data:{{{user.profile.avatar.mimeType}}};base64,{{{parseImageToString user.profile.avatar.data}}}">
+											{{/ifeq}}
+										{{/if}}
 									{{else}}
 									<i class="fa fa-user ml-1"></i>
 									{{/if}}
@@ -103,7 +112,8 @@
 										{{!-- END Cart items --}}
 									</li>
 								</ul>
-								<button class="pull-right my-2 py-1 px-2 rounded" type="button" style="font-size: 13px; text-transform: capitalize;">Checkout</button>
+								<button class="pull-right my-2 py-1 px-2 rounded" type="button"
+									style="font-size: 13px; text-transform: capitalize;">Checkout</button>
 							</div><!-- /.widget_shopping_cart_content -->
 							{{!-- <p class="mb-0 text-right">
 							</p> --}}

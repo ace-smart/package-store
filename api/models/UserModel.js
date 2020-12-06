@@ -29,12 +29,11 @@ const UserSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Profile'
   },
-  addresses: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Address'
-    }
-  ],
+  addressId:
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Address'
+  },
   role: {
     type: String,
     required: true,

@@ -77,11 +77,13 @@ router.post(
 // @desc:   authenticate with google account
 // @route:  GET /auth/google
 router.get('/auth/google', 
+_checkUnauthenticatedCustomer,
 passport.authenticate('google', {scope: ['profile', 'email']}))
 
 // @desc:   authenticate with google account
 // @route:  GET /auth/google
 router.get('/auth/google/callback', 
+_checkUnauthenticatedCustomer,
 passport.authenticate('google', { 
   failureRedirect: "/login"
 }), 
@@ -93,11 +95,13 @@ _storeTokensBySession,
 // @desc:   authenticate with facebook account
 // @route:  GET /auth/facebook
 router.get('/auth/facebook', 
+_checkUnauthenticatedCustomer,
 passport.authenticate('facebook', {scope: 'email'}))
 
 // @desc:   authenticate with facebook account
 // @route:  GET /auth/facebook
 router.get('/auth/facebook/callback', 
+_checkUnauthenticatedCustomer,
 passport.authenticate('facebook', { 
   failureRedirect: "/login"
 }), 
@@ -109,11 +113,13 @@ _storeTokensBySession,
 // @desc:   authenticate with github account
 // @route:  GET /auth/github
 router.get('/auth/github', 
+_checkUnauthenticatedCustomer,
 passport.authenticate('github', {scope: ['user.email', 'read:user']}))
 
 // @desc:   authenticate with github account
 // @route:  GET /auth/github
 router.get('/auth/github/callback', 
+_checkUnauthenticatedCustomer,
 passport.authenticate('github', { 
   failureRedirect: "/login"
 }), 

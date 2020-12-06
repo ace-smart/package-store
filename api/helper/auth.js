@@ -50,40 +50,14 @@ module.exports = authHelper = {
     }
   },
 
-  // @desc    Authenticate user
-  // Args:    { username, password }
-  // Return:  Authenticated => { user }
-  //          Not Authenticated => False
-  isAuthenticatedUser: async ({ ...user } = {}) => {
-    if (JSON.stringify(user) === "{}") return false
-
-    try {
-      const userFromDb = await User.findOne({ username: user.username }).lean()
-      if (userFromDb) {
-        // Check status
-        if (userFromDb.status === "activated") {
-          // Check password
-          const matchedPwd = await bcrypt.compare(user.password, userFromDb.password)
-          if (matchedPwd) return userFromDb
-        } else return { message: "Not activated" }
-      }
-      return false
-    } catch (error) {
-      return error.message
-    }
-  },
-
   //@desc:    Middleware for checking 'admin' role
   //Return:   req.user = {user}
   _ensureAdminRole: (req, res, next) => {
-    if (
-      typeof req.user !== "undefined" &&
-      req.user.role != null &&
-      req.user.role.toLowerCase() === "admin"
+    if (req.user != null && req.user.role === "admin"
     ) {
       return next()
     }
-
+    
     return ErrorHandler.sendErrors(res, new ForbiddenError())
   },
 }

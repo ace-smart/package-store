@@ -2,10 +2,9 @@ const bcrypt = require("bcrypt")
 const UserObject = require("../objects/UserObject")
 const ProfileObject = require("../objects/ProfileObject")
 const ChangePwdObject = require("../objects/ChangePwdObject")
-const ErrorObject = require("../objects/ErrorObject")
-const ValidationError = require("../errors/validation")
 const NotFoundError = require('../errors/not_found')
 const ErrorHandler = require('../helper/errorHandler')
+const UserModel = require("../models/UserModel")
 
 module.exports = {
 
@@ -63,12 +62,14 @@ module.exports = {
       // get profileId by accessToken
       const profileId = await UserObject.getProfileIdById(req.user.id)
       let profileData = JSON.parse(JSON.stringify(req.body))
-      
+      // create for the 1st time
       if (profileId == null) {
-        // create for the 1st time
         const createdProfile = await ProfileObject.create(profileData)
         if (createdProfile) {
-          return res.sendStatus(204)
+          const user = await UserModel.findOneAndUpdate({_id: profileData.userId}, {profileId: createdProfile.id}).lean()
+          if (user){
+            return res.sendStatus(204)
+          }
         }
       } else {
         // update

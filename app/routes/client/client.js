@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const {_autoRenewAccessToken, _loginWithCookie} = require('../../helper/auth_client.helper')
-const {_checkAuthenticatedCustomer} = require('../../helper/auth.helper')
+// const {_checkAuthenticatedCustomer} = require('../../helper/auth.helper')
 
 const indexRouter = require('./index.route')
 const authRouter = require('./auth.route')
@@ -15,8 +15,8 @@ router.use(authRouter)
 router.use(indexRouter)
 router.use(productRouter)
 router.use(cartRouter)
-router.use(accountRouter)
 router.use(orderRouter)
 // router.use(_checkAuthenticatedCustomer)
+router.use(accountRouter)
 
 module.exports = router
