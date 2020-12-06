@@ -23,12 +23,23 @@
             <li class="list-inline-item dropdown notification-list">
                 <a class="nav-link dropdown-toggle arrow-none waves-effect nav-user" data-toggle="dropdown" href="#"
                     role="button" aria-haspopup="false" aria-expanded="false">
-                    {{#ifeq user.profile.avatar.fileName 'default'}}
-                    <img src="/static/default-user.png" alt="avatar-user" class="rounded-circle">
+                    {{#if user.profile}}
+                        {{#if user.profile.avatar.urlLink}}
+                            <img alt="avatar-user" class="rounded-circle"
+                            src="{{{user.profile.avatar.urlLink}}}">
+                        {{else}}
+                            {{#ifeq user.profile.avatar.fileName 'default'}}
+                            <img src="/public/default-user.png" alt="avatar-user" class="rounded-circle">
+                            {{else}}
+                                {{#if user.profile.avatar.data}}
+                                    <img alt="avatar-user" class="rounded-circle"
+                                    src="data:{{{user.profile.avatar.mimeType}}};base64,{{{parseImageToString user.profile.avatar.data}}}">
+                                {{/if}}
+                            {{/ifeq}}
+                        {{/if}}
                     {{else}}
-                    <img alt="avatar-user" class="rounded-circle"
-                    src="data:{{{user.profile.avatar.mimeType}}};base64,{{{parseImageToString user.profile.avatar.data}}}">
-                    {{/ifeq}}
+                    <img src="/public/default-user.png" alt="avatar-user" class="rounded-circle">
+                    {{/if}}
                 </a>
                 <div class="dropdown-menu dropdown-menu-right profile-dropdown ">
                     <a class="dropdown-item" href="/admin/profile"><i class="dripicons-user text-muted"></i> Account</a>

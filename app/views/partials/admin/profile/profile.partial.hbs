@@ -5,13 +5,24 @@
   <div class="row p-3 m-2">
     <div class="p-0 col-2 d-flex flex-column justify-content-start align-items-center">
       <div class="my-3 ">
-        {{#ifeq user.profile.avatar.fileName 'default'}}
-        <img src="/static/default-user.png" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
-          data-holder-rendered="true" class="img-thumbnail">
-        {{else}}
-        <img class="img-thumbnail" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
-          src="data:{{{user.profile.avatar.mimeType}}};base64,{{{parseImageToString user.profile.avatar.data}}}" data-holder-rendered="true">
-        {{/ifeq}}
+        {{#if user.profile}}
+          {{#if user.profile.avatar.urlLink}}
+            <img src="{{{user.profile.avatar.urlLink}}}" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
+              data-holder-rendered="true" class="img-thumbnail">
+          {{else}}
+            {{#ifeq user.profile.avatar.fileName 'default'}}
+            <img src="/public/default-user.png" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
+              data-holder-rendered="true" class="img-thumbnail">
+            {{else}}
+            <img class="img-thumbnail" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
+              src="data:{{{user.profile.avatar.mimeType}}};base64,{{{parseImageToString user.profile.avatar.data}}}" data-holder-rendered="true">
+            {{/ifeq}}
+          {{/if}}
+          
+          {{else}}
+          <img src="/public/default-user.png" id="avatar-block" alt="200x200" style="width: 200px; height: 200px;"
+            data-holder-rendered="true" class="img-thumbnail">
+        {{/if}}
       </div>
       <div class="my-2">
         <label for="avatar" class="btn btn-primary waves-effect waves-light active" onclick="invokeAvatarInp">

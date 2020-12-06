@@ -60,6 +60,11 @@ module.exports = {
         const fs = require('fs')
         return fs.readFileSync(path).toString('base64')
     },
+    print64baseAvatar(fileName, extension) {
+        const path = `tmp\\avatar\\${fileName}.${extension}`
+        const fs = require('fs')
+        return fs.readFileSync(path).toString('base64')
+    },
     lessThan(a,b, options) {
         a = parseFloat(a.toString())
         b = parseFloat(b.toString())

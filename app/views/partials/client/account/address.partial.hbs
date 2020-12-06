@@ -1,29 +1,85 @@
-<form action="">
+<form action="/my-account/address" method="POST">
+{{> csrf}}
   <div class="form-group">
-    <label for="username">Street</label>
-    <input type="text" name="" id="" placeholder="Username">
+    <label for="Street">Street</label>
+    {{#if errors.street}} 
+      <input type="text" name="street" id="street" placeholder="Street" value="{{{errors.street.value}}}">
+      {{#with errors.street}}
+      {{> client/error.partial}}
+      {{/with}}
+    {{else}}
+      {{#if validData.street}}
+      <input type="text" name="street" id="street" placeholder="Street" value="{{{validData.street}}}">
+      {{else}}
+      <input type="text" name="street" id="street" placeholder="Street" value="{{{user.address.street}}}">
+      {{/if}}
+    {{/if}}
   </div>
   <div class="form-group row">
     <div class="col-sm-6">
-      <label for="username">District</label>
-      <input type="text" name="" id="" placeholder="Username">
+      <label for="district">District</label>
+    {{#if errors.district}} 
+      <input type="text" name="district" id="district" placeholder="District" value="{{{errors.district.value}}}">
+      {{#with errors.district}}
+      {{> client/error.partial}}
+      {{/with}}
+    {{else}}
+      {{#if validData.district}}
+      <input type="text" name="district" id="district" placeholder="District" value="{{{validData.district}}}">
+      {{else}}
+      <input type="text" name="district" id="district" placeholder="District" value="{{{user.address.district}}}">
+      {{/if}}
+    {{/if}}
     </div>
     <div class="col-sm-6">
-      <label for="username">City</label>
-      <input type="text" name="" id="" placeholder="Username">
+      <label for="city">City</label>
+    {{#if errors.city}} 
+      <input type="text" name="city" id="city" placeholder="City" value="{{{errors.city.value}}}">
+      {{#with errors.city}}
+      {{> client/error.partial}}
+      {{/with}}
+    {{else}}
+      {{#if validData.city}}
+      <input type="text" name="city" id="city" placeholder="City" value="{{{validData.city}}}">
+      {{else}}
+      <input type="text" name="city" id="city" placeholder="City" value="{{{user.address.city}}}">
+      {{/if}}
+    {{/if}}
     </div>
   </div>
   <div class="form-group row">
     <div class="col-sm-6">
-      <label for="username">Country</label>
-      <input type="text" name="" id="" placeholder="Username">
+      <label for="country">Country</label>
+    {{#if errors.country}} 
+      <input type="text" name="country" id="country" placeholder="Country" value="{{{errors.country.value}}}">
+      {{#with errors.country}}
+      {{> client/error.partial}}
+      {{/with}}
+    {{else}}
+      {{#if validData.country}}
+      <input type="text" name="country" id="country" placeholder="Country" value="{{{validData.country}}}">
+      {{else}}
+      <input type="text" name="country" id="country" placeholder="Country" value="{{{user.address.country}}}">
+      {{/if}}
+    {{/if}}
     </div>
     <div class="col-sm-6">
-      <label for="username">Postal code</label>
-      <input type="text" name="" id="" placeholder="Username">
+      <label for="postalCode">Postal code</label>
+    {{#if errors.postalCode}} 
+      <input type="text" name="postalCode" id="postalCode" placeholder="Postal code" value="{{{errors.postalCode.value}}}">
+      {{#with errors.postalCode}}
+      {{> client/error.partial}}
+      {{/with}}
+    {{else}}
+      {{#if validData.postalCode}}
+      <input type="text" name="postalCode" id="postalCode" placeholder="Postal code" value="{{{validData.postalCode}}}">
+      {{else}}
+      <input type="text" name="postalCode" id="postalCode" placeholder="Postal code" value="{{{user.address.postalCode}}}">
+      {{/if}}
+    {{/if}}
     </div>
   </div>
   <div class="form-group text-right">
-    <button class="btn btn-primary">Save changes</button>
+    <button class="btn btn-primary">Update address</button>
   </div>
 </form>

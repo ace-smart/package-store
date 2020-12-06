@@ -8,11 +8,12 @@ const getAccountById = async function (accessToken, userId) {
         Authorization: "Bearer " + accessToken,
       },
     })
-
+    
     if (response.status === 200) {
       return response.data
     }
   } catch (error) {
+    console.log(error.response.data.error)
     throw error
   }
 }
@@ -118,7 +119,8 @@ module.exports = {
   viewUserById: async (req, res) => {
     try {
       const account = await getAccountById(req.user.accessToken, req.params.id)
-      if(account.profile.avatar.fileName != 'default') {
+      
+      if(account.profile != null && account.profile.avatar.fileName != 'default') {
         account.profile.avatar.data = fs.readFileSync(`tmp\\avatar\\${account.profile.avatar.fileName}`)
       }
 

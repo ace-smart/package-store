@@ -148,16 +148,23 @@ module.exports = helper = {
   },
 
   getUserInstance: async function (req) {
-    const authHelper = require("./auth.helper.js")
-    return {
+    const fs = require('fs')
+    let userInstance = {
       id: req.user.id,
       username: req.user.username,
       email: req.user.email,
       role: req.user.role,
-      profile: req.user.profileId != null ? await authHelper.getProfile({ ...req.user }) : null,
+      profile: req.user.profile,
+      address: req.user.address,
       status: req.user.status,
       createdAt: req.user.createdAt,
     }
+
+    if(userInstance.profile != null && userInstance.profile.avatar.fileName != 'default') {
+      userInstance.profile.avatar.data = fs.readFileSync(`tmp\\avatar\\${userInstance.profile.avatar.fileName}`).toString('base64')
+    }
+
+    return userInstance
   },
 
   handleInvalidationErrors: function (invalidation = []) {

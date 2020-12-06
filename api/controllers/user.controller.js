@@ -66,6 +66,7 @@ module.exports = {
       // Not found
       throw new NotFoundError("No user found.")
     } catch (error) {
+      console.log(error)
       return ErrorHandler.sendErrors(res, error)
     }
   },

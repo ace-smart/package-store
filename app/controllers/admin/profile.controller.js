@@ -1,22 +1,6 @@
 const axiosInstance = require("../../helper/axios.helper")
 const helper = require("../../helper/helper")
-const authHelper = require("../../helper/auth.helper")
 const fs = require('fs')
-const getProfile = async function(accessToken) {
-  try {
-    const response = await axiosInstance.get(`/profile`, {
-      headers: {
-        Authorization: "Bearer " +accessToken
-      }
-    })
-
-    if(response.status === 200) {
-      return response.data
-    }
-  } catch (error) {
-    throw error
-  }
-}
 const getProfileData = function (reqBody) {
   reqBody = JSON.parse(JSON.stringify(reqBody))
   return {
@@ -33,10 +17,6 @@ module.exports = {
   showProfilePage: async (req, res) => {
     try {
       const user = await helper.getUserInstance(req)
-      user.profile = await authHelper.getProfile({ ...req.user })
-      if(user.profile.avatar.fileName != 'default') {
-        user.profile.avatar.data = fs.readFileSync(`tmp\\avatar\\${user.profile.avatar.fileName}`).toString('base64')
-      }
       const tabpane = req.query.tabpane != null ? req.query.tabpane : "account"
       
       return res.render("templates/admin/profile/profile", {
@@ -55,16 +35,12 @@ module.exports = {
   // @desc    Update profile
   // @route   POST /profile
   updateProfile: async (req, res) => {
-    let profileData = {}
+    let profileData = getProfileData(req.body)
     try {
       const user = await helper.getUserInstance(req)
-      user.profile = await authHelper.getProfile({ ...req.user })
+      profileData.userId = user.id
       //  Avatar has error
       if (res.locals.file && res.locals.file.error) {
-        if(user.profile.avatar.fileName != 'default') {
-          user.profile.avatar.data = fs.readFileSync(`tmp\\avatar\\${user.profile.avatar.fileName}`).toString('base64')
-        }
-
         req.flash("fail", res.locals.file.error.message)
         return res.render("templates/admin/profile/profile", {
           layout: "admin/profile.layout.hbs",
@@ -79,16 +55,24 @@ module.exports = {
           },
         })
       } else {
-          // Data from request
-          profileData = getProfileData(req.body)
+          // Change avatar
           if (req.files.avatar != null) {
               profileData.avatar = {
-                  fileName: req.files.avatar[0].filename,
+                  fileName: req.files.avatar[0].filename.replace("temp-", ""),
                   mimeType: req.files.avatar[0].mimetype,
               }
+              // Remove old avatar
+              if (fs.existsSync(`tmp\\avatar\\${profileData.avatar.fileName}`)) {
+                fs.unlinkSync(`tmp\\avatar\\${profileData.avatar.fileName}`)
+              }
+              // Rename 
+              fs.renameSync(`tmp\\avatar\\temp-${profileData.avatar.fileName}`, `tmp\\avatar\\${profileData.avatar.fileName}`)
           }
 
-          profileData = helper.getFilledFields(profileData, user.profile)
+          // Update profile 
+          if(user.profile != null) {
+            profileData = helper.getFilledFields(profileData, user.profile)
+          }
           // Send API
           const response = await axiosInstance.put("/profile", profileData, {
               headers: {
@@ -101,6 +85,7 @@ module.exports = {
           }
       }
     } catch (error) {
+      console.log(error)
       if (error.response.status === 400) {
         const errors = error.response.data.error.invalidation
         const validData = helper.getValidFields(errors, req.body)
@@ -152,7 +137,7 @@ module.exports = {
       }
     } catch (error) {
       if (error.response.status === 400) {
-        req.flash("fail", "Failed to update.")
+        req.flash("fail", "Your input is not valid.")
         return res.render("templates/admin/profile/profile", {
           layout: "admin/profile.layout.hbs",
           user: await helper.getUserInstance(req),

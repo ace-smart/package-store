@@ -15,6 +15,8 @@
 <!-- Favicon and touch icons  -->
 <link href="/static/icon/favicon.png" rel="shortcut icon">
 
+<link href="/admin/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
+
 <style>
   p.form-validation-error {
     font-size: 14px;
@@ -35,6 +37,18 @@
   input.not-valid:focus {
     color: #ea553d;
     border-color: #ea553d;
+  }
+  input[name='avatar'] {
+    display: none;
+  }
+  label[for='avatar']{
+    font-size: 0.9rem;
+  }
+  label[for='avatar']:hover{
+    cursor: pointer;
+    background-color: cornflowerblue;
+    border-color: cornflowerblue;
+    color: black;
   }
   div.account-dropdown div.dropdown-menu a.dropdown-item {
     color: #343a40; !important

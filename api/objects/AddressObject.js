@@ -20,32 +20,6 @@ class AddressObject {
     this.status = status
   }
 
-  static async getAddressListByUserId(userId = null) {
-    if (userId == null) {
-      throw new TypeError("userId can not be null or undefined.")
-    }
-    if (!(await isExistent(UserModel, { _id: userId }))) {
-      throw new NotFoundError("No user found.")
-    }
-
-    try {
-      const userObject = await UserObject.getOneUserBy({_id: userId})
-      if (userObject.getAddress instanceof Array && userObject.getAddress.length > 0) {
-        let addressList = []
-        for (let i = 0; i < userObject.getAddress.length ; i++) {
-          const addressObject = await AddressModel.findOne({_id: userObject.getAddress[i]}).lean()
-          addressList.push(new AddressObject(addressObject))
-        }
-
-        return addressList
-      }
-
-      return null
-    } catch (error) {
-      throw error
-    }
-  }
-
   static async getOneAddressById(addressId = null, selectFields = null) {
     if (addressId == null) {
       throw new TypeError("addressId can not be null or undefined.")
