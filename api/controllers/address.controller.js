@@ -14,7 +14,7 @@ module.exports = {
         return res.status(200).json(address)
       }
       
-      throw new NotFoundError("No address found.")
+      return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }

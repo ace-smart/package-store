@@ -8,11 +8,7 @@ module.exports = {
   showOrderList: async (req, res) => {
     try {
       const orders = await OrderObject.getOrdersBy({})
-      if (orders && orders.length > 0) {
-        return res.status(200).json(orders)
-      }
-
-      throw new NotFoundError("No order found.")
+      return res.status(200).json(orders)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -27,7 +23,7 @@ module.exports = {
         return res.status(200).json(order)
       }
       // Not found
-      throw new NotFoundError("No order found.")
+        return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }

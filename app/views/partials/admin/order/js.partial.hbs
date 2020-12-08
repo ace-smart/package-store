@@ -71,18 +71,42 @@
                 // Set product list to select
                 const productList = JSON.parse(this.responseText)
                 productList.forEach((value) => {
+                    console.log(value)
                     const option = document.createElement('option')
                     option.setAttribute('value', value.id)
                     // Set product info 
                     option.dataset.name = value.name
                     option.dataset.subcategory = value.subcategory.name
                     option.dataset.price = value.price
-                    option.dataset.colorName = value.details.color.colorName
-                    option.dataset.hexCode = value.details.color.hexCode
-                    option.dataset.size = value.details.size
-                    option.dataset.material = value.details.material
-                    option.dataset.gender = value.details.gender
-                    option.dataset.season = value.details.season
+                    if (value.details != null) {
+                        if (value.details.color != null) {
+                            option.dataset.colorName = value.details.color.colorName
+                            option.dataset.hexCode = value.details.color.hexCode
+                        } else {
+                            option.dataset.colorName = ''
+                            option.dataset.hexCode = ''
+                        }
+                        if (value.details.size != null) {
+                            option.dataset.size = value.details.size
+                        }else {
+                            option.dataset.size = ''
+                        }
+                        if (value.details.material != null) {
+                            option.dataset.material = value.details.material
+                        }else {
+                            option.dataset.material = ''
+                        }
+                        if (value.details.gender != null) {
+                            option.dataset.gender = value.details.gender
+                        }else {
+                            option.dataset.gender = ''
+                        }
+                        if (value.details.season != null) {
+                            option.dataset.season = value.details.season
+                        }else {
+                            option.dataset.season = ''
+                        }
+                    }
                     option.innerText = value.name
                     selectTag.appendChild(option)
                 })
@@ -105,15 +129,15 @@
 
         const productSelectTag = document.getElementById('productId')
         const productInfo = productSelectTag.options[productSelectTag.selectedIndex]
-
+        console.log(productInfo.dataset.colorName)
         // Set info
         document.getElementById('product_price').value = new Intl.NumberFormat('en-US').format(parseFloat(productInfo.dataset.price))
-        document.getElementById('product_colorName').value = productInfo.dataset.colorName
-        document.getElementById('product_hexCode').value = productInfo.dataset.hexCode
-        document.getElementById('product_size').value = productInfo.dataset.size
-        document.getElementById('product_material').value = productInfo.dataset.material
-        document.getElementById('product_gender').value = productInfo.dataset.gender
-        document.getElementById('product_season').value = productInfo.dataset.season
+        document.getElementById('product_colorName').value = (!productInfo.dataset.colorName) ? '' : productInfo.dataset.colorName
+        document.getElementById('product_hexCode').value = (!productInfo.dataset.hexCode) ? '' : productInfo.dataset.hexCode
+        document.getElementById('product_size').value = (!productInfo.dataset.size) ? '' : productInfo.dataset.size
+        document.getElementById('product_material').value = (!productInfo.dataset.material) ? '' : productInfo.dataset.material
+        document.getElementById('product_gender').value = (!productInfo.dataset.gender) ? '' : productInfo.dataset.gender
+        document.getElementById('product_season').value = (!productInfo.dataset.season) ? '' : productInfo.dataset.season
     }
 
     function createRow(productObject = {}) {
@@ -282,7 +306,7 @@
     function embedDataToTable() {
         const tableData = (document.getElementById('orderDetails').value) ? JSON.parse(document.getElementById('orderDetails').value) : null
         const tbody = document.getElementById('product-table').children[1]
-        
+
         if (tbody.children.length == 0 && tableData) {
             // Table Columns in order: [Index, Product, Subcategory, Price, Amount, Action] (6)
             tableData.forEach((element, idx) => {

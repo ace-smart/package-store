@@ -14,10 +14,6 @@ const {
 // @route   GET /products
 router.get("/", showProductList)
 
-// @desc    Show list of products by categoryId
-// @route   GET /products/by-category?categoryId='1234qwer'
-router.get("/by-category", showProductsByCategoryId)
-
 // @desc    Show list of products by subcategoryId
 // @route   GET /products/by-subcategory?subcategoryId='1234qwer'
 router.get("/by-subcategory", showProductsBySubcategoryId)

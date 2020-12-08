@@ -64,11 +64,12 @@
 				</a>
 			</div><!-- /.logo -->
 			<div class="mobile-button"><span></span></div>
+
 			<ul class="menu-extra">
 				<li class="box-search">
 					<a class="icon_search header-search-icon" href="#"></a>
-					<form role="search" method="get" class="header-search-form" action="#">
-						<input type="text" value="" name="s" class="header-search-field" placeholder="Search...">
+					<form role="search" method="get" class="header-search-form" action="/search-products">
+						<input type="text" name="productName" class="header-search-field" placeholder="Search...">
 						<button type="submit" class="header-search-submit" title="Search">Search</button>
 					</form>
 				</li>
@@ -129,13 +130,13 @@
 						</li>
 						{{#each categories}}
 						<li>
-							<a href="/category?id={{{id}}}">{{{name}}}</a>
+							<a href="/products-by-category?categoryId={{{id}}}">{{{name}}}</a>
 							{{#if subcategories}}
 							<ul class="submenu">
 								{{!-- Subcategories --}}
 								{{#each subcategories}}
 								<li>
-									<a href="/category?id={{{../id}}}?subcategoryId={{{id}}}">{{{name}}}</a>
+									<a href="/products-by-subcategory?subcategoryId={{{id}}}">{{{name}}}</a>
 								</li>
 								{{!-- END subcategories --}}
 								{{/each}}

@@ -11,11 +11,7 @@ module.exports = {
   showUserList: async (req, res) => {
     try {
       const users = await UserObject.getUsersBy()
-      if (users && users.length > 0) {
-        return res.status(200).json(users)
-      }
-
-      throw new NotFoundError("No user found.")
+      return res.status(200).json(users)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -27,11 +23,8 @@ module.exports = {
     try {
       const selectFields = "username email status role confirmString createdAt profileId"
       const users = await UserObject.getUsersBy({ role: "admin" }, selectFields)
-      if (users && users.length > 0) {
-        return res.status(200).json(users)
-      }
 
-      throw new NotFoundError("No user found.")
+      return res.status(200).json(users)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -44,11 +37,7 @@ module.exports = {
       const selectFields = "username email status role confirmString createdAt profileId"
       const users = await UserObject.getUsersBy({ role: "user" }, selectFields)
 
-      if (users && users.length > 0) {
-        return res.status(200).json(users)
-      }
-
-      throw new NotFoundError("No user found.")
+      return res.status(200).json(users)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -64,7 +53,7 @@ module.exports = {
         return res.status(200).json(user)
       }
       // Not found
-      throw new NotFoundError("No user found.")
+        return res.status(200).json(null)
     } catch (error) {
       console.log(error)
       return ErrorHandler.sendErrors(res, error)
@@ -94,12 +83,16 @@ module.exports = {
   updateUserById: async (req, res) => {
     try {
       const user = await UserObject.getOneUserBy({_id: req.params.id})
-      const isUpdated = await user.update({ ...req.body })
-      if (isUpdated) {
-        return res.sendStatus(204)
+      if (user) {
+        const isUpdated = await user.update({ ...req.body })
+        if (isUpdated) {
+          return res.sendStatus(204)
+        }
+  
+        throw new Error("Failed to update.")
       }
 
-      throw new Error("Failed to update.")
+      throw new NotFoundError("No user found.")
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -173,11 +166,11 @@ module.exports = {
 
       throw new Error("Failed to send reset password email.")
     } catch (error) {
-      if (error instanceof TypeError) {
-        return res
-          .status(404)
-          .json({ error: { message: "The link does not exist. Failed to activate." } })
-      }
+      // if (error instanceof TypeError) {
+      //   return res
+      //     .status(404)
+      //     .json({ error: { message: "The link does not exist. Failed to activate." } })
+      // }
 
       return ErrorHandler.sendErrors(res, error)
     }

@@ -1,0 +1,48 @@
+{{#greaterThan pagination.numOfPages 1}}
+{{!-- Pagination --}}
+<div class="product-pagination text-center clearfix">
+  <ul class="flat-pagination">
+
+    {{!-- Prev --}}
+    {{#equal pagination.currentPage 1}}
+    <li class="prev ">
+      <a class="disabled">
+        <i class="fa fa-angle-left"></i>
+      </a>
+    </li>
+    {{else}}
+    <li class="prev">
+      <a href="javascript:void(0);" onclick="prevPage()"><i class="fa fa-angle-left"></i></a>
+    </li>
+    {{/equal}}
+
+    {{!-- Pages --}}
+    {{#makePagination pagination}}
+    {{!===> makePagination = { pages, currentPage } --}}
+    {{#each pages}}
+      {{#equal ../currentPage this}}
+    <li class="active">
+      <a> 
+      {{else}}
+    <li>
+      <a href="javascript:void(0);" onclick="toPage({{{this}}})">
+      {{/equal}}
+
+      {{{this}}}</a>
+    </li>
+    {{/each}}
+    {{/makePagination}}
+
+    {{!-- Next --}}
+    {{#equal pagination.currentPage pagination.numOfPages}}
+    <li class="next">
+      <a class="disabled"><i class="fa fa-angle-right"></i></a>
+    </li>
+    {{else}}
+    <li class="next">
+      <a href="javascript:void(0);" onclick="nextPage()"><i class="fa fa-angle-right"></i></a>
+    </li>
+    {{/equal}}
+  </ul><!-- /.flat-pagination -->
+</div>
+{{/greaterThan}}

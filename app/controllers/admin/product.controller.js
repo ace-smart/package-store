@@ -1,4 +1,5 @@
 const axiosInstance = require("../../helper/axios.helper")
+const helper = require("../../helper/helper")
 const {
   handleErrors,
   handleInvalidationErrors,
@@ -64,7 +65,7 @@ const getGallery = async function (accessToken, productId) {
       },
     })
 
-    if (response.status === 200) {
+    if (response.status === 200 && response.data != null) {
       const fs = require("fs")
       // Parse response.data to String
       let gallery = response.data.map((image) => {
@@ -80,7 +81,9 @@ const getGallery = async function (accessToken, productId) {
 
       return gallery
     }
+    return null
   } catch (error) {
+    console.log(error)
     throw error
   }
 }
@@ -384,21 +387,21 @@ module.exports = {
 
       const product = await getProductById(req.user.accessToken, productId)
       if (product) {
-        const gallery = await getGallery(req.user.accessToken, productId)
-        if (gallery) {
           return res.render("templates/admin/product/product.hbs", {
             layout: "admin/main.layout.hbs",
             content: "gallery",
             header: "Product Gallery",
             route: "products",
             productId: productId,
-            gallery: gallery,
+            gallery: await getGallery(req.user.accessToken, productId),
             user: await getUserInstance(req),
             csrfToken: req.csrfToken(),
           })
-        }
       }
+      
+      return renderNotFoundPage(res, error, 'admin')
     } catch (error) {
+      console.log(error)
       if (error.response.status === 404) {
         // No image in the gallery
         return res.render("templates/admin/product/product.hbs", {
@@ -450,7 +453,7 @@ module.exports = {
       }
     } catch (error) {
       if (error.response.status == 400) {
-        req.flash("fail", error.response.data.error.message)
+        req.flash("fail", error.response.data.error.invalidation[0].message)
         return res.redirect(`/admin/products/gallery?productId=${productId}`)
       }
 

@@ -1,3 +1,4 @@
+const axiosInstance = require("./axios.helper")
 module.exports = helper = {
   removeCSRF: function (formInput = {}) {
     // remove field ['_csrf'] from the form body
@@ -6,6 +7,18 @@ module.exports = helper = {
     }
 
     return formInput
+  },
+
+  getMenu: async () => {
+    try {
+      const response = await axiosInstance.get(`/get-menu`)
+      
+      if (response.status === 200) {
+        return response.data
+      }
+    } catch (error) {
+      throw error
+    }
   },
 
   isSameDate: function (dateObject1, dateObject2) {
@@ -99,8 +112,8 @@ module.exports = helper = {
     return parseFloat(price.replace(/\$|\,/g, ""))
   },
 
-  renderServerErrorPage: function (res, forRole = "user") {
-    if (forRole === "user") {
+  renderServerErrorPage: function (res, forRole = "client") {
+    if (forRole === "client") {
       return res.render("templates/client/error/500", {
         layout: "client/index.layout.hbs",
       })
@@ -111,8 +124,8 @@ module.exports = helper = {
     }
   },
 
-  renderNotFoundPage: function (res, forRole = "user") {
-    if (forRole === "user") {
+  renderNotFoundPage: function (res, forRole = "client") {
+    if (forRole === "client") {
       return res.render("templates/client/error/404", {
         layout: "client/index.layout.hbs",
       })
@@ -123,8 +136,8 @@ module.exports = helper = {
     }
   },
 
-  renderForbiddenPage: function (res, forRole = "user") {
-    if (forRole === "user") {
+  renderForbiddenPage: function (res, forRole = "client") {
+    if (forRole === "client") {
       return res.render("templates/client/error/403", {
         layout: "client/index.layout.hbs",
       })
@@ -135,8 +148,8 @@ module.exports = helper = {
     }
   },
 
-  renderUnauthorizedPage: function (res, forRole = "user") {
-    if (forRole === "user") {
+  renderUnauthorizedPage: function (res, forRole = "client") {
+    if (forRole === "client") {
       return res.render("templates/client/error/401", {
         layout: "client/index.layout.hbs",
       })
@@ -184,7 +197,7 @@ module.exports = helper = {
     return errorObject
   },
 
-  handleErrors: async function (res, error, forRole = "user") {
+  handleErrors: async function (res, error, forRole = "client") {
     // Opt out 'ValidationError' (code: 400)
     if (error.response.status === 403) {
       return helper.renderForbiddenPage(res, forRole)
@@ -203,13 +216,16 @@ module.exports = helper = {
     if (!items || itemPerPage < 1 || currentPage < 1) {
       return null
     }
-
+    
     const numOfPages = Math.ceil(items.length / itemPerPage)
-    if (currentPage > numOfPages) {
-      throw { response: { status: 404 } }
+    if (currentPage > 1 && currentPage > numOfPages) {
+      return null
     }
     const fromIndex = itemPerPage * (currentPage - 1)
 
-    return items.splice(fromIndex, itemPerPage)
+    return {
+      numOfPages: (numOfPages <= 1) ? 1 : numOfPages,
+      items: items.splice(fromIndex, itemPerPage)
+    }
   },
 }

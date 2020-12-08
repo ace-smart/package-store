@@ -1,19 +1,18 @@
 const axiosInstance = require("../../helper/axios.helper")
 const helper = require("../../helper/helper")
-const getContact = async function(accessToken, contactId) {
+const getContact = async function (accessToken, contactId) {
   try {
-    const response = await axiosInstance.get(`/admin/contacts/${contactId}`,
-    {
+    const response = await axiosInstance.get(`/admin/contacts/${contactId}`, {
       headers: {
-        Authorization: 'Bearer ' + accessToken
-      }
+        Authorization: "Bearer " + accessToken,
+      },
     })
 
     if (response.status === 200) {
       return response.data
     }
   } catch (error) {
-    throw error 
+    throw error
   }
 }
 
@@ -27,40 +26,52 @@ module.exports = {
           Authorization: "Bearer " + req.user.accessToken,
         },
       })
-      
-      if (response.status === 200) {
-        let contacts = response.data
+      let contacts = []
+      if (response.status === 200 && response.data != null) {
+        contacts = response.data
         if (req.query.status) {
-          if (req.query.status === 'starred') {
-            contacts = response.data.filter(element => element.status === 'starred')
-          } else if (req.query.status === 'removed') {
-            contacts = response.data.filter(element => element.status === 'removed')
+          if (req.query.status === "starred") {
+            contacts = response.data.filter((element) => element.status === "starred")
+          } else if (req.query.status === "removed") {
+            contacts = response.data.filter((element) => element.status === "removed")
           } else {
-            contacts = response.data.filter(element => element.status !== 'removed')
+            contacts = response.data.filter((element) => element.status !== "removed")
           }
         } else {
-          contacts = response.data.filter(element => element.status !== 'removed')
+          contacts = response.data.filter((element) => element.status !== "removed")
         }
-        // Pagination
-        let currentPage = (req.query.page) ? parseInt(req.query.page.toString()) : 1
-        const itemPerPage = 10
-        const numOfItems = contacts.length
-        const numOfPages = Math.ceil(numOfItems / itemPerPage)
-        const items = helper.makePagination(contacts, itemPerPage, currentPage)
-
-        return res.render("templates/admin/contact/contact.hbs", {
-          layout: "admin/main.layout.hbs",
-          content: "list",
-          header: "List of contacts",
-          route: "contacts",
-          contacts: items,
-          pagination: {
-            numOfPages, itemPerPage, numOfItems, currentPage
-          },
-          user: await helper.getUserInstance(req),
-          csrfToken: req.csrfToken(),
-        })
       }
+
+      // === Pagination CONSTANT
+      let currentPage = req.query.page ? parseInt(req.query.page.toString()) : 1
+      const itemPerPage = 10
+      const numOfItems = (contacts != null) ? contacts.length : 0
+
+      // Default pagination declaration
+      let pagination = {
+        numOfPages: 1,
+        itemPerPage: itemPerPage,
+        numOfItems: numOfItems,
+        currentPage: 1
+      }
+
+      // Make pagination for contact items
+      const helperPagination = helper.makePagination(contacts, itemPerPage, currentPage)
+      if (helperPagination != null) {
+        pagination.numOfPages = helperPagination.numOfPages
+        pagination.items = helperPagination.items
+      }
+
+      return res.render("templates/admin/contact/contact.hbs", {
+        layout: "admin/main.layout.hbs",
+        content: "list",
+        header: "List of contacts",
+        route: "contacts",
+        contacts: pagination.items,
+        pagination: pagination,
+        user: await helper.getUserInstance(req),
+        csrfToken: req.csrfToken(),
+      })
     } catch (error) {
       return helper.handleErrors(res, error, "admin")
     }
@@ -82,14 +93,14 @@ module.exports = {
         })
       }
     } catch (error) {
-      return helper.handleErrors(res, error, 'admin')
+      return helper.handleErrors(res, error, "admin")
     }
   },
 
   // @desc    Read contact
   // @route   PUT /contacts/read-message?idArr='id1,id2'
   readContactById: async (req, res) => {
-    let contactIDs = req.query.idArr.split(',')
+    let contactIDs = req.query.idArr.split(",")
     try {
       contactIDs.forEach(async (element, index, thisArr) => {
         try {
@@ -108,16 +119,15 @@ module.exports = {
           if (response.status === 204) {
             contactIDs.shift()
           }
-          
-          if (thisArr.length == 0){
+
+          if (thisArr.length == 0) {
             return res.sendStatus(200)
-          } 
+          }
         } catch (error) {
           throw error
         }
       })
     } catch (error) {
-      console.log(error)
       return helper.handleErrors(res, error, "admin")
     }
   },
@@ -125,11 +135,10 @@ module.exports = {
   // @desc    Trash contact
   // @route   PUT /contacts/remove-message?idArr='id1,id2'
   trashContactById: async (req, res) => {
-    let contactIDs = req.query.idArr.split(',')
+    let contactIDs = req.query.idArr.split(",")
     try {
       contactIDs.forEach(async (element, index, thisArr) => {
         try {
-            
           const response = await axiosInstance.put(
             `/admin/contacts/${element}`,
             {
@@ -145,8 +154,8 @@ module.exports = {
           if (response.status === 204) {
             contactIDs.shift()
           }
-          
-          if (thisArr.length == 0){
+
+          if (thisArr.length == 0) {
             return res.sendStatus(200)
           }
         } catch (error) {
@@ -161,7 +170,7 @@ module.exports = {
   // @desc    Star contact
   // @route   PUT /contacts/star-message?idArr='id1,id2'
   starContactById: async (req, res) => {
-    let contactIDs = req.query.idArr.split(',')
+    let contactIDs = req.query.idArr.split(",")
     try {
       contactIDs.forEach(async (element, index, thisArr) => {
         try {
@@ -176,12 +185,12 @@ module.exports = {
               },
             }
           )
-  
+
           if (response.status === 204) {
             contactIDs.shift()
           }
-          
-          if (thisArr.length == 0){
+
+          if (thisArr.length == 0) {
             return res.sendStatus(200)
           }
         } catch (error) {
@@ -196,7 +205,7 @@ module.exports = {
   // @desc    Delete contact
   // @route   DELETE /contacts/:id
   removeContactById: async (req, res) => {
-    let contactIDs = req.params.id.split(',')
+    let contactIDs = req.params.id.split(",")
     try {
       contactIDs.forEach(async (element, index, thisArr) => {
         try {
@@ -205,19 +214,18 @@ module.exports = {
               Authorization: "Bearer " + req.user.accessToken,
             },
           })
-  
+
           if (response.status === 204) {
             contactIDs.shift()
           }
-          
-          if (thisArr.length == 0){
+
+          if (thisArr.length == 0) {
             return res.sendStatus(200)
           }
         } catch (error) {
           throw error
         }
       })
-      
     } catch (error) {
       return helper.handleErrors(res, error, "admin")
     }

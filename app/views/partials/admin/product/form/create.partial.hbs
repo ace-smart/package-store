@@ -81,7 +81,7 @@
                 <span class="input-group-text"><i class="ion ion-social-usd"></i></span>
               </div>
               {{#if errors.price}}
-              <input id="price" name="price" type="number" class="form-control parsley-error"
+              <input id="price" name="price" type="number" class="form-control parsley-error" step=".01"
                 value="{{{errors.price.value}}}">
               </div>
               {{#with errors.price}}
@@ -89,10 +89,10 @@
               {{/with}}
               {{else}}
                 {{#if validData.price}}
-                <input  id="price" name="price" type="number" class="form-control" value="{{{validData.price}}}">
+                <input  id="price" name="price" type="number" class="form-control" value="{{{validData.price}}}" step=".01">
                 {{else}}
                 {{!-- First load  --}}
-                <input id="price" type="number" value="0" name="price" class="form-control">
+                <input id="price" type="number" value="0" name="price" class="form-control" step=".01">
                 {{/if}}
               </div>
               {{/if}}

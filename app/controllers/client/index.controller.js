@@ -1,12 +1,45 @@
 const axiosInstance = require("../../helper/axios.helper")
-const { getUserInstance, handleErrors, handleInvalidationErrors } = require("../../helper/helper")
-const getMenu = async () => {
+const { getUserInstance, handleErrors, handleInvalidationErrors, getMenu } = require("../../helper/helper")
+const getAllProducts = async function() {
   try {
-    const response = await axiosInstance.get(`/get-menu`)
-    
+    const response = await axiosInstance.get(`/all-products`)
+    if(response.status === 200) {
+      return response.data
+    }
+
+    return null
+  } catch (error) {
+    throw error
+  }
+}
+const getBestSellers = async function() {
+  try {
+    const response = await axiosInstance.get(`/get-best-sellers`)
     if (response.status === 200) {
       return response.data
     }
+
+    return null
+  } catch (error) {
+    throw error
+  }
+}
+const getProductsBySubcategoryId = async function() {
+  try {
+    const categories = await getMenu()
+    let products = []
+    for(let i = 0; i < 4; i++) {
+      const response = await axiosInstance.get(`/products-by-category?categoryId=${categories[i].id}`)
+      if (response.status === 200) {
+        products.push({
+          categoryId: categories[i].id,
+          categoryName: categories[i].name,
+          products: response.data
+        })
+      }
+    }
+
+    return products
   } catch (error) {
     throw error
   }
@@ -16,7 +49,6 @@ module.exports = {
   // @route:  GET ['/','/index','/home']
   showIndexPage: async (req, res) => {
     let user = null
-
     if (req.isAuthenticated() && req.user.role === 'user') {
         try {
             user = await getUserInstance(req)
@@ -29,8 +61,10 @@ module.exports = {
     return res.render("templates/client/index/index.hbs", {
       layout: "client/index.layout.hbs",
       user: user,
-      // categories: await getMenu()
-
+      categories: await getMenu(),
+      bestSellers: await getBestSellers(),
+      allProducts: await getAllProducts(),
+      newCollection: await getProductsBySubcategoryId()
     })
   },
 
@@ -71,10 +105,15 @@ module.exports = {
   },
 
   // @desc:   show about page
-  // @route:  GET /contact
+  // @route:  GET /about
   showAboutPage: (req, res) => {
-    return res.render("templates/client/index/index.hbs", {
+    return res.render("templates/client/index/about.hbs", {
       layout: "client/index.layout.hbs",
+      pageTitle: 'About us',
+      breadcrumb: [
+        {link: '/', routeName: 'Home'},
+        {link: '/about', routeName: 'About'},
+      ]
     })
   },
 

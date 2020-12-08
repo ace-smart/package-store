@@ -4,7 +4,7 @@
 		<div class="mini-stat clearfix bg-white">
 			<span class="mini-stat-icon bg-purple mr-0 float-right"><i class="mdi mdi-basket"></i></span>
 			<div class="mini-stat-info">
-				<span class="counter text-purple">{{{formatNumber yearlyStatistics.totalSalesData.totalSales}}}</span>
+				<span class="counter text-purple">{{{formatFloatNumber yearlyStatistics.totalSalesData.totalSales}}}</span>
 				Total Sales
 			</div>
 			<div class="clearfix"></div>
@@ -23,7 +23,7 @@
 		<div class="mini-stat clearfix bg-white">
 			<span class="mini-stat-icon bg-blue-grey mr-0 float-right"><i class="mdi mdi-archive"></i></span>
 			<div class="mini-stat-info">
-				<span class="counter text-blue-grey">{{{formatNumber yearlyStatistics.totalOrdersData.totalOrders}}}</span>
+				<span class="counter text-blue-grey">{{{formatFloatNumber yearlyStatistics.totalOrdersData.totalOrders}}}</span>
 				New Orders
 			</div>
 			<div class="clearfix"></div>
@@ -42,7 +42,7 @@
 		<div class="mini-stat clearfix bg-white">
 			<span class="mini-stat-icon bg-brown mr-0 float-right"><i class="mdi mdi-account"></i></span>
 			<div class="mini-stat-info">
-				<span class="counter text-brown">{{{formatNumber yearlyStatistics.totalUsersData.totalUsers}}}</span>
+				<span class="counter text-brown">{{{formatFloatNumber yearlyStatistics.totalUsersData.totalUsers}}}</span>
 				New Users
 			</div>
 			<div class="clearfix"></div>
@@ -61,7 +61,7 @@
 		<div class="mini-stat clearfix bg-white">
 			<span class="mini-stat-icon bg-teal mr-0 float-right"><i class="mdi mdi-coffee"></i></span>
 			<div class="mini-stat-info">
-				<span class="counter text-teal">{{{formatNumber yearlyStatistics.totalAnonymousData.totalAnonymous}}}</span>
+				<span class="counter text-teal">{{{formatFloatNumber yearlyStatistics.totalAnonymousData.totalAnonymous}}}</span>
 				Anonymous customers
 			</div>
 			<div class="clearfix"></div>
@@ -113,7 +113,7 @@
 
 				<ul class="list-inline widget-chart m-t-20 m-b-15 text-center ">
 					<li class="list-inline-item">
-						<h6 class="mb-0">{{{formatNumber salesAnalytics.totalNum}}}</h6>
+						<h6 class="mb-0">{{{formatFloatNumber salesAnalytics.totalNum}}}</h6>
 						<p class="text-muted font-13">Orders</p>
 					</li>
 					<li class="list-inline-item">
@@ -141,14 +141,14 @@
 
 				<div class="text-center">
 					<input class="knob" data-width="120" data-height="120" data-linecap=round data-fgColor="#ffbb44"
-						data-bgcolor="#36454e" value="{{{orderStatistics.cancelledOrders.numOfOrders}}}" data-skin="tron" data-angleOffset="180" data-readOnly=true
+						data-bgcolor="#36454e" value="{{{formatNumber orderStatistics.cancelledOrders.numOfOrders}}}" data-skin="tron" data-angleOffset="180" data-readOnly=true
 						data-thickness=".1" />
 
 					<div class="clearfix"></div>
 					<span class="btn btn-sm btn-orange m-t-20">Cancelled</span>
 					<ul class="list-inline row m-t-30 clearfix">
 						<li class="col-6">
-							<p class="m-b-5 font-18 font-600">{{{formatNumber orderStatistics.cancelledOrders.purchasedAmount}}}</p>
+							<p class="m-b-5 font-18 font-600">{{{formatFloatNumber orderStatistics.cancelledOrders.purchasedAmount}}}</p>
 							<p class="mb-0">Products</p>
 						</li>
 						<li class="col-6">
@@ -169,14 +169,14 @@
 
 				<div class="text-center">
 					<input class="knob" data-width="120" data-height="120" data-linecap=round data-fgColor="#4ac18e"
-						data-bgcolor="#36454e" value="{{{orderStatistics.doneOrders.numOfOrders}}}" data-skin="tron" data-angleOffset="180" data-readOnly=true
+						data-bgcolor="#36454e" value="{{{formatNumber orderStatistics.doneOrders.numOfOrders}}}" data-skin="tron" data-angleOffset="180" data-readOnly=true
 						data-thickness=".1" />
 
 					<div class="clearfix"></div>
 					<a href="#" class="btn btn-sm btn-success m-t-20">Purchased</a>
 					<ul class="list-inline row m-t-30 clearfix">
 						<li class="col-6">
-							<p class="m-b-5 font-18 font-600">{{{formatNumber orderStatistics.doneOrders.purchasedAmount}}}</p>
+							<p class="m-b-5 font-18 font-600">{{{formatFloatNumber orderStatistics.doneOrders.purchasedAmount}}}</p>
 							<p class="mb-0">Products</p>
 						</li>
 						<li class="col-6">
@@ -197,14 +197,14 @@
 
 				<div class="text-center">
 					<input class="knob" data-width="120" data-height="120" data-linecap=round data-fgColor="#8d6e63"
-						data-bgcolor="#36454e" value="{{{orderStatistics.imports.totalProducts}}}" data-skin="tron" data-angleOffset="180" data-readOnly=true
+						data-bgcolor="#36454e" value="{{{formatNumber orderStatistics.imports.totalProducts}}}" data-skin="tron" data-angleOffset="180" data-readOnly=true
 						data-thickness=".1" />
 
 					<div class="clearfix"></div>
 					<a href="#" class="btn btn-sm btn-brown m-t-20">Products</a>
 					<ul class="list-inline row m-t-30 clearfix">
 						<li class="col-6">
-							<p class="m-b-5 font-18 font-600">{{{formatNumber orderStatistics.imports.importNumbers}}}</p>
+							<p class="m-b-5 font-18 font-600">{{{formatFloatNumber orderStatistics.imports.importNumbers}}}</p>
 							<p class="mb-0">Amount</p>
 						</li>
 						<li class="col-6">
@@ -225,14 +225,14 @@
 
 				<div class="text-center">
 					<input class="knob" data-width="120" data-height="120" data-linecap=round data-fgColor="#90a4ae"
-						data-bgcolor="#36454e" value="{{{orderStatistics.anonymousUsers.numOfUsers}}}" data-skin="tron" data-angleOffset="180" data-readOnly=true
+						data-bgcolor="#36454e" value="{{{formatNumber orderStatistics.anonymousUsers.numOfUsers}}}" data-skin="tron" data-angleOffset="180" data-readOnly=true
 						data-thickness=".1" />
 
 					<div class="clearfix"></div>
 					<a href="#" class="btn btn-sm btn-blue-grey m-t-20">Purchased</a>
 					<ul class="list-inline row m-t-30 clearfix">
 						<li class="col-6">
-							<p class="m-b-5 font-18 font-600">{{{formatNumber orderStatistics.anonymousUsers.purchasedAmount}}}</p>
+							<p class="m-b-5 font-18 font-600">{{{formatFloatNumber orderStatistics.anonymousUsers.purchasedAmount}}}</p>
 							<p class="mb-0">Products</p>
 						</li>
 						<li class="col-6">

@@ -8,7 +8,7 @@ const UserModel = require("../models/UserModel")
 
 module.exports = {
 
-  // @desc:   get profile by accessTK
+  // @desc:   get profile by userId
   // @route:  GET /profile
   getProfile: async (req, res) => {
     try {
@@ -20,7 +20,7 @@ module.exports = {
         }
       }
       
-      throw new NotFoundError("No profile found.")
+      return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -36,7 +36,7 @@ module.exports = {
         return res.status(200).json(profile)
       }
       
-      throw new NotFoundError("No profile found.")
+      return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -96,9 +96,9 @@ module.exports = {
       if (validation instanceof ChangePwdObject) {
         const newPassword = await bcrypt.hash(req.body.new_password, await bcrypt.genSalt())
         const user = await UserObject.getOneUserBy({_id: req.user.id})
-        if (user instanceof UserObject) {
+        if (user) {
           const isUpdated = await user.update({ password: newPassword })
-          if (isUpdated instanceof UserObject) {
+          if (isUpdated ) {
             return res.sendStatus(204)
           }
 

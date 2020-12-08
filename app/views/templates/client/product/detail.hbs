@@ -1,3 +1,5 @@
+{{> client/page-title.partial}}
+
 {{!-- Detail --}}
 <section class="flat-row main-shop shop-detail style-1">
   <div class="container">
@@ -7,41 +9,17 @@
           <div class="inner padding-top-5">
             <div class="flexslider style-2 has-relative">
               <ul class="slides">
-                <li data-thumb="/static/images/shop/sh-detail/thumb-pexels-bogdan-glisik-1661471.jpg">
-                  <img src="/static/images/shop/sh-detail/pexels-bogdan-glisik-1661471.jpg" alt="Image" />
+                {{#if product.gallery}}
+                {{#each product.gallery}}
+                <li data-thumb="data:{{{this.mimeType}}};base64,{{{print64baseProductImg this.fileName this.extension}}}" style="width: 70px; height: 70px;">
+                  <img src="data:{{{this.mimeType}}};base64,{{{print64baseProductImg this.fileName this.extension}}}" alt="Image" style="width: 470px; height: 612px;">
                   <div class="flat-icon style-1">
-                    <a href="images/shop/sh-detail/detail-02.jpg" class="zoom-popup"><span
+                    <a href="data:{{{this.mimeType}}};base64,{{{print64baseProductImg this.fileName this.extension}}}" class="zoom-popup"><span
                         class="fa fa-search-plus"></span></a>
                   </div>
                 </li>
-                <li data-thumb="/static/images/shop/sh-detail/thumb-pexels-tom-leishman-5602878.jpg">
-                  <img src="/static/images/shop/sh-detail/pexels-tom-leishman-5602878.jpg" alt="Image" />
-                  <div class="flat-icon style-1">
-                    <a href="images/shop/sh-detail/detail-02.jpg" class="zoom-popup"><span
-                        class="fa fa-search-plus"></span></a>
-                  </div>
-                </li>
-                <li data-thumb="/static/images/shop/sh-detail/thumb-pexels-pixabay-47037.jpg">
-                  <img src="/static/images/shop/sh-detail/pexels-pixabay-47037.jpg" alt="Image" />
-                  <div class="flat-icon style-1">
-                    <a href="images/shop/sh-detail/detail-02.jpg" class="zoom-popup"><span
-                        class="fa fa-search-plus"></span></a>
-                  </div>
-                </li>
-                <li data-thumb="/static/images/shop/sh-detail/thumb-pexels-aleks-magnusson-2907782.jpg">
-                  <img src="/static/images/shop/sh-detail/pexels-aleks-magnusson-2907782.jpg" alt="Image" />
-                  <div class="flat-icon style-1">
-                    <a href="images/shop/sh-detail/detail-02.jpg" class="zoom-popup"><span
-                        class="fa fa-search-plus"></span></a>
-                  </div>
-                </li>
-                <li data-thumb="/static/images/shop/sh-detail/thumb-pexels-aidan-roof-3492376.jpg">
-                  <img src="/static/images/shop/sh-detail/pexels-aidan-roof-3492376.jpg" alt="Image" />
-                  <div class="flat-icon style-1">
-                    <a href="images/shop/sh-detail/detail-02.jpg" class="zoom-popup"><span
-                        class="fa fa-search-plus"></span></a>
-                  </div>
-                </li>
+                {{/each}}
+                {{/if}}
               </ul>
             </div>
             <!-- /.flexslider -->
@@ -55,7 +33,7 @@
         <div class="product-detail">
           <div class="inner">
             <div class="content-detail">
-              <h2 class="product-title">Best Custom Hoodie</h2>
+              <h2 class="product-title">{{{product.name}}}</h2>
               <div class="flat-star style-1">
                 <i class="fa fa-star"></i>
                 <i class="fa fa-star"></i>
@@ -71,31 +49,29 @@
                 consequat.
               </p>
               <div class="price">
-                <del><span class="regular">$90.00</span></del>
-                <ins><span class="amount">$24.00</span></ins>
+                {{!-- <del><span class="regular">$90.00</span></del> --}}
+                <ins><span class="amount">{{{formatPrice product.price}}}</span></ins>
               </div>
-              <div class="size">
-                <span>Size:</span>
+              {{#if product.details.size}}
+              <div class="size d-flex justify-content-start align-items-center">
+                <p class="font-weight-600 mr-3">Size:</p>
+                <ul class="p-0">
+                  <li class='product-size'>
+                    <a href="#">{{{product.details.size}}}</a>
+                    </li>
+                </ul>
+              </div>
+              {{/if}}
+              {{#if product.details.color}}
+              <div class="color d-flex justify-content-start align-items-center">
+                <p class="font-weight-600 mr-4">Color:</p>
                 <ul>
-                  <li><a href="#">L</a></li>
-                  <li><a href="#">M</a></li>
-                  <li><a href="#">S</a></li>
-                  <li><a href="#">XL</a></li>
-                  <li><a href="#">XXL</a></li>
-                  <li><a href="#">Over Size</a></li>
+                  <li class='product-color'>
+                    <a href="#">{{{product.details.color.colorName}}}</a>
+                  </li>
                 </ul>
               </div>
-              <div class="product-color">
-                <span>Colors:</span>
-                <ul class="flat-color-list">
-                  <li><a href="#" class="yellow"></a></li>
-                  <li><a href="#" class="pink"> </a></li>
-                  <li><a href="#" class="red"></a></li>
-                  <li><a href="#" class="black"></a></li>
-                  <li><a href="#" class="blue"></a></li>
-                  <li><a href="#" class="khaki"></a></li>
-                </ul>
-              </div>
+              {{/if}}
               <ul class="product-infor style-1">
                 <li><span>100% cotton</span></li>
                 <li><span>6 months warranty</span></li>
@@ -115,27 +91,33 @@
                 </div>
               </div>
               <div class="product-categories">
-                <span>Categories: </span><a href="#">Men,</a> <a href="#">Shoes</a>
+                <span>Categories: </span>
+                <a href="/products-by?categoryId={{{product.subcategory.categoryId._id}}}" class="text-info">
+                  {{{product.subcategory.categoryId.name}}}
+                </a>
               </div>
               <div class="product-tags">
-                <span>Tags: </span><a href="#">Dress,</a> <a href="#">Fashion,</a>
-                <a href="#">Furniture,</a> <a href="#">Lookbok</a>
+                <span>Tags: </span>
+                <a >Dress,</a> 
+                <a >Fashion,</a>
+                <a >Furniture,</a>
+                <a >Lookbok</a>
               </div>
               <ul class="flat-socials">
                 <li>
-                  <a href="#"><i class="fa fa-facebook"></i></a>
+                  <a ><i class="fa fa-facebook"></i></a>
                 </li>
                 <li>
-                  <a href="#"><i class="fa fa-twitter"></i></a>
+                  <a ><i class="fa fa-twitter"></i></a>
                 </li>
                 <li>
-                  <a href="#"><i class="fa fa-pinterest"></i></a>
+                 <a ><i class="fa fa-pinterest"></i></a>
                 </li>
                 <li>
-                  <a href="#"><i class="fa fa-linkedin"></i></a>
+                  <a ><i class="fa fa-linkedin"></i></a>
                 </li>
                 <li>
-                  <a href="#"><i class="fa fa-google-plus"></i></a>
+                  <a ><i class="fa fa-google-plus"></i></a>
                 </li>
               </ul>
             </div>
@@ -159,7 +141,6 @@
             <ul class="menu-tab">
               <li class="active">Description</li>
               <li>Additional information</li>
-              <li>Reviews</li>
             </ul>
             <div class="content-tab">
               <div class="content-inner">
@@ -274,101 +255,7 @@
                 </div>
               </div>
               <!-- /.content-inner -->
-              <div class="content-inner">
-                <div class="inner max-width-83 padding-top-33">
-                  <ol class="review-list">
-                    <li class="review">
-                      <div class="thumb">
-                        <img src="images/avatar-1.png" alt="Image" />
-                      </div>
-                      <div class="text-wrap">
-                        <div class="review-meta">
-                          <h5 class="name">Sophia Rosla</h5>
-                          <div class="flat-star style-1">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star-half-o"></i>
-                          </div>
-                        </div>
-                        <div class="review-text">
-                          <p>
-                            I wanted to thank you so much for the rug we have received it
-                            really is beautiful and expertly made. I will be recommending you
-                            to all our friends.
-                          </p>
-                        </div>
-                      </div>
-                    </li>
-                    <!--  /.review    -->
-                    <li class="review">
-                      <div class="thumb">
-                        <img src="images/avatar.png" alt="Image" />
-                      </div>
-                      <div class="text-wrap">
-                        <div class="review-meta">
-                          <h5 class="name">Jayne Haughton</h5>
-                          <div class="flat-star style-1">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star-half-o"></i>
-                          </div>
-                        </div>
-                        <div class="review-text">
-                          <p class="line-height-28">
-                            Customer service is very important part of the buying experience
-                            to us and we must say that we have found Utility's to be
-                            impressive - we will certainly look to buy again in future.
-                          </p>
-                        </div>
-                      </div>
-                    </li>
-                    <!--  /.review    -->
-                  </ol>
-                  <!-- /.review-list -->
-                  <div class="comment-respond review-respond" id="respond">
-                    <div class="comment-reply-title margin-bottom-14">
-                      <h5>Write a review</h5>
-                      <p>
-                        Your email address will not be published. Required fields are marked *
-                      </p>
-                    </div>
-                    <form novalidate="" class="comment-form review-form" id="commentform" method="post" action="#">
-                      <p class="flat-star style-2">
-                        <label>Rating*:</label>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                      </p>
-                      <p class="comment-form-comment">
-                        <label>Review*</label>
-                        <textarea class="" tabindex="4" name="comment" required> </textarea>
-                      </p>
-                      <p class="comment-name">
-                        <label>Name*</label>
-                        <input type="text" aria-required="true" size="30" value="" name="name" id="name" />
-                      </p>
-                      <p class="comment-email">
-                        <label>Email*</label>
-                        <input type="email" size="30" value="" name="email" id="email" />
-                      </p>
-                      <p class="comment-form-notify clearfix">
-                        <input type="checkbox" name="check-notify" id="check-notify" />
-                        <label for="check-notify">Notify me of new posts by email</label>
-                      </p>
-                      <p class="form-submit">
-                        <button class="comment-submit">Submit</button>
-                      </p>
-                    </form>
-                  </div>
-                  <!-- /.comment-respond -->
-                </div>
-              </div>
+
               <!-- /.content-inner -->
             </div>
           </div>
@@ -390,6 +277,40 @@
 
         <div class="product-content product-fourcolumn clearfix">
           <ul class="product style2">
+            {{#if relatedProducts}}
+            {{#each relatedProducts}}
+            <li class="product-item">
+              <div class="product-thumb clearfix">
+                <a href="/product?id={{{id}}}">
+                  <img src="data:{{{gallery.0.mimeType}}};base64,{{{print64baseProductImg gallery.0.fileName gallery.0.extension}}}" alt="image" style="width: 286px; height: 250px"/>
+                </a>
+              </div>
+              <div class="product-info clearfix mt-3">
+                <span class="product-title">{{{name}}}</span>
+                <div class="price">
+                  <ins>
+                    <span class="amount">{{{formatPrice price}}}</span>
+                  </ins>
+                </div>
+                {{!-- <ul class="flat-color-list">
+                  <li>
+                    <a href="#" class="red"></a>
+                  </li>
+                  <li>
+                    <a href="#" class="blue"></a>
+                  </li>
+                  <li>
+                    <a href="#" class="black"></a>
+                  </li>
+                </ul> --}}
+              </div>
+              <div class="add-to-cart text-center">
+                <a href="#">ADD TO CART</a>
+              </div>
+              {{!-- <a href="#" class="like"><i class="fa fa-heart-o"></i></a> --}}
+            </li>
+            {{/each}}
+            {{/if}}
             <li class="product-item">
               <div class="product-thumb clearfix">
                 <a href="#">
@@ -422,47 +343,8 @@
             </li>
             <li class="product-item">
               <div class="product-thumb clearfix">
-                <a href="#">
-                  <img src="/static/images/shop/sh-4/pexels-chris-wölfer-1561011.jpg" alt="image" />
-                </a>
-                <span class="new">New</span>
-              </div>
-              <div class="product-info clearfix mt-3">
-                <span class="product-title">Cotton White Underweaer Block Out Edition</span>
-                <div class="price">
-                  <ins>
-                    <span class="amount">$10.00</span>
-                  </ins>
-                </div>
-              </div>
-              <div class="add-to-cart text-center">
-                <a href="#">ADD TO CART</a>
-              </div>
-              <a href="#" class="like"><i class="fa fa-heart-o"></i></a>
-            </li>
-            <li class="product-item">
-              <div class="product-thumb clearfix">
                 <a href="#" class="product-thumb">
-                  <img src="/static/images/shop/sh-4/pexels-vova-krasilnikov-2698844.jpg" alt="image" />
-                </a>
-              </div>
-              <div class="product-info clearfix mt-3">
-                <span class="product-title">Cotton White Underweaer Block Out Edition</span>
-                <div class="price">
-                  <ins>
-                    <span class="amount">$20.00</span>
-                  </ins>
-                </div>
-              </div>
-              <div class="add-to-cart text-center">
-                <a href="#">ADD TO CART</a>
-              </div>
-              <a href="#" class="like"><i class="fa fa-heart-o"></i></a>
-            </li>
-            <li class="product-item">
-              <div class="product-thumb clearfix">
-                <a href="#" class="product-thumb">
-                  <img src="/static/images/shop/sh-4/pexels-milena-hasvil-1021693≠.jpg" alt="image" />
+                  <img src="/static/images/shop/sh-4/pexels-milena-hasvil-1021693.jpg" alt="image" />
                 </a>
                 <span class="new sale">Sale</span>
               </div>

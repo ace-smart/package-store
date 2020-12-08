@@ -45,3 +45,38 @@
     }
   }
 </script>
+<script>
+  const queryStr = new URLSearchParams(window.location.search)
+  
+  const nextPage = function (event) {
+    const currentPage = (queryStr.get('page'))
+    const numOfPages = {{{pagination.numOfPages}}}
+    if (currentPage && currentPage < numOfPages) {
+      const nextPage = parseInt(currentPage.toString()) + 1
+      queryStr.set('page', nextPage)
+
+      return window.location.search = queryStr.toString();
+    } else {
+      queryStr.set('page', 2)
+
+      return window.location.search = queryStr.toString();
+    }
+  }
+
+  const prevPage = function (event) {
+    const currentPage = (queryStr.get('page'))
+    if (currentPage && currentPage > 1) {
+      const prevPage = parseInt(currentPage.toString()) - 1
+      queryStr.set('page', prevPage)
+
+      return window.location.search = queryStr.toString();
+    }
+  }
+
+  const toPage = function (pageIndex) {
+      const page = parseInt(pageIndex.toString())
+      queryStr.set('page', page)
+
+      return window.location.search = queryStr.toString();
+  }
+</script>

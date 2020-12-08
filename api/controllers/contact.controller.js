@@ -8,11 +8,7 @@ module.exports = {
   showContactList: async (req, res) => {
     try {
       const contactList = await ContactObject.getContactsBy()
-      if (contactList && contactList.length > 0) {
-        return res.status(200).json(contactList)
-      }
-
-      throw new NotFoundError("No contact found.")
+      return res.status(200).json(contactList)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -27,7 +23,7 @@ module.exports = {
         return res.status(200).json(contact)
       }
       // Not found
-      throw new NotFoundError("No contact found.")
+        return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }

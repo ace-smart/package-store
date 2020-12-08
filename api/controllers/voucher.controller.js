@@ -8,11 +8,8 @@ module.exports = {
   showVoucherList: async (req, res) => {
     try {
       const vouchers = await VoucherObject.getVouchersBy({})
-      if (vouchers && vouchers.length > 0) {
-        return res.status(200).json(vouchers)
-      }
 
-      throw new NotFoundError("No voucher found.")
+      return res.status(200).json(vouchers)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -27,7 +24,7 @@ module.exports = {
         return res.status(200).json(voucher)
        } 
       // Not found
-      throw new NotFoundError("No voucher found.")
+        return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }

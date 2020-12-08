@@ -1,5 +1,6 @@
 <div class="card m-t-20">
   <ul class="message-list">
+    {{#if contacts}}
     {{#each contacts}}
     <li {{#ifMatch this.status 'unread'}} class="unread" {{/ifMatch}}>
       <a href="/admin/contacts/view/{{{this.id}}}">
@@ -23,6 +24,6 @@
       </a>
     </li>
     {{/each}}
-
+    {{/if}}
   </ul>
 </div> <!-- panel -->

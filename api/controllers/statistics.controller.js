@@ -11,7 +11,7 @@ module.exports = {
       if (statisticsData) {
         return res.status(200).json(statisticsData)
       }
-      throw new NotFoundError("No statistics found.")
+      return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -25,7 +25,7 @@ module.exports = {
       if (statisticsData) {
         return res.status(200).json(statisticsData)
       }
-      throw new NotFoundError("No statistics found.")
+      return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -39,7 +39,7 @@ module.exports = {
       if (statisticsData) {
         return res.status(200).json(statisticsData)
       }
-      throw new NotFoundError("No statistics found.")
+      return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -53,7 +53,7 @@ module.exports = {
       if (statisticsData) {
         return res.status(200).json(statisticsData)
       }
-      throw new NotFoundError("No statistics found.")
+      return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }

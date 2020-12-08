@@ -10,6 +10,7 @@ module.exports = {
       const subcategories = await SubcategoryObject.getSubcategoriesBy({
         categoryId: req.query.categoryId,
       })
+
       return res.status(200).json(subcategories)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
@@ -21,11 +22,8 @@ module.exports = {
   getSubcategories: async (req, res) => {
     try {
       const subcategories = await SubcategoryObject.getSubcategoriesBy()
-      if (subcategories && subcategories.length > 0) {
-        return res.status(200).json(subcategories)
-      }
 
-      throw NotFoundError("No subcategory found.")
+      return res.status(200).json(subcategories)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -39,6 +37,8 @@ module.exports = {
       if (subcategory) {
         return res.status(200).json(subcategory)
       }
+
+      return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -53,7 +53,7 @@ module.exports = {
         return res.status(201).json(createdSubcategory)
       }
 
-      throw new Error("Failed to create category")
+      throw new Error("Failed to create subcategory")
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -69,9 +69,10 @@ module.exports = {
         if (updatedSubcategory) {
           return res.sendStatus(204)
         }
+        throw new Error("Failed to update subcategory")
       }
 
-      throw new Error("Failed to update subcategory")
+      throw new NotFoundError("No subcategory found.")
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -87,9 +88,10 @@ module.exports = {
         if (isRemoved) {
           return res.sendStatus(204)
         }
+        throw new Error("Failed to remove subcategory.")
       }
 
-      throw new Error("Failed to remove subcategory.")
+      throw new NotFoundError("No subcategory found.")
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }

@@ -1,5 +1,6 @@
 const GalleryObject = require("../objects/GalleryObject")
 const ErrorHandler = require("../helper/errorHandler")
+const NotFoundError = require("../errors/not_found")
 
 module.exports = {
     // @desc    Show gallery
@@ -17,7 +18,7 @@ module.exports = {
                 return res.status(200).json(gallery)
             }
 
-            throw new Error("No image found.")
+            return res.status(200).json(null)
         } catch (error) {
             return ErrorHandler.sendErrors(res, error)
         }
@@ -32,7 +33,7 @@ module.exports = {
                 return res.status(200).json(gallery)
             }
             
-            throw new Error("No image found.")
+            return res.status(200).json(null)
         } catch (error) {
             return ErrorHandler.sendErrors(res, error)
         }
@@ -65,6 +66,7 @@ module.exports = {
                 }
                 throw new Error("Failed to update the image")
             }
+
             throw new NotFoundError("No image found.")
         } catch (error) {
             return ErrorHandler.sendErrors(res, error)
@@ -83,6 +85,7 @@ module.exports = {
                 }
                 throw new Error("Failed to remove the image")
             }
+            
             throw new NotFoundError("No image found.")
         } catch (error) {
             return ErrorHandler.sendErrors(res, error)
