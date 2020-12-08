@@ -10,137 +10,33 @@
         </div>
         <div class="product-content product-fivecolumn clearfix">
           <ul class="product style3">
+            {{#if bestSellers}}
+            {{#each bestSellers}}
             <li class="product-item">
               <div class="product-thumb clearfix">
-                <a href="#">
-                  <img src="images/shop/sh-5/1.jpg" alt="image">
+                <a href="/product?id={{{id}}}">
+                  <img src="data:{{{gallery.0.mimeType}}};base64,{{{print64baseProductImg gallery.0.fileName gallery.0.extension}}}" alt="image" style="width: 233px; height: 349.5px">
                 </a>
-                <span class="new sale">Sale</span>
+                <span class="new sale">{{{subcategory.name}}}</span>
               </div>
               <div class="product-info clearfix">
-                <span class="product-title">Faux shearling aviator<br> jacket</span>
+                <span class="product-title">{{{name}}}
                 <div class="price">
-                  <del>
+                  {{!-- <del>
                     <span class="regular">$130.00</span>
-                  </del>
+                  </del> --}}
                   <ins>
-                    <span class="amount">$100.00</span>
+                    <span class="amount">{{{formatPrice price}}}</span>
                   </ins>
                 </div>
               </div>
               <div class="add-to-cart text-center">
                 <a href="#">ADD TO CART</a>
               </div>
-              <a href="#" class="like"><i class="fa fa-heart-o"></i></a>
+              {{!-- <a href="#" class="like"><i class="fa fa-heart-o"></i></a> --}}
             </li>
-            <li class="product-item">
-              <div class="product-thumb clearfix">
-                <a href="#">
-                  <img src="images/shop/sh-5/2.jpg" alt="image">
-                </a>
-                <span class="new">New</span>
-              </div>
-              <div class="product-info clearfix">
-                <span class="product-title">Cotton White Underweaer Block Out Edition</span>
-                <div class="price">
-                  <ins>
-                    <span class="amount">$100.00</span>
-                  </ins>
-                </div>
-                <ul class="flat-color-list">
-                  <li>
-                    <a href="#" class="red"></a>
-                  </li>
-                  <li>
-                    <a href="#" class="blue"></a>
-                  </li>
-                  <li>
-                    <a href="#" class="black"></a>
-                  </li>
-                </ul>
-              </div>
-              <div class="add-to-cart text-center">
-                <a href="#">ADD TO CART</a>
-              </div>
-              <a href="#" class="like"><i class="fa fa-heart-o"></i></a>
-            </li>
-            <li class="product-item">
-              <div class="product-thumb clearfix">
-                <a href="#">
-                  <img src="images/shop/sh-5/3.jpg" alt="image">
-                </a>
-                <span class="new">New</span>
-              </div>
-              <div class="product-info clearfix">
-                <span class="product-title">Hood wool blend duffle<br> coat</span>
-                <div class="price">
-                  <ins>
-                    <span class="amount">$130.00</span>
-                  </ins>
-                </div>
-              </div>
-              <div class="add-to-cart text-center">
-                <a href="#">ADD TO CART</a>
-              </div>
-              <a href="#" class="like"><i class="fa fa-heart-o"></i></a>
-            </li>
-            <li class="product-item">
-              <div class="product-thumb clearfix">
-                <a href="#">
-                  <img src="images/shop/sh-5/4.jpg" alt="image">
-                </a>
-                <span class="new sale">Sale</span>
-              </div>
-              <div class="product-info clearfix">
-                <span class="product-title">Slim-fit patterned suit<br> blazer</span>
-                <div class="price">
-                  <del>
-                    <span class="regular">$170.00</span>
-                  </del>
-                  <ins>
-                    <span class="amount">$139.00</span>
-                  </ins>
-                </div>
-              </div>
-              <div class="add-to-cart text-center">
-                <a href="#">ADD TO CART</a>
-              </div>
-              <a href="#" class="like"><i class="fa fa-heart-o"></i></a>
-            </li>
-            <li class="product-item">
-              <div class="product-thumb clearfix">
-                <a href="#">
-                  <img src="images/shop/sh-5/5.jpg" alt="image">
-                </a>
-                <span class="new sale">Sale</span>
-              </div>
-              <div class="product-info clearfix">
-                <span class="product-title">Cotton cashmereblend<br> cardigan</span>
-                <div class="price">
-                  <del>
-                    <span class="regular">$130.00</span>
-                  </del>
-                  <ins>
-                    <span class="amount">$100.00</span>
-                  </ins>
-                </div>
-                <ul class="flat-color-list">
-                  <li>
-                    <a href="#" class="red"></a>
-                  </li>
-                  <li>
-                    <a href="#" class="blue"></a>
-                  </li>
-                  <li>
-                    <a href="#" class="black"></a>
-                  </li>
-                </ul>
-              </div>
-              <div class="add-to-cart text-center">
-                <a href="#">ADD TO CART</a>
-              </div>
-              <a href="#" class="like"><i class="fa fa-heart-o"></i></a>
-            </li>
+            {{/each}}
+            {{/if}}
           </ul><!-- /.product -->
         </div><!-- /.product-content -->
       </div>

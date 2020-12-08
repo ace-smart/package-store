@@ -1,11 +1,12 @@
 const ProductModel = require("../models/ProductModel")
 const SubcategoryModel = require("../models/SubcategoryModel")
-const SubcategoryObject = require('./SubcategoryObject')
-const GalleryObject = require('./GalleryObject')
+const SubcategoryObject = require("./SubcategoryObject")
+const GalleryObject = require("./GalleryObject")
 const RestockModel = require("../models/RestockModel")
 const validator = require("validator")
 const { isExistent, hasSpecialChars, STATUS_VALUES } = require("../helper/validation")
-const ValidationError = require('../errors/validation')
+const ValidationError = require("../errors/validation")
+const NotFoundError = require("../errors/not_found")
 
 class ProductObject {
   constructor({ _id, subcategoryId, name, details, price, status, createdAt }) {
@@ -23,12 +24,14 @@ class ProductObject {
   async getRemainingNumber() {
     try {
       let remainingNumber = 0
-      const restockData = await RestockModel.find({$and: [{status: 'activated'}, {productId: this.id}]}).lean()
+      const restockData = await RestockModel.find({
+        $and: [{ status: "activated" }, { productId: this.id }],
+      }).lean()
 
-      restockData.forEach(data => {
-        if (data.action === 'import') {
+      restockData.forEach((data) => {
+        if (data.action === "import") {
           remainingNumber += parseInt(data.amount)
-        } else if (data.action === 'export') {
+        } else if (data.action === "export") {
           remainingNumber -= parseInt(data.amount)
         }
       })
@@ -42,11 +45,11 @@ class ProductObject {
   async setSubcategory() {
     if (this.subcategoryId instanceof Object) {
       // populated
-      this.subcategory = new SubcategoryObject({...this.subcategoryId})
+      this.subcategory = new SubcategoryObject({ ...this.subcategoryId })
       this.subcategoryId = this.subcategory.id.toString()
-    } else if (typeof this.subcategoryId === 'string') {
+    } else if (typeof this.subcategoryId === "string") {
       // existed
-      this.subcategory = await SubcategoryObject.getOneSubcategoryBy({_id: this.subcategoryId})
+      this.subcategory = await SubcategoryObject.getOneSubcategoryBy({ _id: this.subcategoryId })
     } else {
       this.subcategory = null
     }
@@ -57,13 +60,13 @@ class ProductObject {
   static async getOneProductBy(criteria = {}, selectFields = null) {
     try {
       const productDoc = await ProductModel.findOne(criteria, selectFields)
-        .populate({path: 'subcategoryId'})
+        .populate({ path: "subcategoryId", populate: { path: "categoryId" } })
         .lean()
-        
+
       if (productDoc) {
-        const productObject = new ProductObject({...productDoc })
+        const productObject = new ProductObject({ ...productDoc })
         await productObject.setSubcategory()
-        productObject.gallery = await GalleryObject.getImagesBy({productId: productObject.id})
+        productObject.gallery = await GalleryObject.getImagesBy({ productId: productObject.id })
         await productObject.getRemainingNumber()
         return productObject
       }
@@ -79,17 +82,89 @@ class ProductObject {
   static async getProductsBy(criteria = {}, selectFields = null) {
     try {
       const listOfProducts = await ProductModel.find(criteria, selectFields)
-        .populate({path: 'subcategoryId'})
+        .populate({ path: "subcategoryId", populate: { path: "categoryId" } })
         .lean()
-      
+
       if (listOfProducts.length > 0) {
         let productObjects = new Array()
-        productObjects = await Promise.all(listOfProducts.map(async (element) => {
-          const object = new ProductObject({ ...element})
-          await object.setSubcategory()
-          await object.getRemainingNumber()
-          return object
-        }))
+        productObjects = await Promise.all(
+          listOfProducts.map(async (element) => {
+            const object = new ProductObject({ ...element })
+            await object.setSubcategory()
+            object.gallery = await GalleryObject.getImagesBy({ productId: object.id })
+            await object.getRemainingNumber()
+            return object
+          })
+        )
+
+        return productObjects
+      }
+
+      return null
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // @desc:     Get list of products by criteria
+  // @return:   ProductObject[]
+  static async getRelatedProducts(productId = null, num = 5) {
+    if (!productId) {
+      throw new NotFoundError("No product found.")
+    }
+
+    try {
+      const product = await ProductModel.findOne({ _id: productId })
+      if (product) {
+        const relatedProducts = await ProductModel.find({ subcategoryId: product.subcategoryId, status: 'activated' })
+          .populate({ path: "subcategoryId", populate: { path: "categoryId" } })
+          .sort({createdAt: -1})
+          .limit(num)
+          .lean()
+        
+        if (relatedProducts.length > 0) {
+          let productObjects = new Array()
+          productObjects = await Promise.all(
+            relatedProducts.map(async (element) => {
+              const object = new ProductObject({ ...element })
+              await object.setSubcategory()
+              object.gallery = await GalleryObject.getImagesBy({ productId: object.id })
+              await object.getRemainingNumber()
+              return object
+            })
+          )
+          
+          return productObjects
+        }
+      }
+
+      return null
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // @desc:     Get all activated products 
+  // @return:   ProductObject[]
+  static async getAllProducts(num = 8) {
+    try {
+      const products = await ProductModel.find({ status: 'activated' })
+      .populate({ path: "subcategoryId", populate: { path: "categoryId" } })
+      .sort({createdAt: -1})
+      .limit(num)
+      .lean()
+        
+      if (products.length > 0) {
+        let productObjects = new Array()
+        productObjects = await Promise.all(
+          products.map(async (element) => {
+            const object = new ProductObject({ ...element })
+            await object.setSubcategory()
+            object.gallery = await GalleryObject.getImagesBy({ productId: object.id })
+            await object.getRemainingNumber()
+            return object
+          })
+        )
         
         return productObjects
       }
@@ -99,6 +174,98 @@ class ProductObject {
       throw error
     }
   }
+
+  // @desc:     Get best sellers
+  // @return:   ProductObject[]
+  static async getBestSellers(num = 8) {
+    try {
+      const bestSellers = await ProductModel.aggregate([
+        {$match: {status: 'activated'}},
+        {$sort: {createdAt: -1}},
+        {$lookup: {
+          from: 'orderdetails',
+          localField: '_id',
+          foreignField: 'productId',
+          as: 'details'
+        }},
+        {$lookup: {
+          from: 'orders',
+          localField: 'details.orderId',
+          foreignField: '_id',
+          as: 'orders'
+        }},
+        {$match: {"orders.status": "done"}},
+        {$group: {
+          _id: "$_id",
+          totalAmount: {$sum: {$arrayElemAt: ["$details.amount", 0]}}
+        }},
+
+      ])
+        
+      if (bestSellers.length > 0) {
+        let bestSaleProducts = new Array()
+        bestSaleProducts = await Promise.all(
+          bestSellers.map(async (element) => {
+            const object = await ProductObject.getOneProductBy({_id: element._id})
+            return object
+          })
+        )
+        
+        return bestSaleProducts
+      }
+
+      return null
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // @desc:     Get all activated products 
+  // @return:   ProductObject[]
+  static async getProductsByCategory(categoryId, num = 4) {
+    if (categoryId == null) {
+      throw NotFoundError("No product found.")
+    }
+    try {
+      const products = await ProductModel.aggregate([
+        {$match: {status: 'activated'}},
+        {$lookup: {
+          from: 'subcategories',
+          localField: 'subcategoryId',
+          foreignField: '_id',
+          as: 'subcategories'
+        }},
+        {$match: {"subcategories.status": "activated"}},
+        {$lookup: {
+          from: 'categories',
+          localField: 'subcategories.categoryId',
+          foreignField: '_id',
+          as: 'categories'
+        }},
+        {$match: {"categories.status": 'activated', "categories._id": categoryId}},
+        {$sort: {createdAt: -1}},
+        {$project: {_id: 1}}
+      ])
+        
+      if (products.length > 0) {
+        let productObjects = new Array()
+        productObjects = await Promise.all(
+          products.map(async (element) => {
+            const object = await ProductObject.getOneProductBy({_id: element._id})
+            return object
+          })
+        )
+        
+        return productObjects
+      }
+      
+      return null
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
 
   // @fields:   [subcategory, name, price, details, status]
   async validate(type = "create", exceptionId = null) {
@@ -150,7 +317,7 @@ class ProductObject {
     }
     // name
     if (this.name != null && !validator.isEmpty(this.name.toString())) {
-      if (hasSpecialChars(this.name.toString())){
+      if (hasSpecialChars(this.name.toString())) {
         errors.push({
           field: "name",
           message: "Can not have special characters.",
@@ -202,7 +369,7 @@ class ProductObject {
         }
       }
       // details.color
-      if (this.details.color != null ) {
+      if (this.details.color != null) {
         if (
           JSON.stringify(this.details.color) === "{}" ||
           this.details.color.colorName == null ||
@@ -214,7 +381,7 @@ class ProductObject {
             value: this.details.color,
           })
         }
-        if (!validator.isEmpty(this.details.color.colorName.toString())){
+        if (!validator.isEmpty(this.details.color.colorName.toString())) {
           if (hasSpecialChars(this.details.color.colorName)) {
             errors.push({
               field: "colorName",
@@ -223,8 +390,8 @@ class ProductObject {
             })
           }
         }
-        
-        if (!validator.isEmpty(this.details.color.hexCode.toString())){
+
+        if (!validator.isEmpty(this.details.color.hexCode.toString())) {
           if (!validator.isHexColor(this.details.color.hexCode)) {
             errors.push({
               field: "hexCode",
@@ -237,11 +404,11 @@ class ProductObject {
       // details.material
       if (this.details.material != null && !validator.isEmpty(this.details.material.toString())) {
         if (hasSpecialChars(this.details.material.toString())) {
-            errors.push({
-              field: "material",
-              message: "Can not have special characters.",
-              value: this.details.material,
-            })
+          errors.push({
+            field: "material",
+            message: "Can not have special characters.",
+            value: this.details.material,
+          })
         }
       }
       // details.gender
@@ -292,15 +459,17 @@ class ProductObject {
       if (value != null) {
         const isFound = fieldsToClean.find((field) => key === field)
         if (isFound) {
-          if (key === 'name') {
+          if (key === "name") {
             productObject[key] = validator.trim(value)
           }
-          if (key === 'status'){
+          if (key === "status") {
             productObject[key] = validator.trim(value.toString().toLowerCase())
           }
-          if (key === 'details') {
+          if (key === "details") {
             if (productObject[key].color != null && productObject[key].color.colorName != null) {
-              productObject[key].color.colorName = validator.trim(value.color.colorName.toString().toLowerCase())
+              productObject[key].color.colorName = validator.trim(
+                value.color.colorName.toString().toLowerCase()
+              )
             }
             if (productObject[key].size != null) {
               productObject[key].size = validator.trim(value.size.toUpperCase())
@@ -312,12 +481,12 @@ class ProductObject {
               productObject[key].season = validator.trim(value.season.toString().toLowerCase())
             }
           }
-          if (key === 'price') {
+          if (key === "price") {
             productObject[key] = Math.abs(parseFloat(value.toString()))
           }
         }
 
-        if (key === 'updatedAt') {
+        if (key === "updatedAt") {
           productObject[key] = Date.now()
         }
       }
@@ -360,16 +529,15 @@ class ProductObject {
           delete productData.details
         }
       }
-      
+
       // Add product
-      let productObject = new ProductObject({...productData})
+      let productObject = new ProductObject({ ...productData })
       const validation = await productObject.validate()
       if (validation) {
         productObject = productObject.clean()
-        const createdProduct = await ProductModel.create(
-          {...productObject })
+        const createdProduct = await ProductModel.create({ ...productObject })
         if (createdProduct) {
-          return new ProductObject({...createdProduct._doc})
+          return new ProductObject({ ...createdProduct._doc })
         }
       }
 
@@ -380,7 +548,7 @@ class ProductObject {
   }
 
   // @desc:     Update product
-  async update({...productData}) {
+  async update({ ...productData }) {
     if (this.id == null) {
       throw new ObjectError({
         objectName: "ProductObject",
@@ -409,9 +577,12 @@ class ProductObject {
       const validation = await productObject.validate("update", this.id)
       if (validation) {
         productObject = productObject.clean()
-        const updatedProduct = await ProductModel.findOneAndUpdate({ _id: this.id }, 
-            {...productObject }, { new: true })
-            
+        const updatedProduct = await ProductModel.findOneAndUpdate(
+          { _id: this.id },
+          { ...productObject },
+          { new: true }
+        )
+
         return new ProductObject(updatedProduct)
       }
       throw new Error("Failed to update product.")

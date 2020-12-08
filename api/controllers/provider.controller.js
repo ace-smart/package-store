@@ -8,11 +8,7 @@ module.exports = {
   showProviderList: async (req, res) => {
     try {
       const providerList = await ProviderObject.getProvidersBy({})
-      if (providerList && providerList.length > 0) {
-        return res.status(200).json(providerList)
-      }
-      // Not found
-      throw new NotFoundError("No provider found.")
+      return res.status(200).json(providerList)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -27,7 +23,7 @@ module.exports = {
         return res.status(200).json(provider)
       }
       // Not found
-      throw new NotFoundError("No provider found.")
+        return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -82,7 +78,7 @@ module.exports = {
         throw new Error("Failed to remove provider.")
       }
       
-      throw new NotFoundError("No Provider found.")
+      throw new NotFoundError("No provider found.")
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }

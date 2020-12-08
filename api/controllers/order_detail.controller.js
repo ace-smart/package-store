@@ -11,11 +11,7 @@ module.exports = {
       const order = await OrderObject.getOneOrderBy({ _id: req.params.id })
       if (order) {
         const order_details = await OrderDetailObject.getOrderDetailsBy({ orderId: order.id })
-        if (order_details && order_details.length > 0) {
-          return res.status(200).json(order_details)
-        }
-
-        throw new NotFoundError("No detail found.")
+        return res.status(200).json(order_details)
       }
 
       throw new NotFoundError("No order found.")
@@ -39,7 +35,7 @@ module.exports = {
         }
 
         // Not found
-        throw new NotFoundError("No detail found.")
+          return res.status(200).json(null)
       }
 
       throw new NotFoundError("No order found.")

@@ -8,11 +8,7 @@ module.exports = {
   showStorageList: async (req, res) => {
     try {
       const storageList = await StorageObject.getStoragesBy({})
-      if (storageList && storageList.length > 0) {
-        return res.status(200).json(storageList)
-      }
-
-      throw new NotFoundError("No storage found.")
+      return res.status(200).json(storageList)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -27,7 +23,7 @@ module.exports = {
         return res.status(200).json(storage)
       }
       // Not found
-      throw new NotFoundError("No storage found.")
+        return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }

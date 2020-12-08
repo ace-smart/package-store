@@ -1,3 +1,4 @@
+const NotFoundError = require("../errors/not_found")
 const ErrorHandler = require("../helper/errorHandler")
 const CategoryObject = require("../objects/CategoryObject")
 
@@ -8,6 +9,7 @@ module.exports = {
     try {
       const categories = await CategoryObject.getCategoriesBy()
       return res.status(200).json(categories)
+
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -22,6 +24,8 @@ module.exports = {
       if (category) {
         return res.status(200).json(category)
       }
+
+      return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -52,9 +56,10 @@ module.exports = {
         if (updatedCategory) {
           return res.sendStatus(204)
         }
+        throw new Error("Failed to update category")
       }
 
-      throw new Error("Failed to update category")
+      throw new NotFoundError("No category found.")
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -70,9 +75,10 @@ module.exports = {
         if (isRemoved) {
           return res.sendStatus(204)
         }
+        throw new Error("Failed to remove category.")
       }
       
-      throw new Error("Failed to remove category.")
+      throw new NotFoundError("No category found.")
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }

@@ -22,10 +22,11 @@
     document.getElementById('contact-removed-msg').classList.remove('active')
     document.getElementById('contact-starred-msg').classList.remove('active')
   }
-
+  
   const nextPage = function () {
     const currentPage = (queryStr.get('page'))
-    if (currentPage) {
+    const numOfPages = {{{pagination.numOfPages}}}
+    if (currentPage && currentPage < numOfPages) {
       const nextPage = parseInt(currentPage.toString()) + 1
       queryStr.set('page', nextPage)
 
@@ -39,7 +40,7 @@
 
   const prevPage = function () {
     const currentPage = (queryStr.get('page'))
-    if (currentPage) {
+    if (currentPage && currentPage > 1) {
       const prevPage = parseInt(currentPage.toString()) - 1
       queryStr.set('page', prevPage)
 

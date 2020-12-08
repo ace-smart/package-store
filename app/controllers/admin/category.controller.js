@@ -446,17 +446,7 @@ module.exports = {
           // Set updated subcategory
           subcategory = await getSubcategoryById(req.user.accessToken, req.params.subId)
           req.flash("success", "Your changes have been saved.")
-          return res.render("templates/admin/category/category.hbs", {
-            layout: "admin/main.layout.hbs",
-            content: "view",
-            formType: "update",
-            header: "Update the category",
-            route: "categories",
-            category: category,
-            subcategory: subcategory,
-            user: await helper.getUserInstance(req),
-            csrfToken: req.csrfToken(),
-          })
+          return res.redirect(`/admin/categories/view/${category.id}/subcategories/edit/${subcategory.id}`)
         }
       }
 

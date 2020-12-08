@@ -8,9 +8,11 @@ const getLatestOrder = async (accessToken) => {
       },
     })
 
-    if (response.status === 200) {
+    if (response.status === 200 && response.data != null) {
       return response.data.splice(0, 10)
-    }
+		}
+		
+		return null
   } catch (error) {
     throw error
   }
@@ -26,6 +28,7 @@ const getOrderStatistics = async (accessToken) => {
     if (response.status === 200) {
       return response.data
     }
+		return null
   } catch (error) {
     throw error
   }
@@ -41,6 +44,7 @@ const getYearlyStatistics = async (accessToken) => {
 		if(response.status === 200) {
 			return response.data
 		}
+		return null
 	} catch (error) {
 		throw error
 	}
@@ -81,7 +85,12 @@ module.exports = {
   // @route:  GET ['/','/index','/home']
   showIndexPage: async (req, res) => {
     try {
-      const latestOrders = await getLatestOrder(req.user.accessToken)
+			const latestOrders = await getLatestOrder(req.user.accessToken)
+			// const orderStatistics = await getOrderStatistics(req.user.accessToken) != null 
+			// const yearlyStatistics = await getYearlyStatistics(req.user.accessToken)
+			// const salesAnalytics = await getSalesAnalytics(req.user.accessToken)
+			// const combineChartData = await getCombineChartData(req.user.accessToken)
+
       return res.render("templates/admin/index", {
         layout: "admin/index.layout.hbs",
         user: await getUserInstance(req),
@@ -92,6 +101,7 @@ module.exports = {
 				combineChartData: await getCombineChartData(req.user.accessToken),
       })
     } catch (error) {
+			console.log(error)
       return handleErrors(res, error, "admin")
     }
   },

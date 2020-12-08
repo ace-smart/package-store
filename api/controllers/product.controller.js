@@ -10,56 +10,40 @@ module.exports = {
   showProductList: async (req, res) => {
     try {
       const productList = await ProductObject.getProductsBy()
-      if (productList.length > 0) {
-        return res.status(200).json(productList)
-      }
-
-      throw new NotFoundError("No product found.")
+      return res.status(200).json(productList)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
   },
 
-  // @desc:   Show products by category
-  // @route   GET /products/by-category?categoryId='123123asd'
-  showProductsByCategoryId: async (req, res) => {
+  // @desc:   Show products
+  // @route   GET /related-products?id='1234'
+  showRelatedProducts: async (req, res) => {
     try {
-      if (req.query.categoryId) {
-        let category = await CategoryObject.getOneCategoryBy({ _id: req.query.categoryId })
-        if (category) {
-          // Get Subcategories
-          let subcategoryList = new Array()
-          for (let i = 0; i < category.getSubcategories.length; i++) {
-            const subcategory = await SubcategoryObject.getOneSubcategoryBy({
-              _id: category.getSubcategories[i],
-            })
-            if (subcategory) {
-              subcategoryList.push(subcategory)
-            }
-          }
-          // Get products
-          if (subcategoryList.length > 0) {
-            let productList = new Array()
-            for (let j = 0; j < subcategoryList.length; j++) {
-              const products = await ProductObject.getProductsBy({
-                subcategoryId: subcategoryList[j].id,
-              })
-              if (products.length > 0) {
-                productList.push(products)
-              }
-            }
+      const relatedProducts = await ProductObject.getRelatedProducts(req.query.id)
+      return res.status(200).json(relatedProducts)
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 
-            if (productList.length > 0) {
-              category.products = productList
-              return res.status(200).json(category)
-            }
+  // @desc:   Show all activated products
+  // @route   GET /all-products
+  showAllProducts: async (req, res) => {
+    try {
+      const allProducts = await ProductObject.getAllProducts()
+      return res.status(200).json(allProducts)
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 
-            throw new NotFoundError("No product found.")
-          }
-        }
-      }
-
-      throw new NotFoundError("No category found.")
+  // @desc:   Get best sellers
+  // @route   GET /get-best-sellers
+  getBestSellers: async (req, res) => {
+    try {
+      const bestSellers = await ProductObject.getBestSellers()
+      return res.status(200).json(bestSellers)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -77,15 +61,50 @@ module.exports = {
           const products = await ProductObject.getProductsBy({
             subcategoryId: subcategory.id,
           })
-          if (products.length > 0) {
-            return res.status(200).json(products)
-          }
 
-          throw new NotFoundError("No product found.")
+          return res.status(200).json(products)
+        }
+      }
+      
+      throw new NotFoundError("No subcategory found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc:   Show products by category
+  // @route   GET /products-by-category?categoryId='1234'
+  showProductsByCategoryId: async (req, res) => {
+    try {
+      if (req.query.categoryId) {
+        const category = await CategoryObject.getOneCategoryBy({
+          _id: req.query.categoryId,
+        })
+        if (category) {
+          const products = await ProductObject.getProductsByCategory(category.id)
+
+          return res.status(200).json(products)
         }
       }
 
-      throw new NotFoundError("No subcategory found.")
+      throw new NotFoundError("No category found.")
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
+
+  // @desc:   Search products by name
+  // @route   GET /search-products?name='1234'
+  searchProductsByName: async (req, res) => {
+    try {
+      const productName = req.query.name
+      if (productName) {
+        const result = await ProductObject.getProductsBy({name: { $regex: new RegExp(`${productName}`) , $options: 'i' }})
+        
+        return res.status(200).json(result)
+      }
+
+      return res.status(200).json(null)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
@@ -99,7 +118,8 @@ module.exports = {
       if (product) {
         return res.status(200).json(product)
       }
-      throw new NotFoundError("No product found.")
+      
+      return res.status(200).json(product)
     } catch (error) {
       return ErrorHandler.sendErrors(res, error)
     }
