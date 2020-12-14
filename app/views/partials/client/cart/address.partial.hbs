@@ -1,0 +1,266 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-8">
+      {{> flash}}
+      <div class="table-responsive pb-4 mt-2">
+        <form id='delivery-info-form' action="/checkout" method="GET">
+          <table class="table bg-secondary table-bordered" style="background-color: #f7f7f9;">
+            <thead class="thead-dark">
+              <tr id='shopping-cart-header'>
+                <th colspan="5" class="text-center">
+                  <h5 class="mb-0"><i class="fa fa-shopping-bag mr-2"></i> Shopping cart</h5>
+                </th>
+              </tr>
+              <tr>
+                <th><strong>Product</strong></th>
+                <th class="text-center"><strong>Size</strong></th>
+                <th class="text-center"><strong>Amount</strong></th>
+                <th class="text-center"><strong>Price</strong></th>
+                <th class="text-center"></th>
+              </tr>
+            </thead>
+
+            <tbody id='shopping-cart-body'>
+              <tr>
+                <td colspan="5">No items</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="row justify-content-between">
+            <div class="col-sm-4">
+              <a href="/" class="text-primary">
+                <i class="fa fa-long-arrow-left mr-2"></i>
+                Continue shopping
+              </a>
+            </div>
+            <div class="col-sm-4">
+              <div class="card">
+                <div class="card-body p-3">
+                  <div class="total-cost">
+                    <p class=" d-flex justify-content-between">
+                      <span>Subtotal:</span>
+                      <span id='subtotalCost' class="subtotal-cost-value">$0</span>
+                    </p>
+                    <p class=" d-flex justify-content-between">
+                      <span>Shipping cost:</span>
+                      <span id='shippingCost' class="shipping-cost-value">${{{shippingCost}}}</span>
+                    </p>
+                    <hr>
+                    <p class="d-flex justify-content-between">
+                      <span><strong>Total cost:</strong></span>
+                      <span id='totalCost' class="total-cost-value">$0</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+
+      {{!-- </div> --}}
+    </div>
+
+    <div class="col-sm-4">
+      {{!-- Customer info --}}
+      {{#if user}}
+      <input type="hidden" name="userId" id="userId" value="{{{user.id}}}">
+      {{/if}}
+      
+      <div class="card mb-2 mt-2">
+        <div class="card-header">
+          <i class="fa fa-info mr-2"></i>
+          Contact Information <span class="text-danger">*</span>
+        </div>
+        <div class="card-body p-3">
+          <div class="row">
+            <div class="col-sm-6 form-group">
+              <label for="firstName">First Name</label>
+              {{#if errors.firstName}}
+              <input type="text" name="firstName" id="firstName" placeholder="First name" required
+                value="{{{errors.firstName.value}}}">
+              {{#with errors.firstName}}
+              {{> client/error.partial}}
+              {{/with}}
+              {{else}}
+              {{#if validData.profile.firstName}}
+              <input type="text" name="firstName" id="firstName" placeholder="First name" required
+                value="{{{validData.profile.firstName}}}">
+              {{else}}
+              <input type="text" name="firstName" id="firstName" placeholder="First name" required
+                value="{{{user.profile.firstName}}}">
+              {{/if}}
+              {{/if}}
+            </div>
+
+            <div class="col-sm-6 form-group">
+              <label for="lastName">Last Name</label>
+              {{#if errors.lastName}}
+              <input type="text" name="lastName" id="lastName" placeholder="Last name" required
+                value="{{{errors.lastName.value}}}">
+              {{#with errors.lastName}}
+              {{> client/error.partial}}
+              {{/with}}
+              {{else}}
+              {{#if validData.profile.lastName}}
+              <input type="text" name="lastName" id="lastName" placeholder="Last name" required
+                value="{{{validData.profile.lastName}}}">
+              {{else}}
+              <input type="text" name="lastName" id="lastName" placeholder="Last name" required
+                value="{{{user.profile.lastName}}}">
+              {{/if}}
+              {{/if}}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6 form-group">
+              <label for="phoneNumber">Phone Number</label>
+              {{#if errors.phoneNumber}}
+              <input type="text" name="phoneNumber" id="phoneNumber" placeholder="Phone number" required
+                value="{{{errors.phoneNumber.value}}}">
+              {{#with errors.phoneNumber}}
+              {{> client/error.partial}}
+              {{/with}}
+              {{else}}
+              {{#if validData.profile.phoneNumber}}
+              <input type="text" name="phoneNumber" id="phoneNumber" placeholder="Phone number" required
+                value="{{{validData.profile.phoneNumber}}}">
+              {{else}}
+              <input type="text" name="phoneNumber" id="phoneNumber" placeholder="Phone number" required
+                value="{{{user.profile.phoneNumber}}}">
+              {{/if}}
+              {{/if}}
+            </div>
+            <div class="col-sm-6 form-group">
+              <label for="email">Email</label>
+              {{#if errors.phoneNumber}}
+              <input type="email" name="email" id="email" placeholder="Email" required value="{{{errors.email.value}}}">
+              {{#with errors.email}}
+              {{> client/error.partial}}
+              {{/with}}
+              {{else}}
+              {{#if validData.profile.email}}
+              <input type="email" name="email" id="email" placeholder="Email" required
+                value="{{{validData.profile.email}}}">
+              {{else}}
+              <input type="email" name="email" id="email" placeholder="Email" required value="{{{user.email}}}">
+              {{/if}}
+              {{/if}}
+            </div>
+          </div>
+
+        </div>
+      </div>
+      {{!-- Address --}}
+      <div class="card">
+        <div class="card-header">
+          <i class="fa fa-truck mr-2"></i>
+          Delivery to address <span class="text-danger">*</span>
+        </div>
+        <div class="card-body p-3">
+          <div class="row">
+            <div class="col-sm-12 form-group">
+              <label for="street">Street</label>
+              {{#if errors.street}}
+              <input type="text" name="street" id="street" placeholder="Street" required
+                value="{{{errors.street.value}}}">
+              {{#with errors.street}}
+              {{> client/error.partial}}
+              {{/with}}
+              {{else}}
+              {{#if validData.address.street}}
+              <input type="text" name="street" id="street" placeholder="Street" required
+                value="{{{validData.address.street}}}">
+              {{else}}
+              <input type="text" name="street" id="street" placeholder="Street" required
+                value="{{{user.address.street}}}">
+              {{/if}}
+              {{/if}}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6 form-group">
+              <label for="district">District</label>
+              {{#if errors.district}}
+              <input type="text" name="district" id="district" placeholder="District" required
+                value="{{{errors.district.value}}}">
+              {{#with errors.district}}
+              {{> client/error.partial}}
+              {{/with}}
+              {{else}}
+              {{#if validData.address.district}}
+              <input type="text" name="district" id="district" placeholder="District" required
+                value="{{{validData.address.district}}}">
+              {{else}}
+              <input type="text" name="district" id="district" placeholder="District" required
+                value="{{{user.address.district}}}">
+              {{/if}}
+              {{/if}}
+            </div>
+            <div class="col-sm-6 form-group">
+              <label for="city">City</label>
+              {{#if errors.city}}
+              <input type="text" name="city" id="city" placeholder="City" required value="{{{errors.city.value}}}">
+              {{#with errors.city}}
+              {{> client/error.partial}}
+              {{/with}}
+              {{else}}
+              {{#if validData.address.city}}
+              <input type="text" name="city" id="city" placeholder="City" required value="{{{validData.address.city}}}">
+              {{else}}
+              <input type="text" name="city" id="city" placeholder="City" required value="{{{user.address.city}}}">
+              {{/if}}
+              {{/if}}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6 form-group">
+              <label for="country">Country</label>
+              {{#if errors.country}}
+              <input type="text" name="country" id="country" placeholder="Country" required
+                value="{{{errors.country.value}}}">
+              {{#with errors.country}}
+              {{> client/error.partial}}
+              {{/with}}
+              {{else}}
+              {{#if validData.address.country}}
+              <input type="text" name="country" id="country" placeholder="Country" required
+                value="{{{validData.address.country}}}">
+              {{else}}
+              <input type="text" name="country" id="country" placeholder="Country" required
+                value="{{{user.address.country}}}">
+              {{/if}}
+              {{/if}}
+            </div>
+            <div class="col-sm-6 form-group">
+              <label for="postalCode">Postal code</label>
+              {{#if errors.postalCode}}
+              <input type="text" name="postalCode" id="postalCode" placeholder="Postal code" required
+                value="{{{errors.postalCode.value}}}">
+              {{#with errors.postalCode}}
+              {{> client/error.partial}}
+              {{/with}}
+              {{else}}
+              {{#if validData.address.postalCode}}
+              <input type="text" name="postalCode" id="postalCode" placeholder="Postal code" required
+                value="{{{validData.address.postalCode}}}">
+              {{else}}
+              <input type="text" name="postalCode" id="postalCode" placeholder="Postal code" required
+                value="{{{user.address.postalCode}}}">
+              {{/if}}
+              {{/if}}
+            </div>
+          </div>
+        </div>
+
+        <div  class="checkout-btn-container mb-3 mx-3">
+          <button id='checkout-button' class="btn btn-danger w-100">Checkout</button>
+          {{!-- <p class="mt-2 p-1 text-danger font-italic" style="font-size: 0.7rem">Please fill in required information fields before checking out.</p> --}}
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <!-- /.row -->
+</div>
+<!-- /.container -->

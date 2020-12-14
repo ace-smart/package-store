@@ -13,13 +13,14 @@
             {{#if bestSellers}}
             {{#each bestSellers}}
             <li class="product-item">
-              <div class="product-thumb clearfix">
+              <div class="product-thumb clearfix" id="product-box-{{{id}}}" data-name="{{{name}}}" data-size="{{{details.size}}}" data-price="{{{price}}}">
                 <a href="/product?id={{{id}}}">
-                  <img src="data:{{{gallery.0.mimeType}}};base64,{{{print64baseProductImg gallery.0.fileName gallery.0.extension}}}" alt="image" style="width: 233px; height: 349.5px">
+                  <img id="product-image-{{{id}}}"
+                  src="data:{{{gallery.0.mimeType}}};base64,{{{print64baseProductImg gallery.0.fileName gallery.0.extension}}}" alt="image" style="width: 233px; height: 349.5px">
                 </a>
                 <span class="new sale">{{{subcategory.name}}}</span>
               </div>
-              <div class="product-info clearfix">
+              <div class="product-info clearfix m-1">
                 <span class="product-title">{{{name}}}
                 <div class="price">
                   {{!-- <del>
@@ -30,10 +31,9 @@
                   </ins>
                 </div>
               </div>
-              <div class="add-to-cart text-center">
-                <a href="#">ADD TO CART</a>
+              <div class="add-to-cart text-center" data-product-id="{{{id}}}">
+                <a href="javascript:void(0);">ADD TO CART</a>
               </div>
-              {{!-- <a href="#" class="like"><i class="fa fa-heart-o"></i></a> --}}
             </li>
             {{/each}}
             {{/if}}

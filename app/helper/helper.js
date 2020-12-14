@@ -115,7 +115,7 @@ module.exports = helper = {
   renderServerErrorPage: function (res, forRole = "client") {
     if (forRole === "client") {
       return res.render("templates/client/error/500", {
-        layout: "client/index.layout.hbs",
+        layout: "client/error.layout.hbs",
       })
     } else if (forRole === "admin") {
       return res.render("templates/admin/error/500", {
@@ -127,7 +127,7 @@ module.exports = helper = {
   renderNotFoundPage: function (res, forRole = "client") {
     if (forRole === "client") {
       return res.render("templates/client/error/404", {
-        layout: "client/index.layout.hbs",
+        layout: "client/error.layout.hbs",
       })
     } else if (forRole === "admin") {
       return res.render("templates/admin/error/404", {
@@ -139,7 +139,7 @@ module.exports = helper = {
   renderForbiddenPage: function (res, forRole = "client") {
     if (forRole === "client") {
       return res.render("templates/client/error/403", {
-        layout: "client/index.layout.hbs",
+        layout: "client/error.layout.hbs",
       })
     } else if (forRole === "admin") {
       return res.render("templates/admin/error/403", {
@@ -151,7 +151,7 @@ module.exports = helper = {
   renderUnauthorizedPage: function (res, forRole = "client") {
     if (forRole === "client") {
       return res.render("templates/client/error/401", {
-        layout: "client/index.layout.hbs",
+        layout: "client/error.layout.hbs",
       })
     } else if (forRole === "admin") {
       return res.render("templates/admin/error/401", {

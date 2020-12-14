@@ -1,5 +1,5 @@
 const authHelper = require('./auth.helper')
-
+const {_redirectToIndex, _redirectToLogin} = require('./auth.helper')
 module.exports = {
   _loginWithCookie: async (req, res, next) => {
     if (req.isUnauthenticated() && req.cookies["tokens"] != null) {
@@ -89,4 +89,35 @@ module.exports = {
 
     return next()
   },
+  
+  // _checkAuthenticatedCustomer: (req, res, next) => {
+  //   if (req.isAuthenticated()) {
+  //     if (req.user.status === "activated") {
+  //       if(req.user.role === 'user') {
+  //         return next()
+  //       } else if (req.user.role === 'admin') {
+  //         // Log admin account
+  //         req.logout()
+  //         return next()
+  //       }
+  //     }
+
+  //     return helper.renderForbiddenPage(res, "user")
+  //   }
+
+  //   return authHelper._redirectToLogin(req, res, next)
+  // },
+  
+  // _checkUnauthenticatedCustomer: (req, res, next) => {
+  //   if (req.isUnauthenticated()) {
+  //     return next()
+  //   }
+    
+  //   if (req.user.role === 'admin') {
+  //     req.logout()
+  //     return next()
+  //   }
+
+  //   return authHelper._redirectToIndex(req, res, next)
+  // },
 }

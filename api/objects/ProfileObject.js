@@ -9,13 +9,14 @@ const AVATAR_MIMETYPE = ["image/jpeg", "image/png"]
 const { isExistent, hasSpecialChars } = require("../helper/validation")
 
 class ProfileObject {
-  constructor({ _id, firstName, lastName, gender, dateOfBirth, phoneNumber, avatar } = {}) {
+  constructor({ _id, firstName, lastName, gender, dateOfBirth, phoneNumber, avatar, email } = {}) {
     this.id = _id
     this.firstName = firstName
     this.lastName = lastName
     this.gender = gender
     this.dateOfBirth = dateOfBirth
     this.phoneNumber = phoneNumber
+    this.email = email
     this.avatar = avatar
   }
 

@@ -44,26 +44,213 @@
       URL.revokeObjectURL(output.src) // free memory
     }
   }
-</script>
-<script>
-  const queryStr = new URLSearchParams(window.location.search)
-  
-  const nextPage = function (event) {
-    const currentPage = (queryStr.get('page'))
-    const numOfPages = {{{pagination.numOfPages}}}
-    if (currentPage && currentPage < numOfPages) {
-      const nextPage = parseInt(currentPage.toString()) + 1
-      queryStr.set('page', nextPage)
 
-      return window.location.search = queryStr.toString();
+  // Shopping cart constants
+  var totalNumItems = 0
+  var shoppingCart = []
+  if (sessionStorage.getItem('shoppingCart') != null) {
+    const sessionCart = JSON.parse(sessionStorage.getItem("shoppingCart"))
+
+    // render items
+    sessionCart.forEach(item => {
+      addToCart({
+        productId: item.id,
+        productName: item.name, 
+        productAmount: item.amount,
+        productSize: item.size,
+        productPrice: item.price,
+        productImgSrc: item.imgSrc
+      })
+    })
+  }
+
+  // Trigger event from add-to-cart buttons
+  Array.from(document.getElementsByClassName('add-to-cart')).forEach( element => {
+    element.addEventListener('click',function() {
+      if (element.dataset.type != null) {
+        addToCart({
+          productId: document.getElementById('detail-productId').value, 
+          productName: document.getElementById('detail-name').innerText, 
+          productAmount: parseInt(document.getElementById('detail-amount').value), 
+          productPrice: parseInt(document.getElementById('detail-price').innerText.replace("$","")),
+          productSize: document.getElementById('detail-size').innerText, 
+          productImgSrc: document.getElementById(`product-image-${document.getElementById('detail-productId').value}`).src
+        })
+      } else {
+        // Get product info
+        const productId = this.dataset.productId
+        const productBox = document.getElementById(`product-box-${productId}`)
+        const productImgSrc = document.getElementById(`product-image-${productId}`).src
+        const productName = (productBox.dataset.name) ? productBox.dataset.name : ''
+        const productAmount = (productBox.dataset.amount != null && parseInt(productBox.dataset.amount) > 1) ? parseInt(productBox.dataset.amount) : 1
+        const productSize = (productBox.dataset.size != null) ? productBox.dataset.size : ''
+        const productPrice = (productBox.dataset.price != null) ? parseInt(productBox.dataset.price) : 0
+        
+        addToCart({
+          productId, productName, productAmount, productSize, productPrice, productImgSrc
+        })
+      }
+    })
+  })
+
+
+  function createCart () {
+    const cartWrap = document.getElementById('cart-wrap')
+    cartWrap.innerHTML = ''
+    // === Cart container
+    const cartContainer = document.createElement('ul')
+    cartContainer.classList.add("woocommerce-mini-cart", "cart_list","product_list_widget", "p-1")
+    cartContainer.id ='cart-container'
+    // === Checkout button
+    const checkoutBtn = document.createElement('button')
+    checkoutBtn.classList.add("pull-right", "my-2","py-1", "px-2","rounded", "mr-4")
+    checkoutBtn.textContent = 'Checkout'
+    checkoutBtn.id = 'cart-checkout-btn'
+    checkoutBtn.addEventListener('click', () => window.location.assign('/cart'))
+    // Add to cart-warp
+    cartWrap.append(cartContainer, checkoutBtn)
+  }
+
+  function createBlankCart() {
+    const cartWrap = document.getElementById('cart-wrap')
+    cartWrap.innerHTML = `
+    <ul class="woocommerce-mini-cart cart_list product_list_widget p-2" style="overflow-y: unset;">
+      <li class="woocommerce-mini-cart-item mini_cart_item p-2" style="border-bottom: unset;">
+          <span>No Items in Shopping Cart</span>
+      </li>
+    </ul>`
+  }
+
+  function checkCartItem(productId) {
+    const cartContainer = document.getElementById('cart-container')
+    const cartItems = Array.from(cartContainer.children)
+    const isExisted = cartItems.find(item => item.dataset.productId === productId)
+    if (isExisted) {
+      return true
     } else {
-      queryStr.set('page', 2)
-
-      return window.location.search = queryStr.toString();
+      return false
     }
   }
 
-  const prevPage = function (event) {
+  function addToCart({productId, productImgSrc, productName, productSize, productAmount, productPrice}) {
+    let cartContainer = document.getElementById('cart-container')
+    
+    if (!cartContainer) {
+      createCart()
+      cartContainer = document.getElementById('cart-container')
+    }
+
+    const isExisted = checkCartItem(productId)
+    if (isExisted) {
+      const item = document.getElementById(`cart-item-${productId}`)
+      let currentAmount = parseInt(item.children[2].textContent.replace("x", ""))
+      item.children[2].textContent = `x${currentAmount + productAmount}`
+      
+      // update shopping cart
+      shoppingCart.map(item => {
+        if (item.id === productId) {
+          item.amount = currentAmount + productAmount
+        }
+      })
+
+    } else {
+      // Create cart item
+      const cartItem = document.createElement('li')
+      cartItem.classList.add("woocommerce-mini-cart-item", "mini_cart_item", "shopping-cart", "d-flex", "justify-content-between")
+      cartItem.id = `cart-item-${productId}`
+      cartItem.dataset.productId = productId
+      // === Image
+      // const productImgSrc = document.getElementById(`product-image-${productId}`)
+      const itemImgContainer = document.createElement('span')
+      itemImgContainer.classList.add("product-img", "p-1")
+      const itemImg = document.createElement('img')
+      itemImg.src = productImgSrc
+      itemImgContainer.appendChild(itemImg)
+      // === Name
+      const itemName = document.createElement('span')
+      itemName.classList.add("product-name", "p-1")
+      itemName.textContent = productName.substr(0, 13)
+      if (productName.length > 13) {
+        itemName.textContent += ' ...'
+      }
+      // === Amount
+      const itemAmount = document.createElement('span')
+      itemAmount.classList.add("product-amount", "p-1")
+      itemAmount.textContent = `x${productAmount}`
+      // === Price
+      const itemPrice = document.createElement('span')
+      itemPrice.classList.add("product-price", "p-1")
+      itemPrice.textContent = `$${productPrice}`
+
+      // Add to cart container
+      cartItem.append(itemImgContainer, itemName, itemAmount, itemPrice)
+      cartContainer.appendChild(cartItem)
+
+      // update shopping cart
+      shoppingCart.push({
+        id: productId,
+        name: productName,
+        price: productPrice,
+        amount: productAmount,
+        size: productSize,
+        imgSrc: productImgSrc
+      })
+    }
+
+    // Update cart-total-num
+    totalNumItems += productAmount
+    document.getElementById('cart-total-num').textContent = totalNumItems
+    // Update session storage
+    updateShoppingCart()
+  }
+
+  function updateShoppingCart () {
+    sessionStorage.setItem('shoppingCart', JSON.stringify(shoppingCart))
+  }
+
+  function loadDataToCart () {
+    const cartData = JSON.parse(sessionStorage.getItem('shoppingCart'))
+    console.log(2)
+    console.log(cartData)
+    if (cartData) {
+      if (cartData.length == 0) {
+        createBlankCart()
+      } else{
+        createCart()
+        cartData.forEach( cartElement => {
+          addToCart({
+            productId: cartElement.id, 
+            productImgSrc: cartElement.imgSrc, 
+            productName: cartElement.name, 
+            productSize: cartElement.size, 
+            productAmount: cartElement.amount, 
+            productPrice: cartElement.price
+            })
+          })
+      }
+    }
+  }
+</script>
+
+<script>
+  const queryStr = new URLSearchParams(window.location.search)
+
+  const nextPage = function () {
+    const currentPage = (queryStr.get('page'))
+    const numOfPages = {{{ pagination.numOfPages }}}
+  if (currentPage && currentPage < numOfPages) {
+    const nextPage = parseInt(currentPage.toString()) + 1
+    queryStr.set('page', nextPage)
+
+    return window.location.search = queryStr.toString();
+  } else {
+    queryStr.set('page', 2)
+
+    return window.location.search = queryStr.toString();
+  }
+  }
+
+  const prevPage = function () {
     const currentPage = (queryStr.get('page'))
     if (currentPage && currentPage > 1) {
       const prevPage = parseInt(currentPage.toString()) - 1
@@ -74,9 +261,9 @@
   }
 
   const toPage = function (pageIndex) {
-      const page = parseInt(pageIndex.toString())
-      queryStr.set('page', page)
+    const page = parseInt(pageIndex.toString())
+    queryStr.set('page', page)
 
-      return window.location.search = queryStr.toString();
+    return window.location.search = queryStr.toString();
   }
 </script>

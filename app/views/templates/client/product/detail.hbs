@@ -11,8 +11,11 @@
               <ul class="slides">
                 {{#if product.gallery}}
                 {{#each product.gallery}}
-                <li data-thumb="data:{{{this.mimeType}}};base64,{{{print64baseProductImg this.fileName this.extension}}}" style="width: 70px; height: 70px;">
-                  <img src="data:{{{this.mimeType}}};base64,{{{print64baseProductImg this.fileName this.extension}}}" alt="Image" style="width: 470px; height: 612px;">
+                <li 
+                data-thumb="data:{{{this.mimeType}}};base64,{{{print64baseProductImg this.fileName this.extension}}}" style="width: 70px; height: 70px;">
+                  <img {{#ifeq @index 0}} 
+                  id="product-image-{{{../product.id}}}" {{/ifeq}}
+                  src="data:{{{this.mimeType}}};base64,{{{print64baseProductImg this.fileName this.extension}}}" alt="Image" style="width: 470px; height: 612px;">
                   <div class="flat-icon style-1">
                     <a href="data:{{{this.mimeType}}};base64,{{{print64baseProductImg this.fileName this.extension}}}" class="zoom-popup"><span
                         class="fa fa-search-plus"></span></a>
@@ -32,8 +35,9 @@
         <div class="divider h0"></div>
         <div class="product-detail">
           <div class="inner">
+            <input type="hidden" name="detail-productId" id="detail-productId" value="{{{product.id}}}">
             <div class="content-detail">
-              <h2 class="product-title">{{{product.name}}}</h2>
+              <h2 id='detail-name' class="product-title">{{{product.name}}}</h2>
               <div class="flat-star style-1">
                 <i class="fa fa-star"></i>
                 <i class="fa fa-star"></i>
@@ -50,14 +54,14 @@
               </p>
               <div class="price">
                 {{!-- <del><span class="regular">$90.00</span></del> --}}
-                <ins><span class="amount">{{{formatPrice product.price}}}</span></ins>
+                <ins><span id='detail-price' class="amount">{{{formatPrice product.price}}}</span></ins>
               </div>
               {{#if product.details.size}}
               <div class="size d-flex justify-content-start align-items-center">
                 <p class="font-weight-600 mr-3">Size:</p>
                 <ul class="p-0">
                   <li class='product-size'>
-                    <a href="#">{{{product.details.size}}}</a>
+                    <a href="javascript:void(0);" id='detail-size'>{{{product.details.size}}}</a>
                     </li>
                 </ul>
               </div>
@@ -67,7 +71,7 @@
                 <p class="font-weight-600 mr-4">Color:</p>
                 <ul>
                   <li class='product-color'>
-                    <a href="#">{{{product.details.color.colorName}}}</a>
+                    <a href="javascript:void(0);">{{{product.details.color.colorName}}}</a>
                   </li>
                 </ul>
               </div>
@@ -79,15 +83,15 @@
               </ul>
               <div class="product-quantity">
                 <div class="quantity">
-                  <input type="text" value="1" name="quantity-number" class="quantity-number" />
+                  <input type="text" value="1" name="quantity-number" id='detail-amount' class="quantity-number" />
                   <span class="inc quantity-button">+</span>
                   <span class="dec quantity-button">-</span>
                 </div>
-                <div class="add-to-cart">
-                  <a href="#">ADD TO CART</a>
+                <div class="add-to-cart" data-type="detail">
+                  <a href="javascript:void(0);">ADD TO CART</a>
                 </div>
                 <div class="box-like">
-                  <a href="#" class="like"><i class="fa fa-heart-o"></i></a>
+                  <a href="javascript:void(0);" class="like"><i class="fa fa-heart-o"></i></a>
                 </div>
               </div>
               <div class="product-categories">
@@ -279,10 +283,11 @@
           <ul class="product style2">
             {{#if relatedProducts}}
             {{#each relatedProducts}}
-            <li class="product-item">
+            {{#ifeq this.id ../product.id}} {{else}}
+            <li id="product-box-{{{id}}}" class="product-item {{{../categoryName}}}" data-name="{{{name}}}" data-price="{{{price}}}" class="product-item">
               <div class="product-thumb clearfix">
                 <a href="/product?id={{{id}}}">
-                  <img src="data:{{{gallery.0.mimeType}}};base64,{{{print64baseProductImg gallery.0.fileName gallery.0.extension}}}" alt="image" style="width: 286px; height: 250px"/>
+                  <img id="product-image-{{{id}}}" src="data:{{{gallery.0.mimeType}}};base64,{{{print64baseProductImg gallery.0.fileName gallery.0.extension}}}" alt="image" style="width: 286px; height: 250px"/>
                 </a>
               </div>
               <div class="product-info clearfix mt-3">
@@ -292,89 +297,15 @@
                     <span class="amount">{{{formatPrice price}}}</span>
                   </ins>
                 </div>
-                {{!-- <ul class="flat-color-list">
-                  <li>
-                    <a href="#" class="red"></a>
-                  </li>
-                  <li>
-                    <a href="#" class="blue"></a>
-                  </li>
-                  <li>
-                    <a href="#" class="black"></a>
-                  </li>
-                </ul> --}}
               </div>
-              <div class="add-to-cart text-center">
-                <a href="#">ADD TO CART</a>
+              <div class="add-to-cart text-center" data-product-id="{{{id}}}">
+                <a href="javascript:void(0);">ADD TO CART</a>
               </div>
-              {{!-- <a href="#" class="like"><i class="fa fa-heart-o"></i></a> --}}
             </li>
+            
+            {{/ifeq}}
             {{/each}}
             {{/if}}
-            <li class="product-item">
-              <div class="product-thumb clearfix">
-                <a href="#">
-                  <img src="/static/images/shop/sh-4/pexels-mika-borgia-1317712.jpg" alt="image" />
-                </a>
-              </div>
-              <div class="product-info clearfix mt-3">
-                <span class="product-title">Cotton White Underweaer Block Out Edition</span>
-                <div class="price">
-                  <ins>
-                    <span class="amount">$19.00</span>
-                  </ins>
-                </div>
-                <ul class="flat-color-list">
-                  <li>
-                    <a href="#" class="red"></a>
-                  </li>
-                  <li>
-                    <a href="#" class="blue"></a>
-                  </li>
-                  <li>
-                    <a href="#" class="black"></a>
-                  </li>
-                </ul>
-              </div>
-              <div class="add-to-cart text-center">
-                <a href="#">ADD TO CART</a>
-              </div>
-              <a href="#" class="like"><i class="fa fa-heart-o"></i></a>
-            </li>
-            <li class="product-item">
-              <div class="product-thumb clearfix">
-                <a href="#" class="product-thumb">
-                  <img src="/static/images/shop/sh-4/pexels-milena-hasvil-1021693.jpg" alt="image" />
-                </a>
-                <span class="new sale">Sale</span>
-              </div>
-              <div class="product-info clearfix mt-3">
-                <span class="product-title">Cotton White Underweaer Block Out Edition</span>
-                <div class="price">
-                  <del>
-                    <span class="regular">$90.00</span>
-                  </del>
-                  <ins>
-                    <span class="amount">$60.00</span>
-                  </ins>
-                </div>
-                <ul class="flat-color-list">
-                  <li>
-                    <a href="#" class="red"></a>
-                  </li>
-                  <li>
-                    <a href="#" class="blue"></a>
-                  </li>
-                  <li>
-                    <a href="#" class="black"></a>
-                  </li>
-                </ul>
-              </div>
-              <div class="add-to-cart text-center">
-                <a href="#">ADD TO CART</a>
-              </div>
-              <a href="#" class="like"><i class="fa fa-heart-o"></i></a>
-            </li>
           </ul>
           <!-- /.product -->
         </div>

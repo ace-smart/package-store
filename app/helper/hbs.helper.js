@@ -1,10 +1,12 @@
-const { cpuUsage } = require("process")
-const { options } = require("../routes/client/product.route")
-const { makePagination } = require("./helper")
-
 module.exports = {
   ifeq: function (a, b, options) {
     if (a === b) {
+      return options.fn(this)
+    }
+    return options.inverse(this)
+  },
+  ifor: function (a, b, c, options) {
+    if (a === b || a === c) {
       return options.fn(this)
     }
     return options.inverse(this)

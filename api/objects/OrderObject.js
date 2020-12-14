@@ -6,7 +6,11 @@ const validator = require("validator")
 const ValidationError = require("../errors/validation")
 const OrderDetailObject = require("./OrderDetailObject")
 const OrderDetailModel = require("../models/OrderDetailModel")
+const ProductObject = require("./ProductObject")
+const ProfileObject = require("./ProfileObject")
+const AddressObject = require("./AddressObject")
 const ORDER_STATUS_VALUES = ["processing", "packing", "delivering", "done", "cancelled"]
+const SHIPPING_COST = 10
 
 class OrderObject {
   constructor({
@@ -16,6 +20,8 @@ class OrderObject {
     finalCost,
     paymentMethod,
     userId,
+    addressId,
+    profileId,
     voucherId,
     deliveryDay,
     orderDetails = [],
@@ -24,15 +30,29 @@ class OrderObject {
   }) {
     this.id = _id
     this.totalCost = totalCost
-    this.shippingFee = shippingFee
+    this.shippingFee = (shippingFee != null) ? shippingFee : SHIPPING_COST
     this.finalCost = finalCost
     this.paymentMethod = paymentMethod
     this.userId = userId
+    this.profileId = profileId
+    this.addressId = addressId
     this.voucherId = voucherId != "" ? voucherId : undefined
     this.deliveryDay = deliveryDay
     this.orderDetails = orderDetails
     this.status = status
     this.createdAt = createdAt
+  }
+
+  static getDeliveryDay(orderDay = new Date) {
+    const date = orderDay.getDate()
+    const month = orderDay.getMonth()
+    const year = orderDay.getFullYear()
+    const estimatedDays = 7
+    return new Date(year, month, date + estimatedDays)
+  }
+
+  static getShippingCost() {
+    return parseFloat(SHIPPING_COST)
   }
 
   static async getOneOrderBy(criteria = {}, selectFields = null) {
@@ -279,29 +299,82 @@ class OrderObject {
   static async create({ ...orderData }) {
     try {
       let orderObject = new OrderObject({ ...orderData })
-      const validation = await orderObject.validate("create")
-      if (validation) {
-        orderObject = orderObject.clean()
-        const createdOrder = await OrderModel.create({ ...orderObject })
-        if (createdOrder) {
-          // Create order details
-          if (orderData.orderDetails.length < 1) {
-            await OrderModel.findOneAndDelete({ _id: createdOrder._id })
-            throw new Error("Failed to create order with no detail.")
-          } else {
-            orderData.orderDetails.forEach(async (element) => {
+      // Check whether 'detail' existed or not
+      if (orderData.orderDetails && orderData.orderDetails.length > 0) {
+        const validation = await orderObject.validate("create")
+        if (validation) {
+          orderObject = orderObject.clean()
+          const createdOrder = await OrderModel.create({ ...orderObject })
+          if (createdOrder) {
+            await orderData.orderDetails.map(async (element) => {
               await OrderDetailObject.create({
                 ...element,
-                orderId: createdOrder._id,
+                orderId: createdOrder._doc._id,
               })
             })
 
             return new OrderObject({ ...createdOrder._doc })
           }
         }
+        throw new Error("Failed to create order.")
+      }
+      throw new Error("Failed to create order with no detail.")
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /* INPUT:   orderData = {
+  //    productList: [Array],
+  //    deliveryInfo: {address, profile},
+  //    paymentMethod: {
+  //      method: 'COD' || 'CREDITCARD',
+  //      cardInfo: {nameOnCard, cardNumber, validUntil, cvv}
+  //    }
+  // }
+  */
+  static async checkout({...orderData}) {
+    try {
+      // Cost
+      const { totalCost, finalCost } = await ProductObject.calculateCost(orderData.productList, SHIPPING_COST)
+      // Delivery info
+      const { address, profile } = orderData.deliveryInfo
+      // Payment
+      let paymentMethod = orderData.paymentMethod
+      if (paymentMethod.method === 'CREDITCARD') {
+        
+      }
+      // orderDetails
+      let orderDetails = orderData.productList.map(product => {
+        return {
+          productId: product.id, 
+          amount: product.amount
+        } })
+
+      
+      // Create order
+      const order = await OrderObject.create({
+        shippingCost: SHIPPING_COST,
+        totalCost, finalCost, 
+        paymentMethod: paymentMethod.method, 
+        userId: profile.userId,
+        deliveryDay: OrderObject.getDeliveryDay(),
+        orderDetails: orderDetails
+      })
+      if (order) {
+        const addressObject = await AddressObject.create({...address})
+        const profileObject = await ProfileObject.create({...profile})
+        if (addressObject && profileObject) {
+          const updateDeliveryInfo = await OrderModel.findOneAndUpdate({_id: order.id}, {
+            addressId: addressObject.id,
+            profileId: profileObject.id
+          }, {new: true}).lean()
+
+          return new OrderObject(updateDeliveryInfo)
+        }
       }
 
-      throw new Error("Failed to create order.")
+      throw new Error("Failed to checkout.")
     } catch (error) {
       throw error
     }

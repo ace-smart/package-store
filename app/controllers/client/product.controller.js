@@ -40,9 +40,6 @@ module.exports = {
       if (helperPagination != null) {
         pagination.numOfPages = helperPagination.numOfPages
         pagination.items = helperPagination.items
-      } else {
-        // Page not existed
-        return renderNotFoundPage(res, 'client')
       }
       
 
@@ -90,9 +87,6 @@ module.exports = {
       if (helperPagination != null) {
         pagination.numOfPages = helperPagination.numOfPages
         pagination.items = helperPagination.items
-      } else {
-        // Page not existed
-        return renderNotFoundPage(res, 'client')
       }
 
       return res.render("templates/client/product/list", {
@@ -166,11 +160,8 @@ module.exports = {
       if (helperPagination != null) {
         pagination.numOfPages = helperPagination.numOfPages
         pagination.items = helperPagination.items
-      } else {
-        // Page not existed
-        return renderNotFoundPage(res, 'client')
       }
-
+      
       return res.render("templates/client/product/list", {
         layout: "client/index.layout.hbs",
         pageTitle: "Search",

@@ -17,7 +17,9 @@
         {{> csrf}}
           <div class="row form-group my-3">
             <div class="col-12 form-input">
-              <label for="username" class="form-label">Username</label>
+              <label for="username" class="form-label">
+                Username <span class="text-danger">*</span>
+              </label>
               {{#if errors.username}}
               <input type="text" name="username" id="username" class="parsley-error"
               placeholder="Enter username" value="{{{errors.username.value}}}" required>
@@ -35,7 +37,9 @@
           </div>
           <div class="row form-group my-3">
             <div class="col-12 form-input">
-              <label for="email" class="form-label">Email</label>
+              <label for="email" class="form-label">
+                Email <span class="text-danger">*</span>
+              </label>
 
               {{#if errors.email}}
               <input type="email" name="email" id="email" class="not-valid"
@@ -54,7 +58,9 @@
           </div>
           <div class="row form-group my-3">
             <div class="col-12 form-input">
-              <label for="password" class="form-label">Password</label>
+              <label for="password" class="form-label">
+                Password <span class="text-danger">*</span>
+              </label>
               {{#if errors.password}}
               <input type="password" name="password" id="password" class="not-valid"
               placeholder="Enter password" value="{{{errors.password.value.password}}}" required>
@@ -72,7 +78,9 @@
           </div>
           <div class="row form-group my-3">
             <div class="col-12 form-input">
-              <label for="confirm_password" class="form-label">Confirm password</label>
+              <label for="confirm_password" class="form-label">
+                Confirm password <span class="text-danger">*</span>
+              </label>
               {{#if errors.confirm_password}}
               <input type="password" name="confirm_password" id="confirm_password" class="not-valid"
               placeholder="Enter password" value="{{{errors.confirm_password.value.confirm_password}}}" required>

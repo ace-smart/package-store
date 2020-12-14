@@ -22,6 +22,14 @@ const OrderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
+    addressId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Address'
+    },
+    profileId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Profile'
+    },
     voucherId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Voucher'

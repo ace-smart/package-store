@@ -17,7 +17,9 @@
         {{> csrf}}
           <div class="row form-group my-3">
             <div class="col-12 form-input">
-              <label for="email" class="form-label">Email</label>
+              <label for="email" class="form-label">
+                Email <span class="text-danger">*</span>
+              </label>
 
               {{#if errors.email}}
               <input type="email" name="email" id="email" class="not-valid"

@@ -9,6 +9,9 @@ const cartRouter = require('./cart.route')
 const accountRouter = require('./account.route')
 const orderRouter = require('./order.route')
 
+/*
+*   Use authentication middles inside each router
+*/ 
 router.use(_autoRenewAccessToken)
 router.use(_loginWithCookie)
 router.use(authRouter)
