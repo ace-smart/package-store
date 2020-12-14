@@ -14,11 +14,17 @@ const galleryRouter = require("./admin/gallery.route")
 const statisticsRouter = require("./admin/statistics.route")
 const profileRouter = require("./client/profile.route")
 const clientProductRouter = require("./client/product.route")
+const clientCartRouter = require("./client/cart.route")
+const clientIndexRouter = require("./client/index.route")
+const clientOrderRouter = require("./client/order.route")
 const { _ensureAccessToken, _ensureAdminRole } = require("../helper/auth")
 
 router.use(authRouter)
 // Client routes
+router.use(clientIndexRouter)
 router.use(clientProductRouter)
+router.use(clientCartRouter)
+router.use("/my-orders", _ensureAccessToken, clientOrderRouter)
 router.use("/profile", _ensureAccessToken, profileRouter)
 // Admin routes
 router.use("/admin/users", _ensureAccessToken, _ensureAdminRole, userRouter)

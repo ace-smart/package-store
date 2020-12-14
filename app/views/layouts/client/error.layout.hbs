@@ -5,9 +5,6 @@
   {{> client/meta.partial}}
 
   {{> client/css.partial}}
-  {{#if auth}}
-  {{> client/auth/css.partial}}
-  {{/if}}
 </head>
 
 <body class="header_sticky header-style-1 topbar-style-1 has-menu-extra">
@@ -16,27 +13,14 @@
 
   <!-- Boxed -->
   <div class="boxed">
-    {{> client/header.partial}}
 
     {{{body}}}
 
-    {{> client/subscribe-email.partial}}
 
     {{> client/footer.partial}}
   </div>
 
   {{> client/js/assets.partial}}
-  {{#ifeq cart 'address'}}
-  {{> client/js/cart.partial}}
-  {{/ifeq}}
-
-  {{#ifeq cart 'checkout'}}
-  {{> client/js/checkout.partial}}
-  {{/ifeq}}
-
-  {{#ifeq cart 'finish'}}
-  {{> client/js/finish.partial}}
-  {{/ifeq}}
 
   {{> client/index/js.partial}}
 </body>

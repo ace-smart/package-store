@@ -1,0 +1,16 @@
+{{> client/page-title.partial}}
+
+<section class="flat-row">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12">
+        {{#ifeq trackOrder 'form'}}
+          {{> client/track/form.partial}}
+        {{else}}
+          {{#ifeq trackOrder 'result'}}
+            {{> client/track/result.partial}}
+          {{/ifeq}}
+        {{/ifeq}}
+      </div>
+    </div>
+</section>

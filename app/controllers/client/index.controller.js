@@ -1,5 +1,5 @@
 const axiosInstance = require("../../helper/axios.helper")
-const { getUserInstance, handleErrors, handleInvalidationErrors, getMenu } = require("../../helper/helper")
+const { getUserInstance, handleErrors, handleInvalidationErrors, getMenu, renderNotFoundPage } = require("../../helper/helper")
 const getAllProducts = async function() {
   try {
     const response = await axiosInstance.get(`/all-products`)
@@ -129,4 +129,46 @@ module.exports = {
       ]
     })
   },
+
+  showTrackOrderForm: (req, res) => {
+    return res.render("templates/client/index/track-order.hbs", {
+      layout: "client/index.layout.hbs",
+      pageTitle: "Track Order",
+      trackOrder: 'form',
+      csrfToken: req.csrfToken(),
+      breadcrumb: [
+        {link: '/', routeName: 'Home'},
+        {link: '/track-order', routeName: 'Track order'}
+      ]
+    })
+  },
+
+  // @desc:   Track order by id
+  // @route:  POST /track-order
+  trackOrder: async(req, res) => {
+    try {
+      const response = await axiosInstance.get(`/track-order/${req.body.orderId}`)
+
+      if (response.status === 200) {
+        return res.render("templates/client/index/track-order", {
+          layout: "client/index.layout.hbs",
+          user: (req.isAuthenticated()) ? await getUserInstance(req) : null,
+          categories: await getMenu(),
+          order: response.data,
+          pageTitle: "Track order",
+          trackOrder: 'result',
+          breadcrumb: [
+            {link: '/', routeName: 'Home'},
+            {link: `/track-order`, routeName: 'Track order'},
+            {link: `javascript:void(0);`, routeName: response.data.id},
+          ]
+        })
+      }
+
+      return renderNotFoundPage(res, 'client')
+    } catch (error) {
+      return handleErrors(res, error, 'client')
+    }
+  },
+
 }

@@ -55,6 +55,31 @@ class ProductObject {
     }
   }
 
+  // @desc:   Calculate total cost 
+  // INPUT:   [productList]: {productId, amount}
+  static async calculateCost (productList = [], shippingCost = 0) {
+    try {
+      if (productList != null && productList.length > 0) {
+        let subtotalCost = 0
+        await Promise.all(productList.map(async (element) => {
+          // element = {id, amount}
+          const product = await ProductModel.findOne({_id: element.id}, 'price').lean()
+          const cost = parseInt(element.amount) * parseFloat(product.price)
+          subtotalCost += cost
+        }))
+        
+        return {
+          totalCost: subtotalCost,
+          finalCost: parseFloat(subtotalCost + shippingCost)
+        }
+      }
+
+      throw new Error("No product to calculate.")
+    } catch (error) {
+      throw error
+    }
+  }
+
   // @desc:     Get product by criteria
   // @return:   ProductObject
   static async getOneProductBy(criteria = {}, selectFields = null) {
@@ -265,7 +290,6 @@ class ProductObject {
       throw error
     }
   }
-
 
   // @fields:   [subcategory, name, price, details, status]
   async validate(type = "create", exceptionId = null) {

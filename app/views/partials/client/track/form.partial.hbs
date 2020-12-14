@@ -1,0 +1,31 @@
+{{> flash}}
+<form class="contact-form" method="post" action="/track-order">
+  {{> csrf}}
+  <div class="row form-group my-3">
+    <div class="col-12 form-input">
+      <label for="email" class="form-label">
+        Order Id <span class="text-danger">*</span>
+      </label>
+
+      {{#if errors.orderId}}
+      <input type="text" name="orderId" id="orderId" class="not-valid" placeholder="Enter Id of the order you want to keep track on" required>
+      {{#with errors.orderId}}
+      {{> client/error.partial}}
+      {{/with}}
+      {{else}}
+      {{#if validData.orderId}}
+      <input type="text" name="orderId" id="orderId" placeholder="Enter Id of the order you want to keep track on" value="{{{validData.orderId}}}" required>
+      {{else}}
+      <input type="text" name="orderId" id="orderId" placeholder="Enter Id of the order you want to keep track on" required>
+      {{/if}}
+      {{/if}}
+    </div>
+  </div>
+
+
+  <div class="row form-group my-3">
+    <div class="col-12">
+      <button class="w-100 form-input contact-submit my-2">Track</button>
+    </div>
+  </div>
+</form>

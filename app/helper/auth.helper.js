@@ -88,8 +88,18 @@ module.exports = authHelper = {
 
   _checkAuthenticatedAdmin: (req, res, next) => {
     if (req.isAuthenticated()) {
-      if (req.user.status === "activated" && req.user.role === "admin") {
-        return next()
+      // if (req.user.status === "activated" && req.user.role === "admin") {
+      //   return next()
+      // }
+
+      if (req.user.status === "activated") {
+        if(req.user.role === 'admin') {
+          return next()
+        } else if (req.user.role === 'user') {
+          // Log user account
+          req.logout()
+          return authHelper._loginWithCookie(req, res,next)
+        }
       }
 
       return helper.renderForbiddenPage(res, "admin")
@@ -106,7 +116,7 @@ module.exports = authHelper = {
         } else if (req.user.role === 'admin') {
           // Log admin account
           req.logout()
-          return next()
+          return authHelper._loginWithCookie(req, res,next)
         }
       }
 
