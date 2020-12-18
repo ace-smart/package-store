@@ -57,7 +57,7 @@ class ProductObject {
 
   // @desc:   Calculate total cost 
   // INPUT:   [productList]: {productId, amount}
-  static async calculateCost (productList = [], shippingCost = 0) {
+  static async calculateCost (productList = [], shippingCost = 0, voucherCode) {
     try {
       if (productList != null && productList.length > 0) {
         let subtotalCost = 0
@@ -286,7 +286,6 @@ class ProductObject {
       
       return null
     } catch (error) {
-      console.log(error)
       throw error
     }
   }

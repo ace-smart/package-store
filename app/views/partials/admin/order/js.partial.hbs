@@ -71,7 +71,6 @@
                 // Set product list to select
                 const productList = JSON.parse(this.responseText)
                 productList.forEach((value) => {
-                    console.log(value)
                     const option = document.createElement('option')
                     option.setAttribute('value', value.id)
                     // Set product info 
@@ -129,7 +128,6 @@
 
         const productSelectTag = document.getElementById('productId')
         const productInfo = productSelectTag.options[productSelectTag.selectedIndex]
-        console.log(productInfo.dataset.colorName)
         // Set info
         document.getElementById('product_price').value = new Intl.NumberFormat('en-US').format(parseFloat(productInfo.dataset.price))
         document.getElementById('product_colorName').value = (!productInfo.dataset.colorName) ? '' : productInfo.dataset.colorName

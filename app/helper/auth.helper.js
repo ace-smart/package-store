@@ -97,8 +97,8 @@ module.exports = authHelper = {
           return next()
         } else if (req.user.role === 'user') {
           // Log user account
-          req.logout()
-          return authHelper._loginWithCookie(req, res,next)
+          res.redirect('/logout')
+          return authHelper._redirectToLogin(req, res, next)
         }
       }
 
@@ -115,7 +115,7 @@ module.exports = authHelper = {
           return next()
         } else if (req.user.role === 'admin') {
           // Log admin account
-          req.logout()
+          res.redirect('/admin/logout')
           return authHelper._loginWithCookie(req, res,next)
         }
       }

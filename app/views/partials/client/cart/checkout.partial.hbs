@@ -15,8 +15,8 @@
                 <label for="COD" class="ml-2">Cash On Delivery (COD)</label>
               </div>
               <div class="col-sm-12 pl-4">
-                <input type="radio" name="paymentMethod" id="pay-with-cc" value="CREDITCARD" onchange="toggleCreditInfo(this)">
-                <label for="CREDITCARD" class="ml-2">VISA/MASTER</label>
+                <input type="radio" name="paymentMethod" id="pay-with-cc" value="CARD" onchange="toggleCreditInfo(this)">
+                <label for="CARD" class="ml-2">VISA/MASTER</label>
               </div>
             </div>
 
@@ -25,56 +25,34 @@
               <div class="card-header">
                 <i class="fa fa-credit-card mr-2"></i>Card info
               </div>
-              <div class="card-body p-3">
-                <div class="row">
-                  <div class="col-sm-6">
-                    <div class="form-group">      
-                      <label for="nameOnCard">Name on card</label>
-                      <input type="text" name="nameOnCard" id="nameOnCard" placeholder="Name on card">
+              <div class="card-body p-3 row">
+                <div class="col-sm-6">
+                  <div class="sr-payment-form">
+                    <div class="sr-combo-inputs-row">
+                      <div class="sr-input sr-card-element" id="card-element"></div>
                     </div>
+                    <div class="sr-field-error mt-2" id="card-errors" role="alert"></div>
                   </div>
-                  <div class="col-sm-6">
-                    <div class="form-group">      
-                      <label for="cardNumber">Card number</label>
-                      <input type="text" name="cardNumber" id="cardNumber" placeholder="Card number">
-                    </div>
+                  
+                  <div class="sr-result hidden">
+                    <p class="text-success">Payment completed</p>
                   </div>
                 </div>
-                <div class="row">
-                  <div class="col-sm-6">
-                    <div class="form-group">      
-                      <label for="validUntil">Valid until</label>
-                      <div class="row">
-                        <div class="col-sm-5">
-                          <select name="validUntil-month" id="validUntil-month">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                          </select>
-                        </div>
-                        <div class="col-sm-5">
-                          <select name="validUntil-year" id="validUntil-year">
-                            <option value="2000">2000</option>
-                            <option value="2000">2000</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="form-group">      
-                      <label for="cvv">CVV <span class="font-italic">(Authorized signature)</span></label>
-                      <input type="text" name="cvv" id="cvv" placeholder="Example: 123">
-                    </div>
-                  </div>
+
+                <div class="col-sm-6">
                 </div>
+
               </div>
             </div>
           </div>
 
           {{!-- Order button --}}
           <div class="col-sm-12 mb-3 d-flex justify-content-end">
-            <div class="add-to-cart mr-0">
-              <button id="checkout-btn" type="submit">Order</button>
+            <div class="mr-0">
+              <button id="checkout-btn" type="submit">
+                      <div class="spinner hidden" id="spinner"></div>
+                      <span id="button-text">Order</span><span id="order-amount"></span>
+              </button>
             </div>
           </div>
         </div>

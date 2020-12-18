@@ -4,6 +4,7 @@
       {{> flash}}
       <div class="table-responsive pb-4 mt-2">
         <form id='delivery-info-form' action="/checkout" method="GET">
+          {{> csrf}}
           <table class="table bg-secondary table-bordered" style="background-color: #f7f7f9;">
             <thead class="thead-dark">
               <tr id='shopping-cart-header'>
@@ -34,6 +35,26 @@
                 Continue shopping
               </a>
             </div>
+
+            {{!-- Voucher --}}
+            <div class="col-sm-4">
+              <div class="row">
+                <div class="col-sm-8 pr-1">
+                <input type="text" name="voucherCode" id="voucherCode" placeholder="VOUCHER CODE"  style="font-size: 0.7rem">
+
+                </div>
+                <div class="col-sm-4 ">
+                  <button id='apply-voucherCode' class="btn btn-info " style="font-size: 0.9rem; line-height: 2rem;">Apply</button>
+                </div>
+              </div>
+              {{!-- Error message --}}
+              <div class="row">
+                <div class="col-sm-12 voucher-error d-none">
+                  <p id='voucher-error-msg' class="text-danger"  style="font-size: 0.9rem"></p>
+                </div>
+              </div>
+            </div>
+            {{!-- Cost --}}
             <div class="col-sm-4">
               <div class="card">
                 <div class="card-body p-3">
@@ -45,6 +66,12 @@
                     <p class=" d-flex justify-content-between">
                       <span>Shipping cost:</span>
                       <span id='shippingCost' class="shipping-cost-value">${{{shippingCost}}}</span>
+                    </p>
+                    <p class="d-flex justify-content-between d-none">
+                      <span>Discount:</span>
+                      <del>
+                      <span id='voucherDiscount' class="voucherDiscount-value ">$0</span>
+                      </del>
                     </p>
                     <hr>
                     <p class="d-flex justify-content-between">

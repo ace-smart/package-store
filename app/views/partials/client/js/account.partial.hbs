@@ -1,0 +1,23 @@
+<script>
+  
+  $('#myList a').on('click', function (e) {
+    e.preventDefault()
+    // remove previous active tab
+    const prevActiveEle = document.querySelector('a.list-group-item.active')
+    const prevActiveTab = document.querySelector('div.tab-pane.active')
+    prevActiveEle.classList.remove('active')
+    prevActiveTab.classList.remove('active')
+    // show tab
+    $(this).tab('show')
+  })
+
+  // Load temporarily image
+  var loadFile = function (event) {
+    var output = document.getElementById('avatar-block')
+    output.src = URL.createObjectURL(event.target.files[0])
+    output.onload = function () {
+      URL.revokeObjectURL(output.src) // free memory
+    }
+  }
+
+</script>

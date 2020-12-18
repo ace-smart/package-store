@@ -99,6 +99,7 @@ module.exports = {
         return res.render("templates/client/account/my-account", {
           layout: "client/index.layout.hbs",
           user: await getUserInstance(req),
+          tabContent: 'profile',
           errors: handleInvalidationErrors(errors),
           validData: validData,
           csrfToken: req.csrfToken(),

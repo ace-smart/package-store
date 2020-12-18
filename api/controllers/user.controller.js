@@ -55,7 +55,6 @@ module.exports = {
       // Not found
         return res.status(200).json(null)
     } catch (error) {
-      console.log(error)
       return ErrorHandler.sendErrors(res, error)
     }
   },

@@ -84,4 +84,31 @@ module.exports = {
       return ErrorHandler.sendErrors(res, error)
     }
   },
+
+  // @desc:   Validate a voucher by code name
+  // @route:  GET /validate-voucher-code?voucherCode='asdasd'&totalCost='123'
+  validateVoucherCodeName: async (req, res) => {
+    try {
+      if (req.query.voucherCode != null) {
+        const voucher = await VoucherObject.validateVoucherByCode({ 
+          voucherCode: req.query.voucherCode,
+          totalCost: req.query.totalCost
+        })
+        
+        if (voucher){
+          if (voucher.error != null) {
+            // Not valid => voucher = { error: { message: 'errorMsg'} }
+            return res.status(200).json(voucher)
+          } else {
+            return res.status(200).json(voucher)
+          }
+        }
+      }
+
+      // Not found
+      return res.status(404).json({error: {message: 'Voucher is not existed'}})
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  },
 }

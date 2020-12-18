@@ -73,9 +73,23 @@
                 <th>Shipping cost:</th>
                 <td>$ {{{order.shippingFee}}}</td>
               </tr>
+              {{#if order.voucherId}}
+              <tr>
+                <th>Discount:</th>
+                <td>
+                  <del>
+                    <span id='discount-value' >
+                    </span>
+                  </del>
+                  <span id='discount-rate' data-rate="{{{order.voucherId.rate}}}">
+                      ({{{order.voucherId.rate}}}%)
+                  </span>
+                </td>
+              </tr>
+              {{/if}}
               <tr class="bg-primary">
                 <th class="text-white">Total cost:</th>
-                <td class="text-white">$ {{{order.finalCost}}}</td>
+                <td class="text-white" id='order-total-cost'>$ {{{order.finalCost}}}</td>
               </tr>
             </table>
           </div>
@@ -88,7 +102,7 @@
         <p class="mb-0 card-header" style="font-size: 1.1rem;">Payment method</p>
       </div>
       <div class="col-sm-2">
-        <input type="text" name="orderId" id="orderId" readonly value="{{{order.paymentMethod}}}">
+        <input type="text" name="orderId" id="paymentMethod" readonly value="{{{order.paymentMethod}}}">
       </div>
     </div>
     {{!-- Order date --}}
@@ -97,7 +111,7 @@
         <p class="mb-0 card-header" style="font-size: 1.1rem;">Ordered at</p>
       </div>
       <div class="col-sm-2">
-        <input type="text" name="orderId" id="orderId" readonly value="{{{formatDate order.createdAt}}}">
+        <input type="text" name="orderId" id="createdAt" readonly value="{{{formatDate order.createdAt}}}">
       </div>
     </div>
     {{!-- Delivery day --}}
@@ -106,7 +120,7 @@
         <p class="mb-0 card-header" style="font-size: 1.1rem;">Delivery day (estimated)</p>
       </div>
       <div class="col-sm-2">
-        <input type="text" name="orderId" id="orderId" readonly value="{{{formatDate order.deliveryDay}}}">
+        <input type="text" name="orderId" id="deliveryDay" readonly value="{{{formatDate order.deliveryDay}}}">
       </div>
     </div>
   </div>

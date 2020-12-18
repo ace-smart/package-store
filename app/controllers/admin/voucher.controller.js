@@ -228,7 +228,6 @@ module.exports = {
         return res.sendStatus(200)
       }
     } catch (error) {
-      console.log(error)
       return helper.handleErrors(res, error, "admin")
     }
   },
@@ -253,7 +252,6 @@ module.exports = {
         return res.sendStatus(200)
       }
     } catch (error) {
-      console.log(error)
       return helper.handleErrors(res, error, "admin")
     }
   },

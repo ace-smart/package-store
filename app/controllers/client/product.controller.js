@@ -123,12 +123,10 @@ module.exports = {
           ],
         })
       }
-      console.log(1)
+      
       // Throw Not found error
       return renderNotFoundPage(res, 'client')
     } catch (error) {
-      console.log(2)
-      console.log(error)
       return handleErrors(res, error, "client")
     }
   },

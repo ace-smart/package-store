@@ -1,5 +1,8 @@
 const axiosInstance = require("../../helper/axios.helper")
 const { handleErrors, getMenu, handleInvalidationErrors, getValidFields, getUserInstance } = require("../../helper/helper")
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
+let totalCost = 0
+let checkoutData = {}
 
 const getShippingCost = async function () {
   try {
@@ -32,10 +35,26 @@ const getCheckoutData = function (reqQuery) {
         email: reqQuery.email,
         userId: reqQuery.userId
       }
-    }
+    },
+    voucherCode: reqQuery.voucherCode
   }
 }
+const calculateTotalCost = async function (productList = []) {
+  try {
+    if (productList && productList.length > 0) {
+      const response = await axiosInstance.post(`/calculate-total-cost`, productList)
 
+      if (response.status === 200) {
+        return response.data
+      }
+
+    }
+
+    return null 
+  } catch (error) {
+    throw error
+  }
+}
 module.exports = {
   showCart: async (req, res) => {
     try {
@@ -54,28 +73,43 @@ module.exports = {
         user: user,
         categories: await getMenu(),
         shippingCost: await getShippingCost(),
+        csrfToken: req.csrfToken()
       })
     } catch (error) {
       return handleErrors(res, error, "client")
     }
   },
 
-  showCheckoutPage: async (req, res) => {
+  showCheckoutPage: async function (req, res) {
     if(req.query.checkoutData == null || JSON.parse(req.query.checkoutData).length < 1) {
       req.flash('fail', 'No item to checkout')
       return res.redirect('/cart')
     }
 
-    const { productList, deliveryInfo} = getCheckoutData(req.query)
+    const { productList, deliveryInfo, voucherCode} = getCheckoutData(req.query)
     try {
       // Validate info
       const response  = await axiosInstance.post(`/validate-delivery-info`, deliveryInfo) 
 
       if (response.status === 200) {
-        // req.session.checkoutData = {deliveryInfo, productList}
+        checkoutData = getCheckoutData(req.query)
+        const costs = await calculateTotalCost(productList)
+        if (costs && costs.finalCost > 0) {
+          totalCost = costs.finalCost * 100 // (convert to pennies)
+          // If voucher applied
+          if (voucherCode != null) {
+            const isValidVoucher = await axiosInstance.get(`/validate-voucher-code?voucherCode=${voucherCode}&totalCost=${totalCost}`)
+
+            if (isValidVoucher.status === 200) {
+              totalCost -= isValidVoucher.data.discountValue
+            }
+          }
+        }
+        
         return res.render("templates/client/cart/cart", {
           layout: "client/index.layout.hbs",
           cart: "checkout",
+          publishable_key: process.env.STRIPE_PUBLISHABLE_KEY,
           csrfToken: req.csrfToken()
         })
       }
@@ -100,22 +134,16 @@ module.exports = {
 
   checkout: async (req, res) => {
     try {
-      const { productList, deliveryInfo} = getCheckoutData(req.query)
-      let paymentMethod = {method: req.body.paymentMethod}
-      if (paymentMethod.method === 'CREDITCARD') {
-        paymentMethod.cardInfo = {
-          nameOnCard: req.body.nameOnCard,
-          cardNumber: req.body.cardNumber,
-          validUntil: {
-            month: req.body['validUntil-month'],
-            year: req.body['validUntil-year']
-          },
-          cvv: req.body.cvv
-        }
+      // const { productList, deliveryInfo, voucherCode} = checkoutData
+      // Add payment method
+      checkoutData.paymentMethod = { method: req.body.paymentMethod }
+      if (req.body.paymentMethod === 'CARD') {
+        checkoutData.paymentMethod.paymentIntentId = req.body.paymentIntentId
       }
-
+    
       const response = await axiosInstance.post(`/checkout`, {
-        productList, deliveryInfo, paymentMethod
+        // productList, deliveryInfo, paymentMethod
+        ...checkoutData
       })
 
       if(response.status === 201) {
@@ -132,4 +160,38 @@ module.exports = {
     }
   },
 
+  createPaymentIntent: async (req, res) => {
+    if (totalCost > 0) {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: totalCost,
+        currency: 'usd',
+        // Verify your integration in this guide by including this parameter
+        metadata: {integration_check: 'accept_a_payment'},
+      });
+      res.json({client_secret: paymentIntent.client_secret});
+    } else {
+      res.status(500).end()
+    }
+  },
+
+  validateVoucherCode: async (req ,res) => {
+    try {
+      const response = await axiosInstance.get(`/validate-voucher-code?voucherCode=${req.query.voucherCode}&totalCost=${req.query.totalCost}`)
+
+      if(response.status === 200) {
+        if (response.data.error != null) {
+          return res.status(400).json(response.data.error)
+        }
+
+        return res.status(200).json(response.data)
+      }
+
+      return res.status(404).end()
+    } catch (error) {
+      if (error.response.status === 404) {
+        return res.status(404).json(error.response.data.error)
+      }
+      return res.status(error.response.status).end()
+    }
+  }
 }

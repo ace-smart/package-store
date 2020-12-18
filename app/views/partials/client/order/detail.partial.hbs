@@ -68,9 +68,25 @@
             <th>Shipping cost:</th>
             <td>$ {{{order.shippingFee}}}</td>
           </tr>
+      
+          {{#if order.voucherId}}
+          <tr>
+            <th>Discount:</th>
+            <td>
+              <del>
+                <span id='discount-value' >
+                </span>
+              </del>
+              <span id='discount-rate' data-rate="{{{order.voucherId.rate}}}">
+                  ({{{order.voucherId.rate}}}%)
+              </span>
+            </td>
+          </tr>
+          {{/if}}
+
           <tr class="bg-primary">
             <th class="text-white">Total cost:</th>
-            <td class="text-white">$ {{{order.finalCost}}}</td>
+            <td class="text-white" id='order-total-cost'>$ {{{order.finalCost}}}</td>
           </tr>
         </table>
       </div>

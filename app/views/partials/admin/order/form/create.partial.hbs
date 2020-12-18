@@ -326,7 +326,7 @@
           {{#if errors.paymentMethod}} parsley-error {{/if}}select2 col-sm-5" required>
             <option value="">Choose a payment method</option>
             <option {{#ifeq validData.paymentMethod 'COD'}} selected {{/ifeq}} value="COD">COD (Cash on delivery)</option>
-            <option {{#ifeq validData.paymentMethod 'CREDITCARD'}} selected {{/ifeq}} value="CREDITCARD">VISA / MASTERCARD</option>
+            <option {{#ifeq validData.paymentMethod 'CARD'}} selected {{/ifeq}} value="CARD">VISA / MASTERCARD</option>
           </select>
         </div>
       </div>

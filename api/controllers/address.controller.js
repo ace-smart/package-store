@@ -40,7 +40,6 @@ module.exports = {
       // create for the 1st time
       if (addressId == null) {
         const createdAddress = await AddressObject.create(addressData)
-        console.log(createdAddress)
         if (createdAddress) {
           const user = await UserModel.findOneAndUpdate({_id: addressData.userId}, {addressId: createdAddress.id}).lean()
           if (user){
@@ -58,7 +57,6 @@ module.exports = {
       
       throw new Error("Failed to update address")
     } catch (error) {
-      console.log(error)
       return ErrorHandler.sendErrors(res, error)
     }
   },
