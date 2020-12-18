@@ -1,6 +1,7 @@
 const OrderObject = require("../objects/OrderObject")
 const AddressObject = require('../objects/AddressObject')
 const ProfileObject = require('../objects/ProfileObject')
+const ProductObject = require('../objects/ProductObject')
 const NotFoundError = require("../errors/not_found")
 const ErrorHandler = require("../helper/errorHandler")
 
@@ -122,7 +123,7 @@ module.exports = {
   /* INPUT:   req.body = {
   //    productList: [Array],
   //    deliveryInfo: {address, profile},
-  //    paymentMethod: 'COD' || 'CREDITCARD'
+  //    paymentMethod: 'COD' || 'CARD'
   // }
   */
   checkout: async (req, res) => {
@@ -134,14 +135,14 @@ module.exports = {
 
       throw new Error("Failed to checkout.")
     } catch (error) {
-      console.log(error)
       return ErrorHandler.sendErrors(res, error)
     }
   },
 
   trackOrder: async(req, res) => {
     try {
-      const order = await OrderObject.getOneOrderBy({_id: req.params.orderId})
+      const orderId = require('mongoose').Types.ObjectId(req.params.orderId)
+      const order = await OrderObject.getOneOrderBy({_id: orderId})
       if (order) {
         return res.status(200).json(order)
       }
@@ -172,4 +173,20 @@ module.exports = {
       return ErrorHandler.sendErrors(res, error)
     }
   },
+
+  calculateTotalCost: async (req, res) => {
+    try {
+      const productList = req.body
+      const shippingCost = OrderObject.getShippingCost()
+      let totalCost = 0
+      if (productList && productList.length > 0) {
+        totalCost = await ProductObject.calculateCost(productList, shippingCost)
+        return res.status(200).json(totalCost)
+      }
+
+      return res.status(200).json(totalCost)
+    } catch (error) {
+      return ErrorHandler.sendErrors(res, error)
+    }
+  }
 }

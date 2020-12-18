@@ -101,7 +101,6 @@ module.exports = {
 				combineChartData: await getCombineChartData(req.user.accessToken),
       })
     } catch (error) {
-			console.log(error)
       return handleErrors(res, error, "admin")
     }
   },

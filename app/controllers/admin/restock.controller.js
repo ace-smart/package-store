@@ -253,7 +253,6 @@ module.exports = {
           return res.sendStatus(200)
         }
       } catch (error) {
-        console.log(error)
         return helper.handleErrors(error)
       }
     },

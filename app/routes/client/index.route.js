@@ -31,10 +31,6 @@ router.get("/faqs", showFAQsPage)
 
 //@desc:    Show track order form
 //@route:   GET /track-order
-router.get('/track-order', showTrackOrderForm)
-
-//@desc:    Track order
-//@route:   GET /track-order/:orderId
-router.post('/track-order', trackOrder)
+router.get('/track-order', trackOrder)
 
 module.exports = router

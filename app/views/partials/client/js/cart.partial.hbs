@@ -1,139 +1,191 @@
+
 <script>
-  // Render cart 
-  const sessionCart = JSON.parse(sessionStorage.getItem('shoppingCart'))
-  const cartBody = document.getElementById('shopping-cart-body')
+  // Shopping cart constants
+  var totalNumItems = 0
+  var shoppingCart = []
 
-  if (sessionCart && sessionCart.length > 0) {
-    cartBody.innerHTML = ''
-    // Create row
+  // Load added products to cart
+  if (sessionStorage.getItem('shoppingCart') != null) {
+    const sessionCart = JSON.parse(sessionStorage.getItem("shoppingCart"))
+
+    // render items
     sessionCart.forEach(item => {
-      const row = document.createElement('tr')
-      // Product
-      const productCell = document.createElement('td')
-      productCell.dataset.productId = item.id
-      const productImg = document.createElement('img')
-      productImg.src = item.imgSrc
-      productImg.classList.add("cart-item-img")
-      productImg.style.width = '70px'
-      productImg.style.height = '70px'
-      const productName = document.createElement('span')
-      productName.innerText = item.name
-      productName.classList.add("ml-1", "p-1")
-      productCell.append(productImg, productName)
-      // Size
-      const sizeCell = document.createElement('td')
-      sizeCell.classList.add("text-center")
-      sizeCell.innerText = item.size
-      // Amount
-      const amountCell = document.createElement('td')
-      amountCell.classList.add('text-center')
-      const amountInputContainer = document.createElement('div')
-      amountInputContainer.classList.add('amount-container')
-      const amountInput = document.createElement('input')
-      amountInput.type = 'number'
-      amountInput.name = 'amount'
-      amountInput.min = 0
-      amountInput.max = 100
-      amountInput.step = 1
-      amountInput.setAttribute("value", parseInt(item.amount)) 
-      // Update cost when adjust amount
-      amountInput.addEventListener('change', () => {
-        amountInput.setAttribute("value", parseInt(amountInput.value)) 
-        bindingCosts()
+      addToCart({
+        productId: item.id,
+        productName: item.name, 
+        productAmount: item.amount,
+        productSize: item.size,
+        productPrice: item.price,
+        productImgSrc: item.imgSrc
       })
-      amountInputContainer.append(amountInput)
-      amountCell.append(amountInputContainer)
-      // Price
-      const priceCell = document.createElement('td')
-      priceCell.classList.add('text-center')
-      const priceInput = document.createElement('input')
-      priceInput.hidden = true
-      priceInput.type = 'number'
-      priceInput.name = 'price'
-      priceInput.value = parseFloat(item.price)
-      priceCell.innerText = `$${parseFloat(item.price)}`
-      priceCell.append(priceInput)
-      // Remove
-      const removeCell = document.createElement('td')
-      removeCell.classList.add('text-center')
-      const removeBtn = document.createElement('a')
-      removeBtn.href = 'javascript:void(0);'
-      removeBtn.classList.add('btn', 'btn-danger')
-      removeBtn.id = 'remove-cart-item'
-      removeBtn.addEventListener('click', () => {
-        row.remove()
-        const newShoppingCart = 
-        JSON.parse(sessionStorage.getItem('shoppingCart')).filter(shoppingItem => shoppingItem.id != item.id)
-        // Set new cart
-        sessionStorage.removeItem('shoppingCart')
-        sessionStorage.setItem('shoppingCart', JSON.stringify(newShoppingCart))
+    })
+  }
 
-        document.getElementById(`cart-item-${item.id}`).remove()
-        // Update total-num
-        document.getElementById('cart-total-num').innerText = parseInt(document.getElementById('cart-total-num').innerText) - item.amount
-        if (document.getElementById('cart-total-num').innerText == 0) {
-          createBlankCart()
-          subTotalPrice = 0
-          cartBody.innerHTML = `
-          <tr>
-            <td colspan="5">No items</td>
-          </tr>`
-        } else {
-          subTotalPrice -= parseFloat(item.price) * item.amount
+  // Trigger event from add-to-cart buttons
+  var addButtonElements = document.getElementsByClassName('add-to-cart')
+  if (addButtonElements != null && addButtonElements.length > 0) {
+  Array.from(addButtonElements).forEach( element => {
+    element.addEventListener('click',function() {
+      if (element.dataset.type != null) {
+        addToCart({
+          productId: document.getElementById('detail-productId').value, 
+          productName: document.getElementById('detail-name').innerText, 
+          productAmount: parseInt(document.getElementById('detail-amount').value), 
+          productPrice: parseInt(document.getElementById('detail-price').innerText.replace("$","")),
+          productSize: document.getElementById('detail-size').innerText, 
+          productImgSrc: document.getElementById(`product-image-${document.getElementById('detail-productId').value}`).src
+        })
+      } else {
+        // Get product info from clicked productBox
+        const productId = this.dataset.productId
+        const productBox = document.getElementById(`product-box-${productId}`) != null ? document.getElementById(`product-box-${productId}`) : null
+        const productImgSrc = document.getElementById(`product-image-${productId}`) != null ? document.getElementById(`product-image-${productId}`).src : ''
+        const productName = (productBox.dataset.name != null) ? productBox.dataset.name : ''
+        const productAmount = (productBox.dataset.amount != null && parseInt(productBox.dataset.amount) > 1) ? parseInt(productBox.dataset.amount) : 1
+        const productSize = (productBox.dataset.size != null) ? productBox.dataset.size : ''
+        const productPrice = (productBox.dataset.price != null) ? parseInt(productBox.dataset.price) : 0
+        
+        addToCart({
+          productId, productName, productAmount, productSize, productPrice, productImgSrc
+        })
+      }
+    })
+  })
+  }
+
+
+  function createCart () {
+    const cartWrap = document.getElementById('cart-wrap')
+    cartWrap.innerHTML = ''
+    // === Cart container
+    const cartContainer = document.createElement('ul')
+    cartContainer.classList.add("woocommerce-mini-cart", "cart_list","product_list_widget", "p-1")
+    cartContainer.id ='cart-container'
+    // === Checkout button
+    const checkoutBtn = document.createElement('button')
+    checkoutBtn.classList.add("pull-right", "my-2","py-1", "px-2","rounded", "mr-4")
+    checkoutBtn.textContent = 'Checkout'
+    checkoutBtn.id = 'cart-checkout-btn'
+    checkoutBtn.addEventListener('click', () => window.location.assign('/cart'))
+    // Add to cart-warp
+    cartWrap.append(cartContainer, checkoutBtn)
+  }
+
+  function createBlankCart() {
+    const cartWrap = document.getElementById('cart-wrap')
+    cartWrap.innerHTML = `
+    <ul class="woocommerce-mini-cart cart_list product_list_widget p-2" style="overflow-y: unset;">
+      <li class="woocommerce-mini-cart-item mini_cart_item p-2" style="border-bottom: unset;">
+          <span>No Items in Shopping Cart</span>
+      </li>
+    </ul>`
+  }
+
+  function checkCartItem(productId) {
+    const cartContainer = document.getElementById('cart-container')
+    const cartItems = Array.from(cartContainer.children)
+    const isExisted = cartItems.find(item => item.dataset.productId === productId)
+    if (isExisted) {
+      return true
+    } else {
+      return false
+    }
+  }
+
+  function addToCart({productId, productImgSrc, productName, productSize, productAmount, productPrice}) {
+    let cartContainer = document.getElementById('cart-container')
+    
+    if (!cartContainer) {
+      createCart()
+      cartContainer = document.getElementById('cart-container')
+    }
+
+    const isExisted = checkCartItem(productId)
+    if (isExisted) {
+      const item = document.getElementById(`cart-item-${productId}`)
+      let currentAmount = parseInt(item.children[2].textContent.replace("x", ""))
+      item.children[2].textContent = `x${currentAmount + productAmount}`
+      
+      // update shopping cart
+      shoppingCart.map(item => {
+        if (item.id === productId) {
+          item.amount = currentAmount + productAmount
         }
-        // Update costs
-        bindingCosts()
       })
-      const removeIcon = document.createElement('i')
-      removeIcon.classList.add('fa', 'fa-trash')
-      removeBtn.appendChild(removeIcon)
-      removeCell.appendChild(removeBtn)
 
-      // Add to row
-      row.append(productCell, sizeCell, amountCell, priceCell, removeCell)
-      cartBody.append(row)
+    } else {
+      // Create cart item
+      const cartItem = document.createElement('li')
+      cartItem.classList.add("woocommerce-mini-cart-item", "mini_cart_item", "shopping-cart", "d-flex", "justify-content-between")
+      cartItem.id = `cart-item-${productId}`
+      cartItem.dataset.productId = productId
+      // === Image
+      // const productImgSrc = document.getElementById(`product-image-${productId}`)
+      const itemImgContainer = document.createElement('span')
+      itemImgContainer.classList.add("product-img", "p-1")
+      const itemImg = document.createElement('img')
+      itemImg.src = productImgSrc
+      itemImgContainer.appendChild(itemImg)
+      // === Name
+      const itemName = document.createElement('span')
+      itemName.classList.add("product-name", "p-1")
+      itemName.textContent = productName.substr(0, 13)
+      if (productName.length > 13) {
+        itemName.textContent += ' ...'
+      }
+      // === Amount
+      const itemAmount = document.createElement('span')
+      itemAmount.classList.add("product-amount", "p-1")
+      itemAmount.textContent = `x${productAmount}`
+      // === Price
+      const itemPrice = document.createElement('span')
+      itemPrice.classList.add("product-price", "p-1")
+      itemPrice.textContent = `$${productPrice}`
 
-      bindingCosts()
-    })
+      // Add to cart container
+      cartItem.append(itemImgContainer, itemName, itemAmount, itemPrice)
+      cartContainer.appendChild(cartItem)
 
-    // embedding cart data
-    const checkoutData = wrapCartData()
-    const checkoutDataInput = document.createElement('input')
-    checkoutDataInput.hidden = true
-    checkoutDataInput.type = 'text'
-    checkoutDataInput.name = 'checkoutData'
-    checkoutDataInput.setAttribute("value", JSON.stringify(checkoutData)) 
-    document.querySelector('table.table').append(checkoutDataInput)
-  }
-  // Disable checkout button when there is no item
-  if (cartBody.children.length === 1 && cartBody.children[0].children.length === 1) {
-    document.getElementById('checkout-button').setAttribute('disabled', true)
-  }
-
-  function bindingCosts() {
-    let subTotal = 0
-    let shippingCost = parseFloat(document.getElementById('shippingCost').innerText.replace("$", ""))
-    Array.from(cartBody.children).map(tRow => {
-      const amountValue = parseInt(tRow.children[2].children[0].children[0].value)
-      const priceValue = parseFloat(tRow.children[3].innerText.replace("$",""))
-      subTotal += amountValue * priceValue
-    })
-    // Set cost
-    document.getElementById('subtotalCost').innerText = `$${parseFloat(subTotal)}`
-    document.getElementById('totalCost').innerText = `$${parseFloat(subTotal + shippingCost)}`
-  }
-
-  function wrapCartData() {
-    const tableRows = Array.from(document.getElementById('shopping-cart-body').children)
-    let cartData = []
-    tableRows.map( row => {
-      cartData.push({
-        id: row.children[0].dataset.productId,
-        amount: parseInt(row.children[2].children[0].children[0].value)
+      // update shopping cart
+      shoppingCart.push({
+        id: productId,
+        name: productName,
+        price: productPrice,
+        amount: productAmount,
+        size: productSize,
+        imgSrc: productImgSrc
       })
-    })
+    }
 
-    return cartData
+    // Update cart-total-num
+    totalNumItems += productAmount
+    document.getElementById('cart-total-num').textContent = totalNumItems
+    // Update session storage
+    updateShoppingCart()
   }
 
+  function updateShoppingCart () {
+    sessionStorage.setItem('shoppingCart', JSON.stringify(shoppingCart))
+  }
+
+  function loadDataToCart () {
+    const cartData = JSON.parse(sessionStorage.getItem('shoppingCart'))
+    if (cartData) {
+      if (cartData.length == 0) {
+        createBlankCart()
+      } else{
+        createCart()
+        cartData.forEach( cartElement => {
+          addToCart({
+            productId: cartElement.id, 
+            productImgSrc: cartElement.imgSrc, 
+            productName: cartElement.name, 
+            productSize: cartElement.size, 
+            productAmount: cartElement.amount, 
+            productPrice: cartElement.price
+            })
+          })
+      }
+    }
+  }
 </script>

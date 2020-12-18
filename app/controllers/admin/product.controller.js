@@ -83,7 +83,6 @@ const getGallery = async function (accessToken, productId) {
     }
     return null
   } catch (error) {
-    console.log(error)
     throw error
   }
 }
@@ -401,7 +400,6 @@ module.exports = {
       
       return renderNotFoundPage(res, error, 'admin')
     } catch (error) {
-      console.log(error)
       if (error.response.status === 404) {
         // No image in the gallery
         return res.render("templates/admin/product/product.hbs", {
@@ -486,7 +484,6 @@ module.exports = {
         }
       }
     } catch (error) {
-      console.log(error)
       return handleErrors(res, error, "admin")
     }
   },

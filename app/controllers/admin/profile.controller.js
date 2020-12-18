@@ -85,7 +85,6 @@ module.exports = {
           }
       }
     } catch (error) {
-      console.log(error)
       if (error.response.status === 400) {
         const errors = error.response.data.error.invalidation
         const validData = helper.getValidFields(errors, req.body)

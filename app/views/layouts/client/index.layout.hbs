@@ -8,6 +8,21 @@
   {{#if auth}}
   {{> client/auth/css.partial}}
   {{/if}}
+
+  {{#ifeq cart 'checkout'}}
+  <link rel="stylesheet" href="/static/stylesheets/cart.css">
+  <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    var PUBLISHABLE_KEY = '{{{publishable_key}}}'
+    var purchase = window.location.search
+    var fetchBody = {
+      _csrf: '{{{csrfToken}}}',
+      purchase: purchase
+    }
+  </script>
+  <script src="/static/javascript/cart.js" defer></script>
+  {{/ifeq}}
+
 </head>
 
 <body class="header_sticky header-style-1 topbar-style-1 has-menu-extra">
@@ -26,8 +41,11 @@
   </div>
 
   {{> client/js/assets.partial}}
-  {{#ifeq cart 'address'}}
+  {{> client/js/account.partial}}
   {{> client/js/cart.partial}}
+
+  {{#ifeq cart 'address'}}
+  {{> client/js/address.partial}}
   {{/ifeq}}
 
   {{#ifeq cart 'checkout'}}
@@ -37,6 +55,10 @@
   {{#ifeq cart 'finish'}}
   {{> client/js/finish.partial}}
   {{/ifeq}}
+
+  {{#if order}} 
+  {{> client/js/order.partial}}
+  {{/if}}
 
   {{> client/index/js.partial}}
 </body>

@@ -1,0 +1,6 @@
+<script>
+  const totalCosteElement = document.getElementById('order-total-cost')
+  let totalCost = parseFloat(totalCosteElement.textContent.replace("$", "")) * 100
+  let discountValue = totalCost * parseInt(document.getElementById('discount-rate').dataset.rate) / 100
+  document.getElementById('discount-value').textContent = `$${discountValue / 100}`
+</script>

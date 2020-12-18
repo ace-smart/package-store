@@ -130,42 +130,43 @@ module.exports = {
     })
   },
 
-  showTrackOrderForm: (req, res) => {
-    return res.render("templates/client/index/track-order.hbs", {
-      layout: "client/index.layout.hbs",
-      pageTitle: "Track Order",
-      trackOrder: 'form',
-      csrfToken: req.csrfToken(),
-      breadcrumb: [
-        {link: '/', routeName: 'Home'},
-        {link: '/track-order', routeName: 'Track order'}
-      ]
-    })
-  },
-
   // @desc:   Track order by id
-  // @route:  POST /track-order
+  // @route:  GET /track-order
   trackOrder: async(req, res) => {
+    const orderId = req.query.orderId
     try {
-      const response = await axiosInstance.get(`/track-order/${req.body.orderId}`)
-
-      if (response.status === 200) {
-        return res.render("templates/client/index/track-order", {
+      if (orderId == null) {
+        return res.render("templates/client/index/track-order.hbs", {
           layout: "client/index.layout.hbs",
-          user: (req.isAuthenticated()) ? await getUserInstance(req) : null,
-          categories: await getMenu(),
-          order: response.data,
-          pageTitle: "Track order",
-          trackOrder: 'result',
+          pageTitle: "Track Order",
+          trackOrder: 'form',
+          csrfToken: req.csrfToken(),
           breadcrumb: [
             {link: '/', routeName: 'Home'},
-            {link: `/track-order`, routeName: 'Track order'},
-            {link: `javascript:void(0);`, routeName: response.data.id},
+            {link: '/track-order', routeName: 'Track order'}
           ]
         })
-      }
+      } else {
+        const response = await axiosInstance.get(`/track-order/${req.query.orderId}`)
 
-      return renderNotFoundPage(res, 'client')
+        if (response.status === 200) {
+          return res.render("templates/client/index/track-order", {
+            layout: "client/index.layout.hbs",
+            user: (req.isAuthenticated()) ? await getUserInstance(req) : null,
+            categories: await getMenu(),
+            order: response.data,
+            pageTitle: "Track order",
+            trackOrder: 'result',
+            breadcrumb: [
+              {link: '/', routeName: 'Home'},
+              {link: `/track-order`, routeName: 'Track order'},
+              {link: `javascript:void(0);`, routeName: response.data.id},
+            ]
+          })
+        }
+        
+        return renderNotFoundPage(res, 'client')
+      }
     } catch (error) {
       return handleErrors(res, error, 'client')
     }

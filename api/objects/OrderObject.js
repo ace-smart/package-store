@@ -9,6 +9,7 @@ const OrderDetailModel = require("../models/OrderDetailModel")
 const ProductObject = require("./ProductObject")
 const ProfileObject = require("./ProfileObject")
 const AddressObject = require("./AddressObject")
+const VoucherObject = require('./VoucherObject')
 const ORDER_STATUS_VALUES = ["processing", "packing", "delivering", "done", "cancelled"]
 const SHIPPING_COST = 10
 
@@ -19,6 +20,7 @@ class OrderObject {
     shippingFee,
     finalCost,
     paymentMethod,
+    stripePaymentIntentId,
     userId,
     addressId,
     profileId,
@@ -33,6 +35,7 @@ class OrderObject {
     this.shippingFee = (shippingFee != null) ? shippingFee : SHIPPING_COST
     this.finalCost = finalCost
     this.paymentMethod = paymentMethod
+    this.stripePaymentIntentId = stripePaymentIntentId
     this.userId = userId
     this.profileId = profileId
     this.addressId = addressId
@@ -328,22 +331,28 @@ class OrderObject {
   //    productList: [Array],
   //    deliveryInfo: {address, profile},
   //    paymentMethod: {
-  //      method: 'COD' || 'CREDITCARD',
-  //      cardInfo: {nameOnCard, cardNumber, validUntil, cvv}
-  //    }
+  //      method: 'COD' || 'CARD',
+  //      paymentIntentId: 'pi_1HzQgkKMcoHAaDEDNpcoEbgU'
   // }
   */
   static async checkout({...orderData}) {
     try {
       // Cost
-      const { totalCost, finalCost } = await ProductObject.calculateCost(orderData.productList, SHIPPING_COST)
+      let { totalCost, finalCost } = await ProductObject.calculateCost(orderData.productList, SHIPPING_COST)
+      // Voucher
+      let voucherId = null
+      const voucherValidation = await VoucherObject.validateVoucherByCode({voucherCode: orderData.voucherCode, totalCost: totalCost})
+      if (voucherValidation != null && voucherValidation.error == null) {
+        // Update total cost
+        finalCost -= parseFloat(voucherValidation.discountValue)
+        // Get voucher Id
+        const voucher = await VoucherObject.getOneVoucherBy({code: orderData.voucherCode})
+        voucherId = voucher.id
+      }
       // Delivery info
       const { address, profile } = orderData.deliveryInfo
       // Payment
       let paymentMethod = orderData.paymentMethod
-      if (paymentMethod.method === 'CREDITCARD') {
-        
-      }
       // orderDetails
       let orderDetails = orderData.productList.map(product => {
         return {
@@ -357,10 +366,13 @@ class OrderObject {
         shippingCost: SHIPPING_COST,
         totalCost, finalCost, 
         paymentMethod: paymentMethod.method, 
+        stripePaymentIntentId: (paymentMethod.paymentIntentId != null) ? paymentMethod.paymentIntentId : null, 
         userId: profile.userId,
+        voucherId: voucherId,
         deliveryDay: OrderObject.getDeliveryDay(),
         orderDetails: orderDetails
       })
+
       if (order) {
         const addressObject = await AddressObject.create({...address})
         const profileObject = await ProfileObject.create({...profile})

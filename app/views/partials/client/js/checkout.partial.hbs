@@ -1,42 +1,12 @@
 <script>
   const queryParams = window.location.search
-  document.getElementById('checkout-form').setAttribute('action', `/checkout${queryParams}`)
+  // document.getElementById('checkout-form').setAttribute('action', `/checkout${queryParams}`)
   
   function toggleCreditInfo (element) {
     if (element.value === 'COD') {
       document.getElementById('card-info-container').classList.add('d-none')
-    } else  if (element.value === 'CREDITCARD') {
+    } else  if (element.value === 'CARD') {
       document.getElementById('card-info-container').classList.toggle('d-none')
     }
-    
   }
-
-  function setExpirationYear() {
-    const currentYear = (new Date()).getFullYear()
-    const minYear = currentYear - 30
-    const maxYear = currentYear + 30
-    for(let i = minYear; i <= maxYear; i++) {
-      const option = document.createElement('option')
-      option.value = i
-      option.innerText = i
-      document.getElementById('card-expiration-year').append(option)
-    }
-  }
-
-  function toggleCreditCardInput (setDisabled = 1) {
-    if (parseInt(setDisabled) == 1) {
-      document.getElementById('card-name').setAttribute('disabled', true)
-      document.getElementById('card-number').setAttribute('disabled', true)
-      document.getElementById('card-expiration-date').setAttribute('disabled', true)
-      document.getElementById('card-expiration-year').setAttribute('disabled', true)
-      document.getElementById('card-cvv').setAttribute('disabled', true)
-    } else if (parseInt(setDisabled) == 0){
-      document.getElementById('card-name').removeAttribute('disabled')
-      document.getElementById('card-number').removeAttribute('disabled')
-      document.getElementById('card-expiration-date').removeAttribute('disabled')
-      document.getElementById('card-expiration-year').removeAttribute('disabled')
-      document.getElementById('card-cvv').removeAttribute('disabled')
-    }
-  }
-
 </script>

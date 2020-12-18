@@ -344,12 +344,12 @@
                         {{#if validData.paymentMethod}}
                         <option {{#ifeq validData.paymentMethod 'COD'}} selected {{/ifeq}} value="COD">COD (Cash on
                             delivery)</option>
-                        <option {{#ifeq validData.paymentMethod 'CREDITCARD'}} selected {{/ifeq}} value="CREDITCARD">
+                        <option {{#ifeq validData.paymentMethod 'CARD'}} selected {{/ifeq}} value="CARD">
                             VISA / MASTERCARD</option>
                         {{else}}
                         <option {{#ifeq order.paymentMethod 'COD'}} selected {{/ifeq}} value="COD">COD (Cash on
                             delivery)</option>
-                        <option {{#ifeq order.paymentMethod 'CREDITCARD'}} selected {{/ifeq}} value="CREDITCARD">VISA /
+                        <option {{#ifeq order.paymentMethod 'CARD'}} selected {{/ifeq}} value="CARD">VISA /
                             MASTERCARD</option>
                             {{/if}}
                     </select>

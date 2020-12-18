@@ -13,7 +13,6 @@ const getAccountById = async function (accessToken, userId) {
       return response.data
     }
   } catch (error) {
-    console.log(error.response.data.error)
     throw error
   }
 }

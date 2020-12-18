@@ -1,11 +1,8 @@
-const UserModel = require("../models/UserModel")
 const AddressModel = require("../models/AddressModel")
 const { isExistent, hasSpecialChars } = require("../helper/validation")
 const validator = require("validator")
 const ValidationError = require("../errors/validation")
 const ObjectError = require("../errors/object")
-const UserObject = require("./UserObject")
-const NotFoundError = require("../errors/not_found")
 const {toCapitalize} = require('../helper/format')
 const STATUS_VALUES = ["activated", "deactivated"]
 

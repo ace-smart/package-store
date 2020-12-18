@@ -57,7 +57,6 @@ module.exports = {
         })
       }
     } catch (error) {
-      console.log(error)
       return helper.handleErrors(res, error, 'admin')
     }
   },
@@ -202,12 +201,10 @@ module.exports = {
         })
       }
     } catch (error) {
-      console.log(error)
       if (error.response.status === 400) {
         //ValidationError
         const errors = error.response.data.error.invalidation
         const validData = helper.getValidFields(errors, req.body)
-        console.log(storageData)
         req.flash("fail", "Your input is not valid. Please check and then fill in again.")
         return res.render("templates/admin/storage/storage.hbs", {
           layout: "admin/main.layout.hbs",

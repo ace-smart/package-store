@@ -334,6 +334,71 @@ class VoucherObject {
     }
   }
 
+  static async validateVoucherByCode ({voucherCode, totalCost}) {
+    if (voucherCode == null || totalCost == 0) {
+      return null
+    }
+
+    try {
+      voucherCode = voucherCode.toString().toUpperCase().trim()
+      totalCost = parseFloat(totalCost)
+      const voucher = await VoucherModel.findOne({code: voucherCode}).lean()
+      if (voucher) {
+        // Check valid date
+        const expiredDay = new Date(voucher.validUntil)
+        const presentDay = new Date()
+        if (presentDay <= expiredDay) {
+          // Validate totalCost stay between max and min value
+          if (totalCost >= parseFloat(voucher.minValue)) {
+            const discountValue = totalCost * parseInt(voucher.rate) / 100
+            const costAfterApplied = totalCost - discountValue
+            // Reach maximum value for discount
+            if (costAfterApplied >= parseFloat(voucher.maxValue)) {
+              return {
+                rate: voucher.rate,
+                minValue: voucher.minValue,
+                maxValue: voucher.maxValue,
+                discountValue: discountValue
+              }
+            } else {
+              if (costAfterApplied > 0) {
+                return {
+                  rate: voucher.rate,
+                  minValue: voucher.minValue,
+                  maxValue: voucher.maxValue,
+                  discountValue: discountValue
+                } 
+              } else {
+                return {
+                  rate: voucher.rate,
+                  minValue: voucher.minValue,
+                  maxValue: voucher.maxValue,
+                  discountValue: discountValue
+                }
+              }
+            }
+          } else {
+            return { 
+              error: {
+                message: `The total cost must at least ${voucher.minValue}`
+              }
+            } 
+          }
+        } else {
+          return { 
+            error: {
+              message: `The voucher is expired or not existed`
+            }
+          } 
+        }
+      }
+
+      return null
+    } catch (error) {
+      throw error
+    }
+  }
+
   async save() {
     if (this.id == null) {
       throw new ObjectError({
