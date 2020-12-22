@@ -1,8 +1,8 @@
 # Introduction
-The project is a web application for an e-commerce store where business owners can run their business online. It contains two separate servers:
+The project is a web application for an e-commerce store where business owner can run their business online. It contains two separate servers:
 - API Server: Providing number of features and interacting with database. For authentication, it use jsonwebtoken.
 - APP Server: Working as a 'middle-man' between clients, administrators and API Server.
-Overall, the project is built to work like a mircroservices, each one has a specific role in the general system.
+Overall, the project is built to work like a mircroservice, each one has a specific role in the general system.
 
 # Features
 For the API Server:
@@ -42,7 +42,7 @@ Run command below to install those packages:
 npm install
 ```
 
-2. Make sure the folder where API Server is placed have these folder at the same level below
+2. Folder structure
 ```
 - config/
   - multer.js
